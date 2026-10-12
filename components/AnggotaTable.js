@@ -1,0 +1,224 @@
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import { Search, Filter, RotateCcw, User, GraduationCap, Activity, FileSpreadsheet } from 'lucide-react';
+import { STATUS_COLORS } from './PieChart';
+import AdminButton from './AdminButton';
+
+export default function AnggotaTable({ anggota = [], editUrl }) {
+  const [search, setSearch] = useState('');
+  const [selectedKelas, setSelectedKelas] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+
+  // Ekstrak daftar unik Kelas & Status untuk filter dropdown
+  const { kelasList, statusList } = useMemo(() => {
+    const kSet = new Set();
+    const sSet = new Set();
+
+    anggota.forEach((item) => {
+      if (item.kelas && item.kelas !== '-') kSet.add(item.kelas);
+      if (item.perkembangan) sSet.add(item.perkembangan);
+    });
+
+    return {
+      kelasList: Array.from(kSet).sort(),
+      statusList: Array.from(sSet).sort(),
+    };
+  }, [anggota]);
+
+  // Filter anggota berdasarkan pencarian, kelas, dan status
+  const filteredAnggota = useMemo(() => {
+    return anggota.filter((item) => {
+      const matchSearch =
+        search === '' ||
+        item.nama.toLowerCase().includes(search.toLowerCase());
+
+      const matchKelas =
+        selectedKelas === '' ||
+        (selectedKelas === '-' ? item.kelas === '-' : item.kelas === selectedKelas);
+
+      const matchStatus =
+        selectedStatus === '' ||
+        item.perkembangan === selectedStatus;
+
+      return matchSearch && matchKelas && matchStatus;
+    });
+  }, [anggota, search, selectedKelas, selectedStatus]);
+
+  const handleReset = () => {
+    setSearch('');
+    setSelectedKelas('');
+    setSelectedStatus('');
+  };
+
+  const isFiltering = search !== '' || selectedKelas !== '' || selectedStatus !== '';
+
+  return (
+    <div className="bg-white rounded-2xl shadow-xs border border-[#2A9D8F]/15 overflow-hidden">
+      
+      {/* Header Tabel & Tombol Admin */}
+      <div className="p-5 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FFFCF5]">
+        <div>
+          <h2 className="text-xl font-bold text-[#2D3436] flex items-center gap-2">
+            <User className="w-5 h-5 text-[#2A9D8F]" />
+            Daftar Anggota LBM
+          </h2>
+          <p className="text-xs text-[#636E72] mt-0.5">
+            Menampilkan {filteredAnggota.length} dari {anggota.length} anggota santri LBM
+          </p>
+        </div>
+
+        {/* Tombol Admin Google Sheets */}
+        <AdminButton editUrl={editUrl} title="Edit Anggota di Sheets" />
+      </div>
+
+      {/* Baris Pencarian & Filter */}
+      <div className="p-4 sm:p-6 bg-white border-b border-gray-100 space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+          
+          {/* Input Search Nama */}
+          <div className="sm:col-span-5 relative">
+            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Cari nama anggota..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-hidden focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 text-[#2D3436] placeholder-gray-400"
+            />
+          </div>
+
+          {/* Filter Kelas */}
+          <div className="sm:col-span-3">
+            <select
+              value={selectedKelas}
+              onChange={(e) => setSelectedKelas(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-hidden focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 text-[#2D3436] bg-white"
+            >
+              <option value="">Semua Kelas</option>
+              {kelasList.map((k) => (
+                <option key={k} value={k}>
+                  Kelas {k}
+                </option>
+              ))}
+              <option value="-">Tanpa Kelas (-)</option>
+            </select>
+          </div>
+
+          {/* Filter Status Perkembangan */}
+          <div className="sm:col-span-3">
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-hidden focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 text-[#2D3436] bg-white"
+            >
+              <option value="">Semua Status</option>
+              {statusList.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Tombol Reset Filter */}
+          <div className="sm:col-span-1 flex items-center justify-center">
+            {isFiltering && (
+              <button
+                onClick={handleReset}
+                title="Reset Filter"
+                className="w-full sm:w-auto p-2.5 rounded-xl text-gray-500 hover:text-rose-600 hover:bg-rose-50 border border-gray-200 transition-colors flex items-center justify-center"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Info tag filter aktif */}
+        {isFiltering && (
+          <div className="flex items-center gap-2 text-xs text-[#636E72] pt-1">
+            <span>Filter aktif:</span>
+            {search && <span className="bg-[#E8F5F3] text-[#1D7A6F] px-2 py-0.5 rounded-md font-medium">"{search}"</span>}
+            {selectedKelas && <span className="bg-[#E8F5F3] text-[#1D7A6F] px-2 py-0.5 rounded-md font-medium">Kelas: {selectedKelas}</span>}
+            {selectedStatus && <span className="bg-[#E8F5F3] text-[#1D7A6F] px-2 py-0.5 rounded-md font-medium">{selectedStatus}</span>}
+          </div>
+        )}
+      </div>
+
+      {/* Tabel Data Anggota */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr className="bg-[#FDF6E3] border-b border-[#2A9D8F]/20 text-xs font-semibold text-[#636E72] uppercase tracking-wider">
+              <th className="py-3.5 px-4 sm:px-6 w-16 text-center">No</th>
+              <th className="py-3.5 px-4 sm:px-6">Nama Santri</th>
+              <th className="py-3.5 px-4 sm:px-6 w-32">Kelas</th>
+              <th className="py-3.5 px-4 sm:px-6">Status Perkembangan</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {filteredAnggota.length > 0 ? (
+              filteredAnggota.map((item, idx) => {
+                const styling = STATUS_COLORS[item.perkembangan] || {
+                  color: '#64748B',
+                  bgBadge: 'bg-gray-100',
+                  textBadge: 'text-gray-700',
+                  border: 'border-gray-200',
+                };
+
+                return (
+                  <tr
+                    key={item.id || idx}
+                    className="hover:bg-[#FFFCF5] transition-colors"
+                  >
+                    <td className="py-3.5 px-4 sm:px-6 text-center font-medium text-gray-400">
+                      {idx + 1}
+                    </td>
+                    <td className="py-3.5 px-4 sm:px-6 font-semibold text-[#2D3436]">
+                      {item.nama}
+                    </td>
+                    <td className="py-3.5 px-4 sm:px-6">
+                      {item.kelas && item.kelas !== '-' ? (
+                        <span className="inline-flex items-center gap-1 font-medium text-[#2D3436] bg-gray-100 px-2.5 py-0.5 rounded-lg text-xs">
+                          <GraduationCap className="w-3.5 h-3.5 text-gray-500" />
+                          {item.kelas}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs italic">-</span>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4 sm:px-6">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${styling.bgBadge} ${styling.textBadge} ${styling.border}`}
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: styling.color }}
+                        />
+                        {item.perkembangan}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={4} className="py-12 text-center text-gray-400 text-sm">
+                  Tidak ada anggota yang sesuai dengan pencarian atau filter.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Footer Ringkasan */}
+      <div className="p-4 bg-gray-50 border-t border-gray-100 text-xs text-[#636E72] flex flex-col sm:flex-row items-center justify-between gap-2">
+        <span>Menampilkan {filteredAnggota.length} santri</span>
+        <span>Perubahan data di Google Sheets akan otomatis terupdate saat halaman direfresh</span>
+      </div>
+
+    </div>
+  );
+}
