@@ -13,6 +13,7 @@ import {
 import StatCard from '@/components/StatCard';
 import PieChart from '@/components/PieChart';
 import AdminButton from '@/components/AdminButton';
+import JamIstiwaCard from '@/components/JamIstiwaCard';
 import {
   Users,
   Wallet,
@@ -147,6 +148,11 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* ============================================================== */}
+      {/* KARTU JAM ISTIWA' (WIS) WILAYAH PARE                          */}
+      {/* ============================================================== */}
+      <JamIstiwaCard />
 
       {/* Alert Error Jika Ada Masalah Fetch */}
       {error && (
