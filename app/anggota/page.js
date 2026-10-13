@@ -13,9 +13,9 @@ export default function AnggotaPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchAnggota = async () => {
+  const fetchAnggota = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       setError(null);
       const res = await getAnggotaData(DATA_LINKS.anggota.csvUrl);
       setData(res);
@@ -28,7 +28,16 @@ export default function AnggotaPage() {
   };
 
   useEffect(() => {
-    fetchAnggota();
+    fetchAnggota(true);
+
+    const timer = setInterval(() => fetchAnggota(false), 25000);
+    const onFocus = () => fetchAnggota(false);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   return (

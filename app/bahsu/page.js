@@ -13,9 +13,9 @@ export default function BahsuPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchBahsu = async () => {
+  const fetchBahsu = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       setError(null);
       const res = await getBahsuData(DATA_LINKS.bahsu.csvUrl);
       setData(res);
@@ -28,7 +28,16 @@ export default function BahsuPage() {
   };
 
   useEffect(() => {
-    fetchBahsu();
+    fetchBahsu(true);
+
+    const timer = setInterval(() => fetchBahsu(false), 25000);
+    const onFocus = () => fetchBahsu(false);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   return (

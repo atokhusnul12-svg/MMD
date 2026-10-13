@@ -13,9 +13,9 @@ export default function KeuanganPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchKeuangan = async () => {
+  const fetchKeuangan = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       setError(null);
       const res = await getKeuanganData(DATA_LINKS.keuangan.csvUrl);
       setData(res);
@@ -28,7 +28,16 @@ export default function KeuanganPage() {
   };
 
   useEffect(() => {
-    fetchKeuangan();
+    fetchKeuangan(true);
+
+    const timer = setInterval(() => fetchKeuangan(false), 25000);
+    const onFocus = () => fetchKeuangan(false);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   return (

@@ -13,9 +13,9 @@ export default function KalenderPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchKalender = async () => {
+  const fetchKalender = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       setError(null);
       const res = await getKalenderData(DATA_LINKS.kalender.csvUrl);
       setData(res);
@@ -28,7 +28,16 @@ export default function KalenderPage() {
   };
 
   useEffect(() => {
-    fetchKalender();
+    fetchKalender(true);
+
+    const timer = setInterval(() => fetchKalender(false), 25000);
+    const onFocus = () => fetchKalender(false);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   return (
