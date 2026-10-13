@@ -160,6 +160,86 @@ export default function DashboardPage() {
     return bahsuData.events;
   }, [bahsuData, bahsuFilter]);
 
+  // Filter daftar agenda Kalender Kerja yang terdekat dengan hari ini / besok
+  const upcomingActivities = useMemo(() => {
+    if (!kalenderData?.allActivities?.length) return [];
+
+    const MONTH_MAP = {
+      'januari': 0, 'februari': 1, 'maret': 2, 'april': 3, 'mei': 4, 'juni': 5,
+      'juli': 6, 'agustus': 7, 'september': 8, 'oktober': 9, 'november': 10, 'desember': 11
+    };
+
+    const parseDate = (act) => {
+      if (!act.tanggalLengkap) return null;
+      const gregPart = act.tanggalLengkap.split('/')[0].trim();
+      const tokens = gregPart.split(' ');
+      if (tokens.length >= 3) {
+        const day = parseInt(tokens[0]);
+        const month = MONTH_MAP[tokens[1]?.toLowerCase()];
+        const year = parseInt(tokens[2]);
+        if (!isNaN(day) && month !== undefined && !isNaN(year)) {
+          return new Date(year, month, day);
+        }
+      }
+      return null;
+    };
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const withDates = kalenderData.allActivities.map((a) => {
+      const d = parseDate(a);
+      let diffDays = null;
+      let statusLabel = '';
+      let statusBadge = '';
+
+      if (d) {
+        diffDays = Math.round((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays === 0) {
+          statusLabel = 'Hari Ini';
+          statusBadge = 'bg-emerald-600 text-white';
+        } else if (diffDays === 1) {
+          statusLabel = 'Besok';
+          statusBadge = 'bg-amber-500 text-white';
+        } else if (diffDays === 2) {
+          statusLabel = 'Lusa';
+          statusBadge = 'bg-[#2A9D8F] text-white';
+        } else if (diffDays > 2) {
+          statusLabel = `${diffDays} hari lagi`;
+          statusBadge = 'bg-[#E8F5F3] text-[#1D7A6F] border border-[#2A9D8F]/30';
+        } else {
+          statusLabel = `${Math.abs(diffDays)} hari lalu`;
+          statusBadge = 'bg-gray-100 text-gray-600';
+        }
+      }
+
+      return {
+        ...a,
+        parsedDate: d,
+        diffDays,
+        statusLabel,
+        statusBadge,
+      };
+    });
+
+    let future = withDates
+      .filter((a) => a.parsedDate && a.parsedDate >= now)
+      .sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
+
+    // Jika seluruh agenda di kalender telah lewat, cari yang paling mendekati tanggal sekarang
+    if (future.length === 0) {
+      future = withDates
+        .filter((a) => a.parsedDate)
+        .sort(
+          (a, b) =>
+            Math.abs(a.parsedDate.getTime() - now.getTime()) -
+            Math.abs(b.parsedDate.getTime() - now.getTime())
+        );
+    }
+
+    return future.slice(0, 4);
+  }, [kalenderData]);
+
   return (
     <div className="space-y-8">
       
@@ -224,6 +304,89 @@ export default function DashboardPage() {
       {/* 2. KARTU JAM ISTIWA' (WIS) WILAYAH PARE                        */}
       {/* ============================================================== */}
       <JamIstiwaCard />
+
+      {/* ============================================================== */}
+      {/* 3. HIGHLIGHT KALENDER KERJA MMD (AGENDA TERDEKAT DARI HARI INI) */}
+      {/* ============================================================== */}
+      <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-xs border border-[#2A9D8F]/15">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F5F3] text-[#1D7A6F] text-xs font-semibold mb-1">
+              <CalendarDays className="w-3.5 h-3.5" />
+              Agenda Terdekat Madrasah
+            </div>
+            <h3 className="font-extrabold text-xl text-[#2D3436]">
+              Sorotan Agenda Kalender Kerja MMD
+            </h3>
+            <p className="text-xs sm:text-sm text-[#636E72] mt-0.5">
+              Kegiatan terdekat dari tanggal sekarang &amp; hari mendatang ({kalenderData?.totalKegiatan || 0} agenda terdata)
+            </p>
+          </div>
+
+          <Link
+            href="/kalender"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2A9D8F] text-white hover:bg-[#1D7A6F] text-sm font-semibold transition-colors shadow-xs"
+          >
+            <span>Buka Kalender Kerja Lengkap</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="p-8 text-center text-gray-400 text-xs bg-[#FFFCF5] rounded-2xl border border-gray-100">
+            <RefreshCw className="w-5 h-5 animate-spin mx-auto text-[#2A9D8F] mb-2" />
+            <span>Memuat jadwal kegiatan terdekat...</span>
+          </div>
+        ) : upcomingActivities.length === 0 ? (
+          <div className="p-8 text-center text-gray-400 text-xs bg-[#FFFCF5] rounded-2xl border border-gray-100">
+            Belum ada agenda terdekat yang terdata.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {upcomingActivities.map((act, index) => (
+              <div
+                key={index}
+                className="p-4 rounded-2xl bg-[#FFFCF5] border border-[#2A9D8F]/15 flex flex-col justify-between hover:bg-[#FDF6E3] hover:border-[#2A9D8F]/40 transition-all shadow-xs"
+              >
+                <div>
+                  <div className="flex items-center justify-between text-xs text-[#636E72] mb-2 gap-2">
+                    {act.statusLabel ? (
+                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shrink-0 ${act.statusBadge}`}>
+                        {act.statusLabel}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-[#1D7A6F] bg-[#E8F5F3] px-2 py-0.5 rounded-full">
+                        {act.hari}
+                      </span>
+                    )}
+
+                    {act.waktu && act.waktu !== '-' && (
+                      <span className="text-[10px] bg-white px-2 py-0.5 rounded-md border border-gray-200 font-medium">
+                        {act.waktu}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="text-[11px] font-bold text-[#1D7A6F] mb-1 line-clamp-1" title={act.tanggalLengkap}>
+                    {act.tanggalLengkap || `${act.hari}, ${act.tglM} M / ${act.tglH} H`}
+                  </div>
+
+                  <h4 className="font-bold text-xs sm:text-sm text-[#2D3436] line-clamp-2 leading-snug">
+                    {act.kegiatan}
+                  </h4>
+                </div>
+
+                <div className="mt-4 pt-2.5 border-t border-gray-100 flex items-center justify-between text-[11px]">
+                  <span className="text-[#636E72]">Koordinator:</span>
+                  <span className="font-semibold text-[#1D7A6F] bg-white px-2 py-0.5 rounded-md border border-[#2A9D8F]/20">
+                    {act.kordinator}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Alert Error Jika Ada Masalah Fetch */}
       {error && (
@@ -618,64 +781,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-      </div>
-
-      {/* ============================================================== */}
-      {/* 7. HIGHLIGHT KALENDER KERJA MMD                                */}
-      {/* ============================================================== */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-xs border border-[#2A9D8F]/15">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F5F3] text-[#1D7A6F] text-xs font-semibold mb-1">
-              <CalendarDays className="w-3.5 h-3.5" />
-              Jadwal Tahunan Madrasah
-            </div>
-            <h3 className="font-extrabold text-xl text-[#2D3436]">
-              Sorotan Agenda Kalender Kerja MMD
-            </h3>
-            <p className="text-xs sm:text-sm text-[#636E72] mt-0.5">
-              Kegiatan madrasah, musyawarah, takror, dan program LBM ({kalenderData?.totalKegiatan || 0} agenda terdata)
-            </p>
-          </div>
-
-          <Link
-            href="/kalender"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2A9D8F] text-white hover:bg-[#1D7A6F] text-sm font-semibold transition-colors shadow-xs"
-          >
-            <span>Buka Kalender Kerja Lengkap</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {kalenderData?.allActivities?.slice(0, 4).map((act, index) => (
-            <div
-              key={index}
-              className="p-4 rounded-2xl bg-[#FFFCF5] border border-[#2A9D8F]/15 flex flex-col justify-between hover:bg-[#FDF6E3] transition-colors"
-            >
-              <div>
-                <div className="flex items-center justify-between text-xs text-[#636E72] mb-2">
-                  <span className="font-bold text-[#1D7A6F] line-clamp-1" title={act.tanggalLengkap}>
-                    {act.tanggalLengkap || `${act.hari}, ${act.tglM} M / ${act.tglH} H`}
-                  </span>
-                  {act.waktu && act.waktu !== '-' && (
-                    <span className="text-[10px] bg-white px-2 py-0.5 rounded-md border border-gray-200">
-                      {act.waktu}
-                    </span>
-                  )}
-                </div>
-                <h4 className="font-bold text-xs sm:text-sm text-[#2D3436] line-clamp-2">
-                  {act.kegiatan}
-                </h4>
-              </div>
-
-              <div className="mt-4 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px]">
-                <span className="text-[#636E72]">Koordinator:</span>
-                <span className="font-semibold text-[#1D7A6F]">{act.kordinator}</span>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
 
     </div>
