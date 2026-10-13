@@ -36,7 +36,7 @@ export default function LoginPage() {
         router.push('/');
       }, 800);
     } else {
-      setError('Username atau password salah! (Gunakan username: MMD, password: WAKA3)');
+      setError('Username atau password salah! Silakan periksa kembali.');
     }
   };
 
@@ -134,7 +134,7 @@ export default function LoginPage() {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="MMD"
+                  placeholder="Masukkan username"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-hidden focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 text-[#2D3436]"
                 />
               </div>
@@ -168,16 +168,6 @@ export default function LoginPage() {
             </button>
 
           </form>
-
-          {/* Info Akun Default */}
-          <div className="mt-6 pt-5 border-t border-gray-100 text-center">
-            <div className="inline-block p-3 rounded-xl bg-[#FDF6E3] border border-[#2A9D8F]/20 text-xs text-[#2D3436]">
-              <span className="font-semibold text-[#1D7A6F]">Kredensial Admin:</span>
-              <div className="mt-1 font-mono text-[11px] text-[#636E72]">
-                username: <strong>MMD</strong> | password: <strong>WAKA3</strong>
-              </div>
-            </div>
-          </div>
 
         </div>
       )}
