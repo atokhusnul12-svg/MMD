@@ -655,7 +655,9 @@ export default function DashboardPage() {
             >
               <div>
                 <div className="flex items-center justify-between text-xs text-[#636E72] mb-2">
-                  <span className="font-bold text-[#1D7A6F]">{act.hari}, {act.tglM} M / {act.tglH} H</span>
+                  <span className="font-bold text-[#1D7A6F] line-clamp-1" title={act.tanggalLengkap}>
+                    {act.tanggalLengkap || `${act.hari}, ${act.tglM} M / ${act.tglH} H`}
+                  </span>
                   {act.waktu && act.waktu !== '-' && (
                     <span className="text-[10px] bg-white px-2 py-0.5 rounded-md border border-gray-200">
                       {act.waktu}

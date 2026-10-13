@@ -357,7 +357,11 @@ export default function KalenderView({
                           </span>
                         )}
 
-                        {showAllBulan && (
+                        {item.tanggalLengkap ? (
+                          <span className="text-[11px] font-medium text-[#636E72]">
+                            {item.tanggalLengkap}
+                          </span>
+                        ) : showAllBulan && (
                           <span className="text-[10px] font-medium text-[#636E72] bg-gray-100 px-2 py-0.5 rounded-sm">
                             {item.bulan.split('/')[0]}
                           </span>
