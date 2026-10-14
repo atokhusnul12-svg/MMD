@@ -7,6 +7,19 @@ import { STATUS_COLORS } from './PieChart';
 import AdminButton from './AdminButton';
 import AnggotaDetailModal from './AnggotaDetailModal';
 
+// Urutan hierarki standar tingkatan kelas (Aliyah tertinggi ke Tsanawiyah terendah)
+const CLASS_ORDER = [
+  '3 ALIYAH',
+  '2 Aliyah',
+  '2 M ALIYAH',
+  '2 MA',
+  '2 ALIYAH',
+  '1 ALIYAH',
+  '3 Tsanawiyah',
+  '2 Tsanawiyah',
+  '1 Tsanawiyah',
+];
+
 export default function AnggotaTable({ anggota = [], editUrl }) {
   const [search, setSearch] = useState('');
   const [selectedKelas, setSelectedKelas] = useState('');
@@ -14,18 +27,34 @@ export default function AnggotaTable({ anggota = [], editUrl }) {
   const [selectedAnggota, setSelectedAnggota] = useState(null);
 
   // Ekstrak daftar unik Kelas & Status untuk filter dropdown
-  const { kelasList, statusList } = useMemo(() => {
+  const { kelasList, statusList, hasTanpaKelas } = useMemo(() => {
     const kSet = new Set();
     const sSet = new Set();
+    let tanpaKelas = false;
 
     anggota.forEach((item) => {
-      if (item.kelas && item.kelas !== '-') kSet.add(item.kelas);
+      if (item.kelas && item.kelas !== '-') {
+        kSet.add(item.kelas);
+      } else {
+        tanpaKelas = true;
+      }
       if (item.perkembangan) sSet.add(item.perkembangan);
     });
 
+    // Urutkan kelas sesuai jenjang pendidikan (3 ALIYAH s/d 1 Tsanawiyah)
+    const sortedKelas = Array.from(kSet).sort((a, b) => {
+      const idxA = CLASS_ORDER.indexOf(a);
+      const idxB = CLASS_ORDER.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
+    });
+
     return {
-      kelasList: Array.from(kSet).sort(),
+      kelasList: sortedKelas,
       statusList: Array.from(sSet).sort(),
+      hasTanpaKelas: tanpaKelas,
     };
   }, [anggota]);
 
@@ -96,15 +125,15 @@ export default function AnggotaTable({ anggota = [], editUrl }) {
             <select
               value={selectedKelas}
               onChange={(e) => setSelectedKelas(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-hidden focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 text-[#2D3436] bg-white"
+              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-hidden focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 text-[#2D3436] bg-white cursor-pointer"
             >
               <option value="">Semua Kelas</option>
               {kelasList.map((k) => (
                 <option key={k} value={k}>
-                  Kelas {k}
+                  {k.toLowerCase().startsWith('kelas') ? k : `Kelas ${k}`}
                 </option>
               ))}
-              <option value="-">Tanpa Kelas (-)</option>
+              {hasTanpaKelas && <option value="-">Tanpa Kelas (-)</option>}
             </select>
           </div>
 
@@ -209,8 +238,8 @@ export default function AnggotaTable({ anggota = [], editUrl }) {
                     {/* Kolom Kelas */}
                     <td className="py-3.5 px-4 sm:px-6">
                       {item.kelas && item.kelas !== '-' ? (
-                        <span className="inline-flex items-center gap-1 font-medium text-[#2D3436] bg-gray-100 px-2.5 py-0.5 rounded-lg text-xs">
-                          <GraduationCap className="w-3.5 h-3.5 text-gray-500" />
+                        <span className="inline-flex items-center gap-1 font-semibold text-[#1D7A6F] bg-[#E8F5F3] px-2.5 py-1 rounded-lg text-xs border border-[#2A9D8F]/20 shadow-2xs">
+                          <GraduationCap className="w-3.5 h-3.5 text-[#2A9D8F]" />
                           {item.kelas}
                         </span>
                       ) : (

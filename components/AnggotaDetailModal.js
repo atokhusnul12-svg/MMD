@@ -191,8 +191,8 @@ export default function AnggotaDetailModal({ anggota, onClose }) {
 
                   {anggota.kelas && anggota.kelas !== '-' && (
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-white text-gray-700 border border-gray-200 shadow-2xs">
-                      <GraduationCap className="w-3.5 h-3.5 text-gray-500" />
-                      Kelas {anggota.kelas}
+                      <GraduationCap className="w-3.5 h-3.5 text-[#2A9D8F]" />
+                      {anggota.kelas.toLowerCase().startsWith('kelas') ? anggota.kelas : `Kelas ${anggota.kelas}`}
                     </span>
                   )}
 
