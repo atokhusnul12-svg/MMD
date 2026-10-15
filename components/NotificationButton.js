@@ -84,12 +84,12 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
           }}
           disabled={isLoading}
           aria-label="Pengaturan Notifikasi"
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer ${
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
             isSubscribed
-              ? 'bg-[#E8F5F3] text-[#1D7A6F] border border-[#2A9D8F]/30 hover:bg-[#2A9D8F] hover:text-white'
+              ? 'bg-[#E8F5F3] text-[#1D7A6F] border border-[#1D7A6F]/20 hover:bg-[#1D7A6F] hover:text-white'
               : permission === 'denied'
-              ? 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100'
-              : 'text-[#2D3436] hover:text-[#2A9D8F] hover:bg-[#FDF6E3]'
+              ? 'bg-[#FAF0ED] text-[#8A2F1B] border border-[#F1D3CC] hover:bg-[#F5E2DC]'
+              : 'text-[#26332E] hover:text-[#1D7A6F] hover:bg-[#FAF8F5]'
           }`}
           title={
             isSubscribed
@@ -100,17 +100,17 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
           }
         >
           {isLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin text-[#2A9D8F]" />
+            <Loader2 className="w-4 h-4 animate-spin text-[#1D7A6F]" />
           ) : isSubscribed ? (
             <div className="relative flex items-center">
-              <BellRing className="w-4 h-4 text-[#2A9D8F]" />
+              <BellRing className="w-4 h-4 text-[#1D7A6F]" />
               <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C6A66B] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C6A66B]"></span>
               </span>
             </div>
           ) : permission === 'denied' ? (
-            <BellOff className="w-4 h-4 text-amber-600" />
+            <BellOff className="w-4 h-4 text-[#8A2F1B]" />
           ) : (
             <Bell className="w-4 h-4" />
           )}
@@ -132,19 +132,19 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
 
         {/* Dropdown Menu Opsi Notifikasi */}
         {menuOpen && (
-          <div className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-white shadow-xl border border-gray-100 p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-gray-100">
-              <span className="text-xs font-bold text-[#2D3436] flex items-center gap-1.5">
-                <Smartphone className="w-4 h-4 text-[#2A9D8F]" />
+          <div className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-white shadow-xl border border-[#DCE5E0] p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-[#DCE5E0]">
+              <span className="text-xs font-bold font-serif text-[#1D7A6F] flex items-center gap-1.5">
+                <Smartphone className="w-4 h-4 text-[#1D7A6F]" />
                 Status Notifikasi Sistem
               </span>
               <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
                   isSubscribed
-                    ? 'bg-emerald-100 text-emerald-800'
+                    ? 'bg-[#E8F5F3] text-[#1D7A6F] border-[#1D7A6F]/20'
                     : permission === 'denied'
-                    ? 'bg-amber-100 text-amber-800'
-                    : 'bg-gray-100 text-gray-700'
+                    ? 'bg-[#FAF0ED] text-[#8A2F1B] border-[#F1D3CC]'
+                    : 'bg-[#F7F5EF] text-[#5C6D66] border-[#DCE5E0]'
                 }`}
               >
                 {isSubscribed ? '● Terdaftar' : permission === 'denied' ? 'Diblokir' : 'Belum Aktif'}
@@ -152,24 +152,24 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
             </div>
 
             {/* Info Jumlah Pengguna Terdaftar */}
-            <div className="flex items-center justify-between text-[11px] text-[#636E72] mb-3 px-1">
+            <div className="flex items-center justify-between text-[11px] text-[#5C6D66] mb-3 px-1">
               <span className="flex items-center gap-1">
-                <Users className="w-3.5 h-3.5 text-[#2A9D8F]" />
+                <Users className="w-3.5 h-3.5 text-[#1D7A6F]" />
                 Total Perangkat Terhubung:
               </span>
-              <span className="font-bold text-[#2D3436] bg-[#E8F5F3] px-2 py-0.5 rounded-md text-[10px] text-[#1D7A6F]">
+              <span className="font-bold text-[#1D7A6F] bg-[#E8F5F3] border border-[#1D7A6F]/15 px-2 py-0.5 rounded-md text-[10px]">
                 {subscriberCount} HP/Laptop
               </span>
             </div>
 
             {/* Panduan jika diblokir oleh browser */}
             {permission === 'denied' && (
-              <div className="mb-3 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
+              <div className="mb-3 p-2.5 rounded-xl bg-[#FAF0ED] border border-[#F1D3CC] text-xs text-[#8A2F1B] space-y-1">
                 <p className="font-semibold flex items-center gap-1">
-                  <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                  <AlertCircle className="w-3.5 h-3.5 text-[#8A2F1B]" />
                   Izin Notifikasi Diblokir di Browser
                 </p>
-                <p className="text-[11px] leading-relaxed text-amber-800">
+                <p className="text-[11px] leading-relaxed text-[#8A2F1B]/90">
                   Untuk mengaktifkannya: klik ikon gembok / setelan di bilah URL browser Anda, lalu ubah <strong>Notifikasi</strong> menjadi <strong>Izinkan (Allow)</strong>.
                 </p>
               </div>
@@ -180,10 +180,10 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
               <button
                 onClick={handleToggleSubscribe}
                 disabled={isLoading}
-                className={`w-full flex items-center justify-between p-2 rounded-xl transition-colors font-medium text-left ${
+                className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-colors font-medium text-left cursor-pointer ${
                   isSubscribed
-                    ? 'text-rose-600 hover:bg-rose-50'
-                    : 'bg-[#2A9D8F] text-white hover:bg-[#238276]'
+                    ? 'text-[#8A2F1B] hover:bg-[#FAF0ED]'
+                    : 'bg-[#1D7A6F] text-white hover:bg-[#1A453B]'
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -200,9 +200,9 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
                     setMenuOpen(false);
                     setBroadcastOpen(true);
                   }}
-                  className="w-full flex items-center gap-2 p-2 rounded-xl text-[#1D7A6F] hover:bg-[#E8F5F3] transition-colors font-medium text-left cursor-pointer"
+                  className="w-full flex items-center gap-2 p-2.5 rounded-xl text-[#1D7A6F] hover:bg-[#E8F5F3] transition-colors font-medium text-left cursor-pointer"
                 >
-                  <Send className="w-4 h-4 text-[#2A9D8F]" />
+                  <Send className="w-4 h-4 text-[#1D7A6F]" />
                   <span>Kirim Broadcast Notifikasi...</span>
                 </button>
               )}
@@ -226,49 +226,50 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
   // ============================================================================
   return (
     <>
-      <div className="bg-gradient-to-br from-white to-[#E8F5F3]/50 rounded-3xl p-6 sm:p-7 shadow-xs border border-[#2A9D8F]/20 relative overflow-hidden">
+      <div className="bg-white rounded-2xl p-6 sm:p-7 shadow-xs border border-[#DCE5E0] relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-[#1D7A6F]" />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           
           {/* Sisi Kiri: Deskripsi & Keuntungan Push Notification */}
           <div className="flex items-start gap-4">
-            <div className="relative shrink-0 w-12 h-12 rounded-2xl bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center border border-[#2A9D8F]/30 shadow-xs">
+            <div className="relative shrink-0 w-12 h-12 rounded-2xl bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center border border-[#1D7A6F]/15 shadow-xs">
               {isSubscribed ? (
                 <>
-                  <BellRing className="w-6 h-6 text-[#2A9D8F]" />
+                  <BellRing className="w-6 h-6 text-[#1D7A6F]" />
                   <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C6A66B] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[#C6A66B]"></span>
                   </span>
                 </>
               ) : permission === 'denied' ? (
-                <BellOff className="w-6 h-6 text-amber-600" />
+                <BellOff className="w-6 h-6 text-[#8A2F1B]" />
               ) : (
-                <Bell className="w-6 h-6 text-[#2A9D8F]" />
+                <Bell className="w-6 h-6 text-[#1D7A6F]" />
               )}
             </div>
 
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base sm:text-lg font-bold text-[#2D3436]">
+                <h3 className="text-base sm:text-lg font-bold font-serif text-[#1D7A6F]">
                   Notifikasi Sistem WAKA III MMD
                 </h3>
                 <span
-                  className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
+                  className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-md border ${
                     isSubscribed
-                      ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                      ? 'bg-[#E8F5F3] text-[#1D7A6F] border-[#1D7A6F]/20'
                       : permission === 'denied'
-                      ? 'bg-amber-100 text-amber-800 border-amber-300'
-                      : 'bg-gray-100 text-gray-700 border-gray-200'
+                      ? 'bg-[#FAF0ED] text-[#8A2F1B] border-[#F1D3CC]'
+                      : 'bg-[#F7F5EF] text-[#5C6D66] border-[#DCE5E0]'
                   }`}
                 >
                   {isSubscribed ? (
                     <>
-                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                      <CheckCircle2 className="w-3 h-3 text-[#1D7A6F]" />
                       Aktif di Perangkat Ini
                     </>
                   ) : permission === 'denied' ? (
                     <>
-                      <AlertCircle className="w-3 h-3 text-amber-600" />
+                      <AlertCircle className="w-3 h-3 text-[#8A2F1B]" />
                       Izin Diblokir
                     </>
                   ) : (
@@ -277,14 +278,14 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
                 </span>
                 
                 {subscriberCount > 0 && (
-                  <span className="inline-flex items-center gap-1 text-[11px] text-[#1D7A6F] bg-white border border-[#2A9D8F]/30 px-2 py-0.5 rounded-full font-medium">
-                    <Users className="w-3 h-3 text-[#2A9D8F]" />
+                  <span className="inline-flex items-center gap-1 text-[11px] text-[#1D7A6F] bg-[#E8F5F3] border border-[#1D7A6F]/20 px-2 py-0.5 rounded-md font-medium">
+                    <Users className="w-3 h-3 text-[#1D7A6F]" />
                     {subscriberCount} Terhubung
                   </span>
                 )}
               </div>
 
-              <p className="text-xs sm:text-sm text-[#636E72] mt-1.5 leading-relaxed max-w-2xl">
+              <p className="text-xs sm:text-sm text-[#5C6D66] mt-1.5 leading-relaxed max-w-2xl">
                 Dapatkan pemberitahuan otomatis di layar HP (Android &amp; iOS) dan Laptop saat ada agenda Bahtsul Masail terdekat, kegiatan tahunan Kalender Kerja MMD, maupun pembaruan data keuangan santri.
               </p>
 
@@ -293,9 +294,9 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
                 <p
                   className={`mt-2 text-xs font-semibold ${
                     feedback.type === 'success'
-                      ? 'text-emerald-700'
+                      ? 'text-[#1D7A6F]'
                       : feedback.type === 'error'
-                      ? 'text-rose-600'
+                      ? 'text-[#8A2F1B]'
                       : 'text-[#1D7A6F]'
                   }`}
                 >
@@ -313,10 +314,10 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
                 {isAdmin && (
                   <button
                     onClick={() => setBroadcastOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#2A9D8F]/30 text-[#1D7A6F] hover:bg-[#E8F5F3] text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#DCE5E0] text-[#1D7A6F] hover:bg-[#E8F5F3] text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer"
                     title="Kirim notifikasi broadcast ke seluruh santri"
                   >
-                    <Send className="w-4 h-4 text-[#2A9D8F]" />
+                    <Send className="w-4 h-4 text-[#1D7A6F]" />
                     <span>Kirim Broadcast</span>
                   </button>
                 )}
@@ -324,7 +325,7 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
                 <button
                   onClick={handleToggleSubscribe}
                   disabled={isLoading}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-rose-200 bg-white text-rose-600 hover:bg-rose-50 text-xs sm:text-sm font-semibold transition-all cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[#F1D3CC] bg-white text-[#8A2F1B] hover:bg-[#FAF0ED] text-xs sm:text-sm font-semibold transition-all cursor-pointer"
                   title="Matikan notifikasi di perangkat ini"
                 >
                   {isLoading ? (
@@ -336,11 +337,11 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
                 </button>
               </>
             ) : permission === 'denied' ? (
-              <div className="text-left text-xs bg-amber-50 border border-amber-200 p-3 rounded-xl max-w-xs">
-                <span className="font-bold text-amber-900 block mb-1">
+              <div className="text-left text-xs bg-[#FAF0ED] border border-[#F1D3CC] p-3 rounded-xl max-w-xs">
+                <span className="font-bold text-[#8A2F1B] block mb-1">
                   Cara Mengizinkan:
                 </span>
-                <span className="text-amber-800 text-[11px] block">
+                <span className="text-[#8A2F1B]/90 text-[11px] block">
                   Klik ikon gembok di sebelah kiri alamat web browser Anda, lalu ubah <strong>Notifikasi</strong> menjadi <strong>Izinkan</strong>.
                 </span>
               </div>
@@ -348,7 +349,7 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
               <button
                 onClick={handleToggleSubscribe}
                 disabled={isLoading}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-[#2A9D8F] hover:bg-[#238276] text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-[#2A9D8F]/25 cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#1D7A6F] hover:bg-[#1A453B] text-white text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-50"
               >
                 {isLoading ? (
                   <>

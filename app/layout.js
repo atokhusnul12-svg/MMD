@@ -22,7 +22,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="id" className="h-full">
-      <body className="min-h-full flex flex-col bg-[#FDF6E3] text-[#2D3436] antialiased">
+      <body className="min-h-full flex flex-col bg-[#F7F5EF] text-[#26332E] antialiased">
         <AuthProvider>
           <NotificationProvider>
             <Navbar />

@@ -4,58 +4,59 @@ import React, { useState, useMemo } from 'react';
 import { formatRupiah } from '@/lib/fetchCSV';
 import { Wallet, PieChart as PieChartIcon, TrendingDown, Info, ArrowUpRight } from 'lucide-react';
 
-// Palet warna harmonis tema web WAKA III (Teal / Tosca / Hijau Islami / Warm Gold / Coral)
+// Palet warna harmonis tema web WAKA III (Islamic Contemporary: Deep Pine, Gold, Slate Blue, Amber, Sage)
 export const KEUANGAN_COLORS = [
   {
-    color: '#2A9D8F',
-    bgBadge: 'bg-[#2A9D8F]/15',
+    color: '#1D7A6F',
+    bgBadge: 'bg-[#E8F5F3]',
     textBadge: 'text-[#1D7A6F]',
-    border: 'border-[#2A9D8F]/30',
-    lightBg: 'bg-[#E8F5F3]',
+    border: 'border-[#C8E3DC]',
+    lightBg: 'bg-[#F7F5EF]',
   },
   {
-    color: '#38A3A5',
-    bgBadge: 'bg-[#38A3A5]/15',
-    textBadge: 'text-[#22577A]',
-    border: 'border-[#38A3A5]/30',
-    lightBg: 'bg-[#EAF4F4]',
+    color: '#C6A66B',
+    bgBadge: 'bg-[#FAF3E6]',
+    textBadge: 'text-[#8C6D23]',
+    border: 'border-[#E8D5A7]',
+    lightBg: 'bg-[#FAF8F2]',
   },
   {
-    color: '#E9C46A',
-    bgBadge: 'bg-[#E9C46A]/25',
-    textBadge: 'text-[#8A6D14]',
-    border: 'border-[#E9C46A]/40',
-    lightBg: 'bg-[#FDF6E3]',
+    color: '#224A63',
+    bgBadge: 'bg-[#EDF3F7]',
+    textBadge: 'text-[#224A63]',
+    border: 'border-[#B9D1E0]',
+    lightBg: 'bg-[#F4F7F9]',
   },
   {
-    color: '#57CC99',
-    bgBadge: 'bg-[#57CC99]/20',
-    textBadge: 'text-[#2D6A4F]',
-    border: 'border-[#57CC99]/30',
-    lightBg: 'bg-[#EBFBF4]',
+    color: '#436A5B',
+    bgBadge: 'bg-[#EEF4F1]',
+    textBadge: 'text-[#2A5243]',
+    border: 'border-[#C3D8CE]',
+    lightBg: 'bg-[#F5F8F6]',
   },
   {
-    color: '#F4A261',
-    bgBadge: 'bg-[#F4A261]/20',
-    textBadge: 'text-[#B2531F]',
-    border: 'border-[#F4A261]/40',
-    lightBg: 'bg-[#FFF3EB]',
+    color: '#C47C35',
+    bgBadge: 'bg-[#FDF4EB]',
+    textBadge: 'text-[#9A5212]',
+    border: 'border-[#F0D0B4]',
+    lightBg: 'bg-[#FDF7F2]',
   },
   {
-    color: '#22577A',
-    bgBadge: 'bg-[#22577A]/15',
-    textBadge: 'text-[#153B54]',
-    border: 'border-[#22577A]/30',
-    lightBg: 'bg-[#E9F1F6]',
+    color: '#A8382B',
+    bgBadge: 'bg-[#FAF0ED]',
+    textBadge: 'text-[#8A2F1B]',
+    border: 'border-[#E8BCB0]',
+    lightBg: 'bg-[#FCF5F3]',
   },
   {
-    color: '#E76F51',
-    bgBadge: 'bg-[#E76F51]/20',
-    textBadge: 'text-[#9B2226]',
-    border: 'border-[#E76F51]/40',
-    lightBg: 'bg-[#FDF0ED]',
+    color: '#9C824E',
+    bgBadge: 'bg-[#F8F5EE]',
+    textBadge: 'text-[#6B572B]',
+    border: 'border-[#DFD6C3]',
+    lightBg: 'bg-[#F9F7F2]',
   },
 ];
+
 
 export default function KeuanganDonutChart({
   rekapitulasi = [],
@@ -123,22 +124,22 @@ export default function KeuanganDonutChart({
   // 1. STATE LOADING (SKELETON SHIMMER)
   if (isLoading) {
     return (
-      <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-xs border border-[#2A9D8F]/15 animate-pulse">
+      <div className="bg-white rounded-xl p-6 sm:p-7 border border-[#DCE5E0] animate-pulse">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="space-y-2">
-            <div className="h-4 bg-gray-200 rounded w-48"></div>
-            <div className="h-3 bg-gray-100 rounded w-64"></div>
+            <div className="h-4 bg-stone-200 rounded w-48"></div>
+            <div className="h-3 bg-stone-100 rounded w-64"></div>
           </div>
-          <div className="h-6 bg-gray-200 rounded-full w-28"></div>
+          <div className="h-6 bg-stone-200 rounded w-28"></div>
         </div>
 
         <div className="flex flex-col lg:flex-row items-center justify-around gap-8">
-          <div className="w-56 h-56 rounded-full bg-gray-200/80 animate-pulse relative flex items-center justify-center">
+          <div className="w-56 h-56 rounded-full bg-stone-200/80 animate-pulse relative flex items-center justify-center">
             <div className="w-32 h-32 rounded-full bg-white"></div>
           </div>
-          <div className="space-y-3 w-full max-w-md">
+          <div className="space-y-2.5 w-full max-w-md">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-12 bg-gray-100 rounded-xl w-full"></div>
+              <div key={i} className="h-12 bg-stone-100 rounded-lg w-full"></div>
             ))}
           </div>
         </div>
@@ -149,11 +150,11 @@ export default function KeuanganDonutChart({
   // 2. STATE ERROR
   if (error) {
     return (
-      <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-5 text-sm flex items-start gap-3">
-        <Info className="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
+      <div className="bg-[#FAF0ED] border border-[#E8BCB0] text-[#8A2F1B] rounded-xl p-5 text-sm flex items-start gap-3">
+        <Info className="w-5 h-5 shrink-0 text-[#8A2F1B] mt-0.5" />
         <div>
           <h4 className="font-bold text-sm">Gagal Menampilkan Diagram Pengeluaran</h4>
-          <p className="text-xs text-rose-700 mt-1">{error}</p>
+          <p className="text-xs text-[#8A2F1B] mt-1">{error}</p>
         </div>
       </div>
     );
@@ -162,33 +163,33 @@ export default function KeuanganDonutChart({
   // 3. STATE EMPTY
   if (chartData.length === 0 || calculatedTotal <= 0) {
     return (
-      <div className="bg-white rounded-3xl p-8 shadow-xs border border-[#2A9D8F]/15 text-center text-gray-400">
-        <PieChartIcon className="w-10 h-10 mx-auto text-gray-300 mb-2" />
-        <p className="text-sm font-semibold text-gray-600">Belum ada data pengeluaran yang terdata</p>
-        <p className="text-xs text-gray-400 mt-1">Data akan otomatis muncul saat LPJ tercatat di Google Sheets.</p>
+      <div className="bg-white rounded-xl p-8 border border-[#DCE5E0] text-center text-[#5C6E66]">
+        <PieChartIcon className="w-10 h-10 mx-auto text-stone-300 mb-2" />
+        <p className="text-sm font-semibold text-[#26332E]">Belum ada data pengeluaran yang terdata</p>
+        <p className="text-xs text-[#5C6E66] mt-1">Data akan otomatis muncul saat LPJ tercatat di Google Sheets.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-xs border border-[#2A9D8F]/15">
+    <div className="bg-white rounded-xl p-6 sm:p-7 border border-[#DCE5E0] shadow-xs">
       {/* Header Card */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-[#DCE5E0]">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F5F3] text-[#1D7A6F] text-xs font-semibold mb-1">
-            <PieChartIcon className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#E8F5F3] text-[#1D7A6F] text-[11px] font-bold border border-[#C8E3DC] mb-1.5">
+            <PieChartIcon className="w-3.5 h-3.5 text-[#1D7A6F]" />
             Visualisasi Distribusi Keuangan
           </div>
-          <h3 className="font-extrabold text-xl text-[#2D3436] tracking-tight flex items-center gap-2">
+          <h3 className="font-extrabold text-xl text-[#26332E] tracking-tight font-serif flex items-center gap-2">
             Proporsi Realisasi Pengeluaran (LPJ) Antar Periode
           </h3>
-          <p className="text-xs sm:text-sm text-[#636E72] mt-0.5">
+          <p className="text-xs sm:text-sm text-[#5C6E66] mt-0.5">
             Komposisi dan persentase penyerapan dana dari total realisasi {formatRupiah(calculatedTotal)}
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs font-bold text-[#1D7A6F] bg-[#E8F5F3] px-3 py-1.5 rounded-xl border border-[#2A9D8F]/20">
+          <span className="text-xs font-bold text-[#1D7A6F] bg-[#E8F5F3] px-3 py-1 rounded border border-[#C8E3DC]">
             {chartData.length} Periode Terdata
           </span>
         </div>
@@ -212,7 +213,7 @@ export default function KeuanganDonutChart({
               cx={size / 2}
               cy={size / 2}
               r={radius}
-              stroke="#F4EFE6"
+              stroke="#F7F5EF"
               strokeWidth={strokeWidth}
               fill="transparent"
             />
@@ -235,7 +236,7 @@ export default function KeuanganDonutChart({
                   cy={size / 2}
                   r={radius}
                   stroke={item.color}
-                  strokeWidth={highlight ? strokeWidth + 7 : strokeWidth}
+                  strokeWidth={highlight ? strokeWidth + 6 : strokeWidth}
                   strokeDasharray={strokeDasharray}
                   strokeDashoffset={strokeDashoffset}
                   fill="transparent"
@@ -257,14 +258,14 @@ export default function KeuanganDonutChart({
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-6">
             {activeHoverItem ? (
               <div className="animate-fade-in space-y-0.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#636E72] block max-w-[140px] truncate">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66] block max-w-[140px] truncate">
                   {activeHoverItem.bulan}
                 </span>
-                <span className="text-xl sm:text-2xl font-black text-[#2D3436] tracking-tight block">
+                <span className="text-xl sm:text-2xl font-black text-[#26332E] tracking-tight font-serif block">
                   {formatRupiah(activeHoverItem.pengeluaran)}
                 </span>
                 <span
-                  className="inline-block text-xs font-bold px-2 py-0.5 rounded-full text-white shadow-xs"
+                  className="inline-block text-xs font-bold px-2 py-0.5 rounded text-white shadow-xs"
                   style={{ backgroundColor: activeHoverItem.color }}
                 >
                   {activeHoverItem.percentage}% dari Total
@@ -272,10 +273,10 @@ export default function KeuanganDonutChart({
               </div>
             ) : (
               <div className="space-y-0.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#636E72] block">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#5C6E66] block">
                   Total Realisasi (LPJ)
                 </span>
-                <span className="text-xl sm:text-2xl font-black text-[#2D3436] tracking-tight block">
+                <span className="text-xl sm:text-2xl font-black text-[#26332E] tracking-tight font-serif block">
                   {formatRupiah(calculatedTotal)}
                 </span>
                 <span className="text-[11px] font-semibold text-[#1D7A6F] block">
@@ -289,13 +290,13 @@ export default function KeuanganDonutChart({
         {/* ============================================================== */}
         {/* 2. LEGENDA & DETAIL NOMINAL PER PERIODE                        */}
         {/* ============================================================== */}
-        <div className="flex-1 w-full max-w-lg space-y-2.5">
-          <div className="flex items-center justify-between text-xs font-semibold text-[#636E72] px-2 mb-1">
+        <div className="flex-1 w-full max-w-lg space-y-2">
+          <div className="flex items-center justify-between text-xs font-bold text-[#5C6E66] px-2 mb-1">
             <span>Nama Periode Bulan</span>
             <span>Nominal Realisasi &amp; Porsi</span>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {chartData.map((item, index) => {
               const isHovered = hoveredIndex === index;
               const isSelected = selectedBulan === item.bulan;
@@ -307,34 +308,34 @@ export default function KeuanganDonutChart({
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                   onClick={() => onSelectBulan(item.bulan)}
-                  className={`flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer border ${
+                  className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer border ${
                     highlight
-                      ? 'bg-[#FFFCF5] border-[#2A9D8F]/50 shadow-xs translate-x-1'
-                      : 'bg-[#FDFCFB] border-gray-100 hover:bg-[#FFFCF5] hover:border-gray-200'
+                      ? 'bg-[#F7F5EF] border-[#1D7A6F]/50 shadow-xs'
+                      : 'bg-white border-[#DCE5E0] hover:bg-[#F7F5EF]/60'
                   }`}
                 >
                   {/* Sisi Kiri: Dot Warna & Nama Periode */}
-                  <div className="flex items-center gap-3 min-w-0 pr-2">
+                  <div className="flex items-center gap-2.5 min-w-0 pr-2">
                     <span
-                      className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs transition-transform duration-200"
+                      className="w-3 h-3 rounded-sm shrink-0 transition-transform duration-200"
                       style={{
                         backgroundColor: item.color,
-                        transform: highlight ? 'scale(1.3)' : 'scale(1)',
+                        transform: highlight ? 'scale(1.2)' : 'scale(1)',
                       }}
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className={`text-xs font-bold truncate ${highlight ? 'text-[#1D7A6F]' : 'text-[#2D3436]'}`}>
+                        <span className={`text-xs font-bold truncate ${highlight ? 'text-[#1D7A6F]' : 'text-[#26332E]'}`}>
                           {item.bulan}
                         </span>
                         {isSelected && (
-                          <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-[#2A9D8F] text-white">
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-[#1D7A6F] text-white">
                             AKTIF
                           </span>
                         )}
                       </div>
                       {item.keterangan && (
-                        <p className="text-[10px] text-[#636E72] truncate">
+                        <p className="text-[10px] text-[#5C6E66] truncate">
                           {item.keterangan}
                         </p>
                       )}
@@ -342,18 +343,18 @@ export default function KeuanganDonutChart({
                   </div>
 
                   {/* Sisi Kanan: Nominal Rupiah & Persentase Badge */}
-                  <div className="flex items-center gap-2.5 shrink-0 ml-2">
+                  <div className="flex items-center gap-2 shrink-0 ml-2">
                     <div className="text-right">
-                      <span className="text-xs font-extrabold text-[#2D3436] block">
+                      <span className="text-xs font-extrabold text-[#26332E] block">
                         {formatRupiah(item.pengeluaran)}
                       </span>
-                      <span className="text-[10px] text-[#636E72]">
+                      <span className="text-[10px] text-[#5C6E66]">
                         dari {formatRupiah(item.subsidi)}
                       </span>
                     </div>
 
                     <span
-                      className="text-xs font-black px-2.5 py-1 rounded-xl text-right w-14 shrink-0 transition-colors"
+                      className="text-xs font-black px-2 py-0.5 rounded text-right w-14 shrink-0 transition-colors"
                       style={{
                         backgroundColor: highlight ? item.color : `${item.color}20`,
                         color: highlight ? '#ffffff' : item.color,
@@ -367,8 +368,8 @@ export default function KeuanganDonutChart({
             })}
           </div>
 
-          <p className="text-[11px] text-[#636E72] pt-1 px-2 flex items-center gap-1.5">
-            <Info className="w-3.5 h-3.5 text-[#2A9D8F] shrink-0" />
+          <p className="text-[11px] text-[#5C6E66] pt-1 px-2 flex items-center gap-1.5">
+            <Info className="w-3.5 h-3.5 text-[#1D7A6F] shrink-0" />
             <span>Arahkan kursor atau klik periode untuk menyorot detail anggaran di tabel bawah.</span>
           </p>
         </div>
@@ -377,3 +378,4 @@ export default function KeuanganDonutChart({
     </div>
   );
 }
+

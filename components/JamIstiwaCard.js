@@ -38,22 +38,20 @@ export default function JamIstiwaCard() {
   // Tampilan cadangan (placeholder) saat awal muat agar tidak berkedip
   if (!dataWaktu) {
     return (
-      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-[#2A9D8F]/20 animate-pulse">
-        <div className="h-6 bg-gray-200 rounded-md w-48 mb-4"></div>
-        <div className="h-12 bg-gray-200 rounded-md w-72 mb-4"></div>
-        <div className="h-4 bg-gray-200 rounded-md w-60"></div>
+      <div className="bg-white rounded-xl p-6 sm:p-7 border border-[#DCE5E0] animate-pulse">
+        <div className="h-5 bg-stone-200 rounded w-48 mb-4"></div>
+        <div className="h-12 bg-stone-200 rounded w-72 mb-4"></div>
+        <div className="h-4 bg-stone-100 rounded w-60"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-[#2A9D8F]/20 relative overflow-hidden transition-all duration-200">
-      
-      {/* Aksen Latar Belakang Lingkaran Halus (Tosca & Cream) */}
-      <div className="absolute -top-16 -right-16 w-56 h-56 bg-[#E8F5F3] rounded-full blur-3xl opacity-70 pointer-events-none" />
-      <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-[#FDF6E3] rounded-full blur-3xl opacity-70 pointer-events-none" />
+    <div className="bg-white rounded-xl p-6 sm:p-7 border border-[#DCE5E0] shadow-xs relative overflow-hidden">
+      {/* Aksen garis emas halus di bagian atas */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1D7A6F] via-[#C6A66B] to-[#1D7A6F]" />
 
-      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pt-1">
         
         {/* ============================================================== */}
         {/* BAGIAN KIRI: JAM ISTIWA' UTAMA (BESAR & JELAS)                  */}
@@ -62,95 +60,95 @@ export default function JamIstiwaCard() {
           
           {/* Header Label & Lokasi */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F5F3] text-[#1D7A6F] text-xs font-bold border border-[#2A9D8F]/25 shadow-xs">
-              <Sun className="w-3.5 h-3.5 text-[#2A9D8F] animate-spin-slow" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#1D7A6F] text-[#C6A66B] text-[11px] font-bold tracking-wider border border-[#C6A66B]/30 shadow-xs">
+              <Sun className="w-3.5 h-3.5 text-[#C6A66B]" />
               <span>JAM ISTIWA&apos; (WIS)</span>
             </span>
 
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#E8F5F3] text-[#1D7A6F] text-[11px] font-semibold border border-[#C8E3DC]">
+              <span className="w-2 h-2 rounded-full bg-[#1D7A6F] animate-pulse"></span>
               Real-time Detik
             </span>
 
-            <span className="hidden sm:inline-flex items-center gap-1 text-xs text-[#636E72]">
-              <MapPin className="w-3 h-3 text-[#2A9D8F]" />
-              Wilayah Pare, Kediri
+            <span className="hidden sm:inline-flex items-center gap-1 text-xs text-[#5C6E66]">
+              <MapPin className="w-3.5 h-3.5 text-[#C6A66B]" />
+              Pare, Kediri (PP. Darussalam Sumbersari)
             </span>
           </div>
 
-          {/* Tampilan Jam Istiwa' (Font Jumbo & Font Monospace agar angka detik tidak goyang) */}
+          {/* Tampilan Jam Istiwa' (Font Jumbo & Monospace) */}
           <div className="flex items-baseline gap-3">
-            <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#1D7A6F] tracking-tight font-mono drop-shadow-xs">
+            <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#1D7A6F] tracking-tight font-mono">
               {dataWaktu.wis.teks}
             </div>
-            <span className="text-lg sm:text-2xl font-extrabold text-[#2A9D8F]">
+            <span className="text-xl sm:text-2xl font-black text-[#C6A66B] tracking-wide">
               WIS
             </span>
           </div>
 
           {/* Keterangan Deskriptif */}
-          <p className="text-xs sm:text-sm text-[#636E72] leading-relaxed max-w-xl">
+          <p className="text-xs sm:text-sm text-[#5C6E66] leading-relaxed max-w-xl">
             Waktu Matahari Hakiki (Zawal) Pondok Pesantren Darussalam Sumbersari.
-            Matahari tepat berada di titik kulminasi atas saat jam 12:00:00 WIS.
+            Matahari tepat berada di titik kulminasi atas saat jam 12:00:00 WIS sebagai patokan utama waktu sholat dan kegiatan pondok.
           </p>
         </div>
 
         {/* ============================================================== */}
         {/* BAGIAN KANAN: DETAIL JAM WIB, SELISIH HARI INI & TANGGAL       */}
         {/* ============================================================== */}
-        <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:min-w-[280px]">
+        <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 lg:min-w-[290px]">
           
           {/* Baris 1: Jam WIB Saat Ini */}
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#FDF6E3] border border-[#2A9D8F]/15">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-[#F7F5EF] border border-[#DCE5E0]">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[#2A9D8F] shadow-xs border border-[#2A9D8F]/10">
+              <div className="w-8 h-8 rounded bg-white flex items-center justify-center text-[#1D7A6F] border border-[#DCE5E0] shadow-xs">
                 <Clock className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-[11px] font-semibold text-[#636E72] uppercase tracking-wider">
-                  Waktu WIB
+                <div className="text-[10px] font-bold text-[#5C6E66] uppercase tracking-wider">
+                  Waktu Indonesia Barat
                 </div>
-                <div className="text-sm font-bold text-[#2D3436] font-mono">
+                <div className="text-sm font-bold text-[#26332E] font-mono">
                   {dataWaktu.wib.teks} WIB
                 </div>
               </div>
             </div>
-            <span className="text-[11px] font-bold text-[#1D7A6F] bg-[#E8F5F3] px-2 py-0.5 rounded-md">
+            <span className="text-[11px] font-semibold text-[#1D7A6F] bg-[#E8F5F3] border border-[#C8E3DC] px-2 py-0.5 rounded">
               UTC+7
             </span>
           </div>
 
           {/* Baris 2: Selisih Hari Ini */}
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#FDF6E3] border border-[#2A9D8F]/15">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-[#F7F5EF] border border-[#DCE5E0]">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[#2A9D8F] shadow-xs border border-[#2A9D8F]/10">
+              <div className="w-8 h-8 rounded bg-white flex items-center justify-center text-[#1D7A6F] border border-[#DCE5E0] shadow-xs">
                 <Compass className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-[11px] font-semibold text-[#636E72] uppercase tracking-wider">
-                  Selisih Hari Ini
+                <div className="text-[10px] font-bold text-[#5C6E66] uppercase tracking-wider">
+                  Koreksi / Selisih Hari Ini
                 </div>
-                <div className="text-sm font-extrabold text-[#1D7A6F]">
+                <div className="text-sm font-bold text-[#1D7A6F]">
                   {dataWaktu.selisihTeks}
                 </div>
               </div>
             </div>
-            <span className="text-[11px] font-medium text-[#636E72] bg-white px-2 py-0.5 rounded-md border border-gray-200" title="Rumus: Jam Istiwa = Jam WIB ditambah selisih">
+            <span className="text-[11px] font-medium text-[#26332E] bg-white px-2 py-0.5 rounded border border-[#DCE5E0]" title="Rumus: Jam Istiwa = Jam WIB ditambah selisih">
               WIB + {dataWaktu.selisihMenit}m
             </span>
           </div>
 
           {/* Baris 3: Tanggal Hari Ini */}
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#FDF6E3] border border-[#2A9D8F]/15">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-[#F7F5EF] border border-[#DCE5E0]">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[#2A9D8F] shadow-xs border border-[#2A9D8F]/10">
+              <div className="w-8 h-8 rounded bg-white flex items-center justify-center text-[#1D7A6F] border border-[#DCE5E0] shadow-xs">
                 <Calendar className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-[11px] font-semibold text-[#636E72] uppercase tracking-wider">
-                  Tanggal Masehi
+                <div className="text-[10px] font-bold text-[#5C6E66] uppercase tracking-wider">
+                  Penanggalan Masehi
                 </div>
-                <div className="text-xs sm:text-sm font-bold text-[#2D3436]">
+                <div className="text-xs sm:text-sm font-bold text-[#26332E]">
                   {dataWaktu.tanggalLengkap}
                 </div>
               </div>
@@ -164,3 +162,4 @@ export default function JamIstiwaCard() {
     </div>
   );
 }
+

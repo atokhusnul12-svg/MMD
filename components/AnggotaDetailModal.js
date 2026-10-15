@@ -124,31 +124,33 @@ export default function AnggotaDetailModal({ anggota, onClose }) {
           animate="visible"
           exit="exit"
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-[#2A9D8F]/25 overflow-hidden my-auto max-h-[92vh] flex flex-col z-10"
+          className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-[#DCE5E0] overflow-hidden my-auto max-h-[92vh] flex flex-col z-10"
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-anggota-title"
         >
+          {/* Garis aksen emas di bagian atas */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1D7A6F] via-[#C6A66B] to-[#1D7A6F]" />
           
           {/* Header Modal */}
-          <div className="relative px-6 pt-7 pb-6 bg-gradient-to-br from-[#E8F5F3] via-[#F4FAF8] to-[#FFFCF5] border-b border-[#2A9D8F]/15 shrink-0">
-            {/* Tombol Close (X) dengan animasi rotasi saat hover */}
+          <div className="relative px-6 pt-7 pb-6 bg-[#F7F5EF] border-b border-[#DCE5E0] shrink-0">
+            {/* Tombol Close (X) */}
             <motion.button
               type="button"
               onClick={onClose}
               whileHover={{ rotate: 90, scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="absolute top-5 right-5 p-2 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-gray-800 shadow-xs border border-gray-200 transition-colors cursor-pointer"
+              className="absolute top-5 right-5 p-2 rounded-lg bg-white hover:bg-stone-100 text-[#5C6E66] hover:text-[#26332E] shadow-xs border border-[#DCE5E0] transition-colors cursor-pointer"
               aria-label="Tutup detail santri"
               title="Tutup (Esc)"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </motion.button>
 
             <div className="flex items-start gap-4 pr-10">
               {/* Avatar Santri dengan inisial */}
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-[#1D7A6F] to-[#2A9D8F] text-white flex items-center justify-center font-black text-xl sm:text-2xl shadow-md shadow-[#2A9D8F]/20 shrink-0 border-2 border-white">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-[#1D7A6F] text-[#C6A66B] flex items-center justify-center font-black text-xl sm:text-2xl shadow-xs shrink-0 border border-[#C6A66B]/30 font-serif">
                 {anggota.nama
                   ? anggota.nama
                       .split(' ')
@@ -163,16 +165,16 @@ export default function AnggotaDetailModal({ anggota, onClose }) {
               {/* Nama & Tagline */}
               <div className="min-w-0">
                 <div className="flex items-center gap-2 text-xs font-semibold text-[#1D7A6F] mb-1">
-                  <span className="bg-white/90 px-2 py-0.5 rounded-md border border-[#2A9D8F]/20">
-                    No. Urut #{anggota.urutan || anggota.noOriginal || '-'}
+                  <span className="bg-white px-2 py-0.5 rounded border border-[#DCE5E0] font-mono text-[11px]">
+                    No. #{anggota.urutan || anggota.noOriginal || '-'}
                   </span>
                   <span>•</span>
-                  <span>Santri LBM</span>
+                  <span>Santri Lembaga Bahtsul Masail</span>
                 </div>
 
                 <h2
                   id="modal-anggota-title"
-                  className="text-xl sm:text-2xl font-black text-[#2D3436] tracking-tight leading-tight break-words"
+                  className="text-xl sm:text-2xl font-bold text-[#26332E] tracking-tight leading-tight break-words font-serif"
                 >
                   {anggota.nama}
                 </h2>
@@ -180,24 +182,24 @@ export default function AnggotaDetailModal({ anggota, onClose }) {
                 {/* Badge Status Perkembangan & Kelas */}
                 <div className="flex flex-wrap items-center gap-2 mt-2.5">
                   <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-2xs ${styling.bgBadge} ${styling.textBadge} ${styling.border}`}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-semibold border ${styling.bgBadge} ${styling.textBadge} ${styling.border}`}
                   >
                     <span
-                      className="w-2 h-2 rounded-full shrink-0 animate-pulse"
+                      className="w-2 h-2 rounded-full shrink-0"
                       style={{ backgroundColor: styling.color }}
                     />
                     {anggota.perkembangan}
                   </span>
 
                   {anggota.kelas && anggota.kelas !== '-' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-white text-gray-700 border border-gray-200 shadow-2xs">
-                      <GraduationCap className="w-3.5 h-3.5 text-[#2A9D8F]" />
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-white text-[#26332E] border border-[#DCE5E0]">
+                      <GraduationCap className="w-3.5 h-3.5 text-[#1D7A6F]" />
                       {anggota.kelas.toLowerCase().startsWith('kelas') ? anggota.kelas : `Kelas ${anggota.kelas}`}
                     </span>
                   )}
 
                   {anggota.domisili && anggota.domisili !== '-' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#2A9D8F]/10 text-[#1D7A6F] border border-[#2A9D8F]/20">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-[#E8F5F3] text-[#1D7A6F] border border-[#C8E3DC]">
                       <Home className="w-3.5 h-3.5" />
                       {anggota.domisili}
                     </span>
@@ -218,8 +220,8 @@ export default function AnggotaDetailModal({ anggota, onClose }) {
             {/* Bagian 1: Informasi Pribadi */}
             <motion.div variants={itemVariants}>
               <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4 text-[#2A9D8F]" />
-                <h3 className="text-sm font-bold uppercase tracking-wider text-gray-700">
+                <Sparkles className="w-4 h-4 text-[#C6A66B]" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#5C6E66]">
                   Informasi Pribadi &amp; Domisili
                 </h3>
               </div>
@@ -227,68 +229,68 @@ export default function AnggotaDetailModal({ anggota, onClose }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 
                 {/* Tempat, Tanggal Lahir (TTL) */}
-                <div className="p-3.5 rounded-2xl bg-[#FFFCF5] border border-gray-100 flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center shrink-0">
+                <div className="p-3.5 rounded-xl bg-[#F7F5EF]/60 border border-[#DCE5E0] flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-white text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0]">
                     <Calendar className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
+                    <p className="text-[10px] font-bold text-[#5C6E66] uppercase tracking-wider">
                       Tempat, Tanggal Lahir (TTL)
                     </p>
-                    <p className="text-sm font-semibold text-[#2D3436] mt-0.5">
+                    <p className="text-sm font-semibold text-[#26332E] mt-0.5">
                       {anggota.ttl && anggota.ttl !== '-' ? anggota.ttl : (
-                        <span className="text-gray-400 italic font-normal">Belum ada data TTL</span>
+                        <span className="text-[#5C6E66] italic font-normal">Belum ada data TTL</span>
                       )}
                     </p>
                   </div>
                 </div>
 
                 {/* Domisili Asrama */}
-                <div className="p-3.5 rounded-2xl bg-[#FFFCF5] border border-gray-100 flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+                <div className="p-3.5 rounded-xl bg-[#F7F5EF]/60 border border-[#DCE5E0] flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-white text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0]">
                     <Home className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
+                    <p className="text-[10px] font-bold text-[#5C6E66] uppercase tracking-wider">
                       Domisili di Pesantren
                     </p>
-                    <p className="text-sm font-semibold text-[#2D3436] mt-0.5">
+                    <p className="text-sm font-semibold text-[#26332E] mt-0.5">
                       {anggota.domisili && anggota.domisili !== '-' ? anggota.domisili : (
-                        <span className="text-gray-400 italic font-normal">Belum ditentukan</span>
+                        <span className="text-[#5C6E66] italic font-normal">Belum ditentukan</span>
                       )}
                     </p>
                   </div>
                 </div>
 
                 {/* Nama Orang Tua (Ayah / Ibu) */}
-                <div className="p-3.5 rounded-2xl bg-[#FFFCF5] border border-gray-100 flex items-start gap-3 sm:col-span-2">
-                  <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
+                <div className="p-3.5 rounded-xl bg-[#F7F5EF]/60 border border-[#DCE5E0] flex items-start gap-3 sm:col-span-2">
+                  <div className="w-8 h-8 rounded-lg bg-white text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0]">
                     <Users className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
+                    <p className="text-[10px] font-bold text-[#5C6E66] uppercase tracking-wider">
                       Nama Orang Tua (Ayah / Ibu)
                     </p>
-                    <p className="text-sm font-semibold text-[#2D3436] mt-0.5">
+                    <p className="text-sm font-semibold text-[#26332E] mt-0.5">
                       {anggota.ayahIbu && anggota.ayahIbu !== '-' ? anggota.ayahIbu : (
-                        <span className="text-gray-400 italic font-normal">Belum ada data orang tua</span>
+                        <span className="text-[#5C6E66] italic font-normal">Belum ada data orang tua</span>
                       )}
                     </p>
                   </div>
                 </div>
 
                 {/* Alamat Lengkap */}
-                <div className="p-3.5 rounded-2xl bg-[#FFFCF5] border border-gray-100 flex items-start gap-3 sm:col-span-2">
-                  <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center shrink-0">
+                <div className="p-3.5 rounded-xl bg-[#F7F5EF]/60 border border-[#DCE5E0] flex items-start gap-3 sm:col-span-2">
+                  <div className="w-8 h-8 rounded-lg bg-white text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0]">
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
+                    <p className="text-[10px] font-bold text-[#5C6E66] uppercase tracking-wider">
                       Alamat Asal
                     </p>
-                    <p className="text-sm font-semibold text-[#2D3436] mt-0.5">
+                    <p className="text-sm font-semibold text-[#26332E] mt-0.5">
                       {anggota.alamat && anggota.alamat !== '-' ? anggota.alamat : (
-                        <span className="text-gray-400 italic font-normal">Belum ada data alamat</span>
+                        <span className="text-[#5C6E66] italic font-normal">Belum ada data alamat</span>
                       )}
                     </p>
                   </div>
@@ -301,49 +303,49 @@ export default function AnggotaDetailModal({ anggota, onClose }) {
             <motion.div variants={itemVariants} className="pt-2">
               <div className="flex items-center justify-between gap-3 mb-3">
                 <div className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-[#2A9D8F]" />
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-gray-700">
+                  <BookOpen className="w-4 h-4 text-[#1D7A6F]" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#5C6E66]">
                     Daftar Bahtsul Masail yang Dihadiri
                   </h3>
                 </div>
 
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#E8F5F3] text-[#1D7A6F] border border-[#2A9D8F]/20">
-                  <Award className="w-3.5 h-3.5" />
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-bold bg-[#FAF3E6] text-[#8C6D23] border border-[#E8D5A7] font-mono">
+                  <Award className="w-3.5 h-3.5 text-[#C6A66B]" />
                   {bahtsuCount} Forum
                 </span>
               </div>
 
               {bahtsuCount > 0 ? (
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {anggota.bahtsuList.map((item, idx) => (
                     <motion.div
                       key={idx}
                       variants={itemVariants}
                       whileHover={{ scale: 1.01, x: 2 }}
                       transition={{ duration: 0.15 }}
-                      className="p-3.5 rounded-2xl bg-white border border-gray-200/80 hover:border-[#2A9D8F]/50 hover:bg-[#FFFCF5] shadow-2xs flex items-start gap-3 transition-colors"
+                      className="p-3 rounded-lg bg-white border border-[#DCE5E0] hover:border-[#1D7A6F]/40 hover:bg-[#F7F5EF]/50 flex items-start gap-3 transition-colors"
                     >
-                      <span className="w-6 h-6 rounded-lg bg-[#E8F5F3] text-[#1D7A6F] font-black text-xs flex items-center justify-center shrink-0 mt-0.5 border border-[#2A9D8F]/20">
+                      <span className="w-5 h-5 rounded bg-[#E8F5F3] text-[#1D7A6F] font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 border border-[#C8E3DC] font-mono">
                         {idx + 1}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs sm:text-sm font-semibold text-[#2D3436] leading-relaxed">
+                        <p className="text-xs sm:text-sm font-semibold text-[#26332E] leading-relaxed">
                           {item}
                         </p>
                       </div>
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <CheckCircle2 className="w-4 h-4 text-[#1D7A6F] shrink-0 mt-0.5" />
                     </motion.div>
                   ))}
                 </div>
               ) : (
-                <div className="p-8 rounded-2xl bg-[#FFFCF5] border border-dashed border-gray-200 text-center">
-                  <div className="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto mb-2.5">
-                    <BookOpen className="w-6 h-6" />
+                <div className="p-8 rounded-xl bg-[#F7F5EF]/40 border border-dashed border-[#DCE5E0] text-center">
+                  <div className="w-10 h-10 rounded-full bg-white text-[#5C6E66] border border-[#DCE5E0] flex items-center justify-center mx-auto mb-2">
+                    <BookOpen className="w-5 h-5" />
                   </div>
-                  <p className="text-sm font-bold text-gray-700">
-                    Belum ada data bahtsu yang dihadiri
+                  <p className="text-sm font-bold text-[#26332E]">
+                    Belum ada forum bahtsu yang tercatat
                   </p>
-                  <p className="text-xs text-gray-400 mt-1 max-w-sm mx-auto">
+                  <p className="text-xs text-[#5C6E66] mt-1 max-w-sm mx-auto">
                     Santri ini belum tercatat mengikuti delegasi forum Bahtsul Masail pada spreadsheet LBM.
                   </p>
                 </div>
@@ -353,14 +355,14 @@ export default function AnggotaDetailModal({ anggota, onClose }) {
           </motion.div>
 
           {/* Footer Modal */}
-          <div className="p-4 sm:px-6 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-3 shrink-0">
-            <span className="text-xs text-gray-500 truncate">
-              Data terhubung ke Google Sheets WAKA III
+          <div className="p-4 sm:px-6 bg-[#F7F5EF] border-t border-[#DCE5E0] flex items-center justify-between gap-3 shrink-0">
+            <span className="text-xs text-[#5C6E66] truncate">
+              Data terhubung langsung ke Google Sheets WAKA III
             </span>
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs sm:text-sm font-bold transition-colors cursor-pointer"
+              className="px-4 py-1.5 rounded-lg bg-[#1D7A6F] hover:bg-[#155D54] text-white text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
             >
               Tutup
             </button>
@@ -371,3 +373,4 @@ export default function AnggotaDetailModal({ anggota, onClose }) {
     </AnimatePresence>
   );
 }
+

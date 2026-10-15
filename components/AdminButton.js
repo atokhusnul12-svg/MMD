@@ -22,9 +22,9 @@ export default function AdminButton({ editUrl, title = "Edit Data di Google Shee
         href={editUrl || '#'}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[#2A9D8F] text-white hover:bg-[#1D7A6F] shadow-sm hover:shadow-md transition-all duration-200 active:scale-95"
+        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold bg-[#1D7A6F] text-white hover:bg-[#155D54] border border-[#155D54] transition-colors shadow-2xs cursor-pointer"
       >
-        <Edit3 className="w-4 h-4" />
+        <Edit3 className="w-3.5 h-3.5" />
         <span>{title}</span>
         <ExternalLink className="w-3.5 h-3.5 opacity-80" />
       </a>

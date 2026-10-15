@@ -5,7 +5,7 @@ import { DATA_LINKS } from '@/lib/dataLinks';
 import { getKeuanganData } from '@/lib/fetchCSV';
 import KeuanganTable from '@/components/KeuanganTable';
 import AdminButton from '@/components/AdminButton';
-import { Wallet, RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Wallet, RefreshCw, AlertCircle, ArrowLeft, Printer } from 'lucide-react';
 import Link from 'next/link';
 
 export default function KeuanganPage() {
@@ -44,30 +44,39 @@ export default function KeuanganPage() {
     <div className="space-y-6">
       
       {/* Header Halaman */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#636E72] mb-1">
-            <Link href="/" className="hover:text-[#2A9D8F] flex items-center gap-1">
+          <div className="flex items-center gap-2 text-xs text-[#5C6D66] mb-1.5 font-medium">
+            <Link href="/" className="hover:text-[#1D7A6F] flex items-center gap-1 transition-colors">
               <ArrowLeft className="w-3.5 h-3.5" /> Dashboard
             </Link>
             <span>/</span>
             <span className="text-[#1D7A6F] font-semibold">Keuangan</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2D3436] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold font-serif text-[#1D7A6F] tracking-tight">
             Ringkasan Keuangan RAB & LPJ
           </h1>
-          <p className="text-xs sm:text-sm text-[#636E72] mt-1">
+          <p className="text-xs sm:text-sm text-[#5C6D66] mt-1">
             Rekapitulasi anggaran subsidi, realisasi pengeluaran, dan saldo kas MMD Darussalamah
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => window.print()}
+            disabled={loading || !!error}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#DCE5E0] bg-white text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F] text-xs sm:text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
+            title="Cetak Laporan Keuangan atau Simpan sebagai PDF"
+          >
+            <Printer className="w-4 h-4 text-[#1D7A6F]" />
+            <span>Cetak Laporan</span>
+          </button>
           <button
             onClick={fetchKeuangan}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#2A9D8F]/30 bg-white text-[#1D7A6F] hover:bg-[#E8F5F3] text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#DCE5E0] bg-white text-[#1D7A6F] hover:bg-[#E8F5F3] text-xs sm:text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#2A9D8F]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#1D7A6F]' : 'text-[#5C6D66]'}`} />
             <span>{loading ? 'Menyinkronkan...' : 'Perbarui'}</span>
           </button>
           <AdminButton editUrl={DATA_LINKS.keuangan.editUrl} title="Edit di Google Sheets" />
@@ -76,19 +85,19 @@ export default function KeuanganPage() {
 
       {/* Error state */}
       {error && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 flex items-start gap-3 text-sm">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
+        <div className="bg-[#FAF0ED] border border-[#F1D3CC] text-[#8A2F1B] rounded-2xl p-4 flex items-start gap-3 text-sm">
+          <AlertCircle className="w-5 h-5 shrink-0 text-[#8A2F1B] mt-0.5" />
           <div>
             <p className="font-semibold">{error}</p>
-            <button onClick={fetchKeuangan} className="underline text-xs mt-1">Coba Muat Ulang</button>
+            <button onClick={fetchKeuangan} className="underline text-xs mt-1 cursor-pointer">Coba Muat Ulang</button>
           </div>
         </div>
       )}
 
       {/* Konten Utama */}
       {loading ? (
-        <div className="bg-white rounded-2xl p-16 text-center text-gray-400 border border-[#2A9D8F]/15">
-          <RefreshCw className="w-8 h-8 animate-spin mx-auto text-[#2A9D8F] mb-3" />
+        <div className="bg-white rounded-2xl p-16 text-center text-[#5C6D66] border border-[#DCE5E0]">
+          <RefreshCw className="w-8 h-8 animate-spin mx-auto text-[#1D7A6F] mb-3" />
           <p className="text-sm font-medium">Memuat ringkasan keuangan dari Google Sheets...</p>
         </div>
       ) : (

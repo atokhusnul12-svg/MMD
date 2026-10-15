@@ -4,8 +4,8 @@
   "description": "Sistem Informasi LBM, Kalender Kerja & Keuangan Pondok Pesantren Darussalam Sumbersari",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FDF6E3",
-  "theme_color": "#2A9D8F",
+  "background_color": "#F7F5EF",
+  "theme_color": "#1D7A6F",
   "icons": [
     {
       "src": "/icon.png",

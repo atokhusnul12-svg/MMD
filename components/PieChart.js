@@ -2,51 +2,51 @@
 
 import React, { useState } from 'react';
 
-// Pemetaan warna dan gaya untuk tiap status perkembangan
+// Pemetaan warna dan gaya untuk tiap status perkembangan (Islamic Contemporary Palette)
 export const STATUS_COLORS = {
   'SENIOR - SANGAT BAIK': {
-    color: '#2A9D8F',
-    bgBadge: 'bg-[#2A9D8F]/15',
+    color: '#1D7A6F',
+    bgBadge: 'bg-[#E8F5F3]',
     textBadge: 'text-[#1D7A6F]',
-    border: 'border-[#2A9D8F]/30',
+    border: 'border-[#C8E3DC]',
   },
   'JUNIOR - SANGAT BAIK': {
-    color: '#38A3A5',
-    bgBadge: 'bg-[#38A3A5]/15',
-    textBadge: 'text-[#22577A]',
-    border: 'border-[#38A3A5]/30',
+    color: '#224A63',
+    bgBadge: 'bg-[#EDF3F7]',
+    textBadge: 'text-[#224A63]',
+    border: 'border-[#B9D1E0]',
   },
   'ADAPTASI TOTAL': {
-    color: '#57CC99',
-    bgBadge: 'bg-[#57CC99]/20',
-    textBadge: 'text-[#2D6A4F]',
-    border: 'border-[#57CC99]/30',
+    color: '#436A5B',
+    bgBadge: 'bg-[#EEF4F1]',
+    textBadge: 'text-[#2A5243]',
+    border: 'border-[#C3D8CE]',
   },
   'SENIOR - KURANG BAIK': {
-    color: '#E9C46A',
-    bgBadge: 'bg-[#E9C46A]/25',
-    textBadge: 'text-[#8A6D14]',
-    border: 'border-[#E9C46A]/40',
+    color: '#C6A66B',
+    bgBadge: 'bg-[#FAF3E6]',
+    textBadge: 'text-[#8C6D23]',
+    border: 'border-[#E8D5A7]',
   },
   'DALAM MASA REPARASI': {
-    color: '#F4A261',
-    bgBadge: 'bg-[#F4A261]/20',
-    textBadge: 'text-[#B2531F]',
-    border: 'border-[#F4A261]/40',
+    color: '#C47C35',
+    bgBadge: 'bg-[#FDF4EB]',
+    textBadge: 'text-[#9A5212]',
+    border: 'border-[#F0D0B4]',
   },
   'TERANCAM KELUAR': {
-    color: '#E76F51',
-    bgBadge: 'bg-[#E76F51]/20',
-    textBadge: 'text-[#9B2226]',
-    border: 'border-[#E76F51]/40',
+    color: '#A8382B',
+    bgBadge: 'bg-[#FAF0ED]',
+    textBadge: 'text-[#8A2F1B]',
+    border: 'border-[#E8BCB0]',
   },
 };
 
 const DEFAULT_COLOR = {
-  color: '#A0AEC0',
-  bgBadge: 'bg-gray-100',
-  textBadge: 'text-gray-700',
-  border: 'border-gray-300',
+  color: '#6E7C77',
+  bgBadge: 'bg-[#F7F5EF]',
+  textBadge: 'text-[#26332E]',
+  border: 'border-[#DCE5E0]',
 };
 
 export default function PieChart({ statusCounts = {}, total = 0 }) {
@@ -79,14 +79,14 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
   let accumulatedPercent = 0;
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-xs border border-[#2A9D8F]/15">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white rounded-xl p-6 border border-[#DCE5E0] shadow-xs">
+      <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#DCE5E0]">
         <div>
-          <h3 className="text-lg font-bold text-[#2D3436]">
+          <h3 className="text-lg font-bold text-[#26332E] font-serif">
             Distribusi Status Perkembangan Anggota
           </h3>
-          <p className="text-xs text-[#636E72] mt-0.5">
-            Proporsi kondisi anggota LBM terkini ({total} santri)
+          <p className="text-xs text-[#5C6E66] mt-0.5">
+            Proporsi kondisi evaluasi {total} santri Lembaga Bahtsul Masail
           </p>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
               cx={size / 2}
               cy={size / 2}
               r={radius}
-              stroke="#F0EADB"
+              stroke="#F7F5EF"
               strokeWidth={strokeWidth}
               fill="transparent"
             />
@@ -135,22 +135,22 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
             {hoveredIndex !== null ? (
               <>
-                <span className="text-2xl font-black text-[#2D3436]">
+                <span className="text-2xl font-black text-[#26332E] font-serif">
                   {data[hoveredIndex].count}
                 </span>
-                <span className="text-xs font-semibold text-[#1D7A6F]">
+                <span className="text-xs font-bold text-[#1D7A6F]">
                   {data[hoveredIndex].percentage}%
                 </span>
-                <span className="text-[10px] text-[#636E72] max-w-[110px] truncate">
+                <span className="text-[10px] text-[#5C6E66] max-w-[120px] truncate px-1">
                   {data[hoveredIndex].status}
                 </span>
               </>
             ) : (
               <>
-                <span className="text-3xl font-black text-[#2D3436] tracking-tight">
+                <span className="text-3xl font-black text-[#26332E] tracking-tight font-serif">
                   {total}
                 </span>
-                <span className="text-xs font-medium text-[#636E72]">
+                <span className="text-xs font-semibold text-[#5C6E66]">
                   Total Anggota
                 </span>
               </>
@@ -159,7 +159,7 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
         </div>
 
         {/* Legend / Daftar Keterangan Status */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 w-full max-w-md">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 w-full max-w-md">
           {data.map((item, index) => {
             const isHovered = hoveredIndex === index;
             return (
@@ -167,26 +167,26 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
                 key={item.status}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
-                className={`flex items-center justify-between p-2.5 rounded-xl transition-all cursor-pointer border ${
+                className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer border ${
                   isHovered
-                    ? 'bg-[#FDF6E3] border-[#2A9D8F]/40 shadow-xs translate-x-1'
-                    : 'bg-white border-gray-100 hover:bg-[#FFFCF5]'
+                    ? 'bg-[#F7F5EF] border-[#1D7A6F]/40 shadow-xs'
+                    : 'bg-white border-[#DCE5E0] hover:bg-[#F7F5EF]/60'
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span
-                    className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs"
+                    className="w-3 h-3 rounded-sm shrink-0"
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="text-xs font-semibold text-[#2D3436] truncate">
+                  <span className="text-xs font-semibold text-[#26332E] truncate">
                     {item.status}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
-                  <span className="text-xs font-bold text-[#2D3436]">
-                    {item.count} orang
+                  <span className="text-xs font-bold text-[#26332E]">
+                    {item.count} santri
                   </span>
-                  <span className="text-[11px] font-medium text-[#636E72] w-12 text-right">
+                  <span className="text-[11px] font-medium text-[#5C6E66] w-12 text-right">
                     ({item.percentage}%)
                   </span>
                 </div>
@@ -199,3 +199,4 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
     </div>
   );
 }
+

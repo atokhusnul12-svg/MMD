@@ -35,20 +35,20 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
   if (!isAdmin) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-        <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-rose-200 text-center space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+        <div className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-[#F1D3CC] text-center space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#FAF0ED] text-[#8A2F1B] flex items-center justify-center mx-auto border border-[#F1D3CC]">
             <AlertCircle className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-[#2D3436]">Akses Dibatasi</h3>
-            <p className="text-xs text-rose-600 font-semibold mt-1">
+            <h3 className="text-base font-bold font-serif text-[#1D7A6F]">Akses Dibatasi</h3>
+            <p className="text-xs text-[#8A2F1B] font-semibold mt-1">
               Hanya Admin yang dapat mengirim broadcast.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-semibold text-gray-700 transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-[#FAF8F5] hover:bg-[#F0ECE1] text-xs font-semibold text-[#26332E] border border-[#DCE5E0] transition-colors cursor-pointer"
           >
             Tutup
           </button>
@@ -131,19 +131,19 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-[#2A9D8F]/20 relative overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-[#DCE5E0] relative overflow-hidden flex flex-col max-h-[92vh]">
         
         {/* Header Modal */}
-        <div className="flex items-start justify-between pb-4 border-b border-gray-100">
+        <div className="flex items-start justify-between pb-4 border-b border-[#DCE5E0]">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center border border-[#2A9D8F]/25 shadow-xs">
-              <Send className="w-5 h-5 text-[#2A9D8F]" />
+            <div className="w-11 h-11 rounded-2xl bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center border border-[#1D7A6F]/15 shadow-xs">
+              <Send className="w-5 h-5 text-[#1D7A6F]" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-[#2D3436]">
+              <h3 className="text-lg font-bold font-serif text-[#1D7A6F]">
                 Broadcast Push Notifikasi Mandiri
               </h3>
-              <p className="text-xs text-[#636E72] flex items-center gap-1.5 mt-0.5">
+              <p className="text-xs text-[#5C6D66] flex items-center gap-1.5 mt-0.5">
                 <span>Notifikasi sistem langsung ke HP &amp; laptop</span>
                 <span className="text-gray-300">•</span>
                 <span className="inline-flex items-center gap-1 font-semibold text-[#1D7A6F]">
@@ -155,7 +155,7 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-xl text-[#5C6D66] hover:text-[#26332E] hover:bg-[#FAF8F5] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -166,7 +166,7 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
           
           {/* Pilihan Template Cepat */}
           <div>
-            <label className="block text-xs font-semibold text-[#2D3436] mb-2 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-[#5C6D66] mb-2 uppercase tracking-wider">
               Pilih Template Notifikasi:
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -178,13 +178,13 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
                     key={tpl.id}
                     type="button"
                     onClick={() => applyTemplate(tpl)}
-                    className={`flex items-center gap-2 p-2.5 rounded-xl text-left border text-xs font-medium transition-all ${
+                    className={`flex items-center gap-2 p-2.5 rounded-xl text-left border text-xs font-semibold transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-[#2A9D8F] text-white border-[#2A9D8F] shadow-xs'
-                        : 'bg-[#FDF6E3]/60 text-[#2D3436] border-gray-200 hover:border-[#2A9D8F]/50 hover:bg-[#E8F5F3]'
+                        ? 'bg-[#1D7A6F] text-white border-[#1D7A6F] shadow-xs'
+                        : 'bg-[#FAF8F5] text-[#26332E] border-[#DCE5E0] hover:border-[#1D7A6F]/40 hover:bg-[#E8F5F3]'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-[#2A9D8F]'}`} />
+                    <Icon className={`w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-[#1D7A6F]'}`} />
                     <span className="truncate">{tpl.label}</span>
                   </button>
                 );
@@ -196,8 +196,8 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
             
             {/* Input Judul */}
             <div>
-              <label className="block text-xs font-semibold text-[#2D3436] mb-1">
-                Judul Notifikasi <span className="text-rose-500">*</span>
+              <label className="block text-xs font-bold text-[#26332E] mb-1">
+                Judul Notifikasi <span className="text-[#8A2F1B]">*</span>
               </label>
               <input
                 type="text"
@@ -205,14 +205,14 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
                 onChange={(e) => setTitle(e.target.value)}
                 required
                 placeholder="Contoh: 📅 Agenda WAKA III Terdekat"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:outline-hidden focus:ring-2 focus:ring-[#2A9D8F]/40 focus:border-[#2A9D8F] text-sm text-[#2D3436]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE5E0] focus:outline-hidden focus:ring-2 focus:ring-[#1D7A6F]/20 focus:border-[#1D7A6F] text-sm text-[#26332E] bg-white"
               />
             </div>
 
             {/* Input Pesan */}
             <div>
-              <label className="block text-xs font-semibold text-[#2D3436] mb-1">
-                Isi Pesan Notifikasi <span className="text-rose-500">*</span>
+              <label className="block text-xs font-bold text-[#26332E] mb-1">
+                Isi Pesan Notifikasi <span className="text-[#8A2F1B]">*</span>
               </label>
               <textarea
                 value={message}
@@ -220,13 +220,13 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
                 required
                 rows={3}
                 placeholder="Tulis pesan singkat yang akan muncul di pop-up layar HP/desktop..."
-                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:outline-hidden focus:ring-2 focus:ring-[#2A9D8F]/40 focus:border-[#2A9D8F] text-sm text-[#2D3436] resize-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE5E0] focus:outline-hidden focus:ring-2 focus:ring-[#1D7A6F]/20 focus:border-[#1D7A6F] text-sm text-[#26332E] bg-white resize-none"
               />
             </div>
 
             {/* Input Tautan Target URL */}
             <div>
-              <label className="block text-xs font-semibold text-[#2D3436] mb-1">
+              <label className="block text-xs font-bold text-[#26332E] mb-1">
                 Tautan Halaman saat Notifikasi Diklik
               </label>
               <input
@@ -234,40 +234,40 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
                 value={targetUrl}
                 onChange={(e) => setTargetUrl(e.target.value)}
                 placeholder="/kalender atau /keuangan"
-                className="w-full px-3.5 py-2 rounded-xl border border-gray-300 focus:outline-hidden focus:ring-2 focus:ring-[#2A9D8F]/40 focus:border-[#2A9D8F] text-xs font-mono text-[#2D3436]"
+                className="w-full px-3.5 py-2 rounded-xl border border-[#DCE5E0] focus:outline-hidden focus:ring-2 focus:ring-[#1D7A6F]/20 focus:border-[#1D7A6F] text-xs font-mono text-[#26332E] bg-white"
               />
-              <span className="text-[11px] text-[#636E72] mt-1 block">
+              <span className="text-[11px] text-[#5C6D66] mt-1 block">
                 Pengguna yang mengeklik notifikasi akan langsung diarahkan ke halaman ini.
               </span>
             </div>
 
             {/* Target Penerima */}
             <div>
-              <label className="block text-xs font-semibold text-[#2D3436] mb-1.5">
+              <label className="block text-xs font-bold text-[#26332E] mb-1.5">
                 Target Pengiriman:
               </label>
               <div className="flex items-center gap-4 text-xs">
-                <label className="flex items-center gap-1.5 cursor-pointer">
+                <label className="flex items-center gap-1.5 cursor-pointer text-[#26332E]">
                   <input
                     type="radio"
                     name="targetMode"
                     value="all"
                     checked={targetMode === 'all'}
                     onChange={() => setTargetMode('all')}
-                    className="text-[#2A9D8F] focus:ring-[#2A9D8F]"
+                    className="accent-[#1D7A6F]"
                   />
                   <span>Semua Pengguna Terdaftar ({subscriberCount} HP/PC)</span>
                 </label>
 
                 {isSubscribed && (
-                  <label className="flex items-center gap-1.5 cursor-pointer">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[#26332E]">
                     <input
                       type="radio"
                       name="targetMode"
                       value="me"
                       checked={targetMode === 'me'}
                       onChange={() => setTargetMode('me')}
-                      className="text-[#2A9D8F] focus:ring-[#2A9D8F]"
+                      className="accent-[#1D7A6F]"
                     />
                     <span>Hanya Perangkat Saya Sendiri (Uji Coba)</span>
                   </label>
@@ -282,14 +282,14 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
             <div
               className={`p-3.5 rounded-xl text-xs flex items-start gap-2.5 border ${
                 result.type === 'success'
-                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                  : 'bg-rose-50 text-rose-800 border-rose-200'
+                  ? 'bg-[#E8F5F3] text-[#1D7A6F] border-[#1D7A6F]/20'
+                  : 'bg-[#FAF0ED] text-[#8A2F1B] border-[#F1D3CC]'
               }`}
             >
               {result.type === 'success' ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-[#1D7A6F] shrink-0 mt-0.5" />
               ) : (
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <AlertCircle className="w-4 h-4 text-[#8A2F1B] shrink-0 mt-0.5" />
               )}
               <div className="flex-1">
                 <p className="font-semibold">{result.text}</p>
@@ -300,11 +300,11 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
         </div>
 
         {/* Footer Tombol Aksi */}
-        <div className="pt-4 border-t border-gray-100 flex items-center justify-between gap-3">
+        <div className="pt-4 border-t border-[#DCE5E0] flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-100 text-xs font-semibold transition-colors"
+            className="px-4 py-2.5 rounded-xl border border-[#DCE5E0] text-[#5C6D66] hover:bg-[#FAF8F5] text-xs font-semibold transition-colors cursor-pointer"
           >
             Tutup
           </button>
@@ -313,7 +313,7 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
             form="broadcast-form"
             type="submit"
             disabled={isSending || !title || !message}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#2A9D8F] hover:bg-[#238276] text-white text-xs font-bold transition-all shadow-md shadow-[#2A9D8F]/25 disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#1D7A6F] hover:bg-[#1A453B] text-white text-xs font-semibold transition-all shadow-xs disabled:opacity-50 cursor-pointer"
           >
             {isSending ? (
               <>

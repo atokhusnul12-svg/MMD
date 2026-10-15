@@ -28,7 +28,7 @@ export default function JamIstiwaTopBar() {
   }, []);
 
   return (
-    <div className="bg-[#2A9D8F] text-white py-1.5 px-4 sm:px-6 lg:px-8 border-b border-[#238276] text-xs shadow-xs">
+    <div className="bg-[#155D54] text-white py-1.5 px-4 sm:px-6 lg:px-8 border-b border-[#0F433C] text-xs shadow-xs">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
         
         {/* SISI KIRI: JAM ISTIWA' REAL-TIME & JAM WIB */}
@@ -36,23 +36,23 @@ export default function JamIstiwaTopBar() {
           
           {/* Jam Istiwa' (Jumbo & Monospace) */}
           <div className="flex items-center gap-1.5 font-bold shrink-0">
-            <Sun className="w-3.5 h-3.5 text-amber-300 shrink-0 animate-spin-slow" />
-            <span className="text-teal-100 uppercase text-[10px] sm:text-xs tracking-wider">
+            <Sun className="w-3.5 h-3.5 text-[#C6A66B] shrink-0" />
+            <span className="text-[#C6A66B] uppercase text-[10px] sm:text-xs tracking-wider font-semibold">
               WIS:
             </span>
-            <span className="font-mono text-xs sm:text-sm font-black bg-black/20 text-white px-2 py-0.5 rounded-md tracking-wider shadow-inner">
+            <span className="font-mono text-xs sm:text-sm font-bold bg-black/25 text-white px-2 py-0.5 rounded-md tracking-wider border border-white/10 shadow-2xs">
               {dataWaktu ? `${dataWaktu.wis.teks} WIS` : '--:--:-- WIS'}
             </span>
           </div>
 
           {/* Jam WIB & Selisih */}
-          <div className="flex items-center gap-1.5 text-teal-100 border-l border-teal-500/40 pl-3 shrink-0">
-            <Clock className="w-3 h-3 text-teal-200 hidden xs:inline" />
-            <span className="text-[10px] sm:text-xs text-teal-200">WIB:</span>
+          <div className="flex items-center gap-1.5 text-white/80 border-l border-white/15 pl-3 shrink-0">
+            <Clock className="w-3 h-3 text-white/60 hidden xs:inline" />
+            <span className="text-[10px] sm:text-xs text-white/70">WIB:</span>
             <span className="font-mono font-bold text-white text-[11px] sm:text-xs">
               {dataWaktu ? dataWaktu.wib.teks : '--:--:--'}
             </span>
-            <span className="bg-[#1D7A6F] text-teal-100 text-[10px] px-1.5 py-0.2 rounded-sm font-semibold border border-teal-400/30">
+            <span className="bg-[#0F433C] text-[#C6A66B] text-[10px] px-1.5 py-0.5 rounded-xs font-semibold border border-[#C6A66B]/30">
               {dataWaktu ? dataWaktu.selisihTeks : '+--m'}
             </span>
           </div>
@@ -60,13 +60,13 @@ export default function JamIstiwaTopBar() {
         </div>
 
         {/* SISI KANAN: LOKASI & TANGGAL MASEHI */}
-        <div className="hidden sm:flex items-center gap-3 text-[11px] text-teal-100 shrink-0">
-          <span className="hidden md:inline-flex items-center gap-1 text-teal-200">
-            <MapPin className="w-3 h-3 text-teal-300" />
+        <div className="hidden sm:flex items-center gap-3 text-[11px] text-white/80 shrink-0">
+          <span className="hidden md:inline-flex items-center gap-1 text-[#C6A66B]">
+            <MapPin className="w-3 h-3" />
             Pare, Kediri
           </span>
-          <span className="border-l border-teal-500/40 pl-3 flex items-center gap-1 text-teal-100">
-            <Calendar className="w-3 h-3 text-teal-300 hidden lg:inline" />
+          <span className="border-l border-white/15 pl-3 flex items-center gap-1 text-white/90">
+            <Calendar className="w-3 h-3 text-[#C6A66B] hidden lg:inline" />
             {dataWaktu?.tanggalLengkap || 'Memuat tanggal...'}
           </span>
         </div>

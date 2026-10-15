@@ -36,7 +36,9 @@ import {
   CheckCircle2,
   XCircle,
   Activity,
+  Printer,
 } from 'lucide-react';
+import { PrintHeader, PrintSignatures } from '@/components/PrintHeaderFooter';
 
 export default function DashboardPage() {
   const [anggotaData, setAnggotaData] = useState(null);
@@ -47,6 +49,12 @@ export default function DashboardPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [lastRefreshed, setLastRefreshed] = useState(null);
+
+  const handlePrint = () => {
+    if (typeof window !== 'undefined') {
+      window.print();
+    }
+  };
 
   // Filter bulan keuangan interaktif di dashboard
   const [selectedBulan, setSelectedBulan] = useState('TOTAL');
@@ -311,19 +319,19 @@ export default function DashboardPage() {
         diffDays = Math.round((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
         if (diffDays === 0) {
           statusLabel = 'Hari Ini';
-          statusBadge = 'bg-emerald-600 text-white';
+          statusBadge = 'bg-[#1D7A6F] text-white';
         } else if (diffDays === 1) {
           statusLabel = 'Besok';
-          statusBadge = 'bg-amber-500 text-white';
+          statusBadge = 'bg-[#FAF3E6] text-[#8C6D23] border border-[#E5D7B7]';
         } else if (diffDays === 2) {
           statusLabel = 'Lusa';
-          statusBadge = 'bg-[#2A9D8F] text-white';
+          statusBadge = 'bg-[#EDF3F7] text-[#224A63] border border-[#CCDCE8]';
         } else if (diffDays > 2) {
           statusLabel = `${diffDays} hari lagi`;
-          statusBadge = 'bg-[#E8F5F3] text-[#1D7A6F] border border-[#2A9D8F]/30';
+          statusBadge = 'bg-[#E8F5F3] text-[#1D7A6F] border border-[#1D7A6F]/20';
         } else {
           statusLabel = `${Math.abs(diffDays)} hari lalu`;
-          statusBadge = 'bg-gray-100 text-gray-600';
+          statusBadge = 'bg-[#F7F5EF] text-[#5C6D66] border border-[#DCE5E0]';
         }
       }
 
@@ -355,36 +363,55 @@ export default function DashboardPage() {
   }, [kalenderData]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-7">
       
+      {/* KOP SURAT RESMI CETAK (HANYA MUNCUL DI PRINT / PDF) */}
+      <PrintHeader
+        title="Laporan Ringkasan Eksekutif Administrasi WAKA III"
+        subtitle="Pondok Pesantren Darussalam Sumbersari Kencong Pare Kediri"
+        filterInfo={`Tahun Ajaran 1447-1448 H / 2026-2027 M | Periode Anggaran: ${activeKeuangan.label}`}
+        totalInfo={`${anggotaData?.total || 25} Santri LBM | ${bahsuData?.totalAgenda || 0} Forum Bahsu | ${kalenderData?.totalKegiatan || 0} Agenda Kalender | Saldo Kas: ${formatRupiah(activeKeuangan.saldo)}`}
+      />
+
       {/* ============================================================== */}
       {/* 1. BANNER SAMBUTAN, STATUS LIVE REAL-TIME & SINKRONISASI         */}
       {/* ============================================================== */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-[#2A9D8F]/15 relative overflow-hidden">
-        <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-[#E8F5F3] rounded-full blur-2xl opacity-60 pointer-events-none" />
-        
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-white rounded-xl p-6 sm:p-7 border border-[#DCE5E0] shadow-xs relative overflow-hidden no-print">
+        {/* Garis aksen emas di bagian atas */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1D7A6F] via-[#C6A66B] to-[#1D7A6F]" />
+
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-1">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F5F3] text-[#1D7A6F] text-xs font-semibold mb-3 border border-[#2A9D8F]/20">
-              <Sparkles className="w-3.5 h-3.5" />
-              Sistem Informasi WAKA III Pondok Pesantren Darussalam Sumbersari
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#E8F5F3] text-[#1D7A6F] text-xs font-semibold mb-3 border border-[#C8E3DC]">
+              <Sparkles className="w-3.5 h-3.5 text-[#C6A66B]" />
+              <span>MMD Madrasah Islamiyah Darussalamah • PP. Darussalam Sumbersari</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#2D3436] tracking-tight">
-              Portal LBM, Kalender Kerja &amp; Keuangan
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#26332E] tracking-tight font-serif">
+              Lembaga Bahtsul Masail &amp; Administrasi WAKA III
             </h1>
-            <p className="text-sm sm:text-base text-[#636E72] mt-2 leading-relaxed">
-              Memantau perkembangan {anggotaData?.total || 25} santri LBM, kalender kerja tahunan madrasah, {bahsuData?.totalAgenda || 34} agenda delegasi Bahtsul Masail, dan rekapitulasi keuangan RAB &amp; LPJ secara langsung dan otomatis dari Google Sheets.
+            <p className="text-sm sm:text-base text-[#5C6E66] mt-2 leading-relaxed">
+              Pusat komando pembinaan {anggotaData?.total || 25} santri LBM, monitoring agenda kalender kerja madrasah, koordinasi {bahsuData?.totalAgenda || 34} forum delegasi Bahtsul Masail, serta transparansi anggaran belanja (RAB &amp; LPJ) secara langsung dari Google Sheets.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            {/* Tombol Cetak Laporan */}
+            <button
+              onClick={handlePrint}
+              disabled={loading || isRefreshing}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-[#DCE5E0] bg-white text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F] text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
+              title="Cetak Laporan Eksekutif Dashboard atau Simpan sebagai PDF"
+            >
+              <Printer className="w-4 h-4 text-[#1D7A6F]" />
+              <span>Cetak Laporan</span>
+            </button>
             <button
               onClick={() => loadData(true)}
               disabled={loading || isRefreshing}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[#2A9D8F]/30 bg-white text-[#1D7A6F] hover:bg-[#E8F5F3] text-sm font-semibold transition-all duration-150 disabled:opacity-50 shadow-xs cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-[#DCE5E0] bg-white text-[#1D7A6F] hover:bg-[#F7F5EF] text-sm font-semibold transition-colors duration-150 disabled:opacity-50 shadow-xs cursor-pointer"
               title="Perbarui data langsung dari Google Sheets sekarang"
             >
-              <RefreshCw className={`w-4 h-4 ${loading || isRefreshing ? 'animate-spin text-[#2A9D8F]' : ''}`} />
+              <RefreshCw className={`w-4 h-4 text-[#1D7A6F] ${loading || isRefreshing ? 'animate-spin' : ''}`} />
               <span>{loading || isRefreshing ? 'Menyinkronkan...' : 'Sinkronkan Data'}</span>
             </button>
             <AdminButton editUrl={DATA_LINKS.anggota.editUrl} title="Edit di Sheets" />
@@ -392,23 +419,23 @@ export default function DashboardPage() {
         </div>
 
         {/* Status Sinkronisasi Real-Time */}
-        <div className="mt-5 pt-3.5 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2 text-xs text-[#636E72]">
+        <div className="mt-5 pt-3.5 border-t border-[#DCE5E0] flex flex-wrap items-center justify-between gap-2 text-xs text-[#5C6E66]">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1D7A6F] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#1D7A6F]"></span>
             </span>
-            <span className="font-semibold text-emerald-800">
-              Live Real-Time Auto-Sync Aktif
+            <span className="font-semibold text-[#1D7A6F]">
+              Live Auto-Sync Google Sheets Aktif
             </span>
-            <span className="text-gray-400">•</span>
-            <span>Update otomatis tiap 25 detik &amp; saat tab aktif</span>
+            <span className="text-[#DCE5E0]">•</span>
+            <span>Update berkala 25 detik &amp; saat tab aktif</span>
           </div>
 
           {lastRefreshed && (
-            <div className="flex items-center gap-1.5 text-[#636E72]">
-              <Clock className="w-3.5 h-3.5 text-[#2A9D8F]" />
-              <span>Terakhir diperbarui: pukul <strong className="text-[#2D3436]">{lastRefreshed} WIB</strong></span>
+            <div className="flex items-center gap-1.5 text-[#5C6E66]">
+              <Clock className="w-3.5 h-3.5 text-[#C6A66B]" />
+              <span>Pembaruan terakhir: <strong className="text-[#26332E] font-mono">{lastRefreshed} WIB</strong></span>
             </div>
           )}
         </div>
@@ -417,37 +444,41 @@ export default function DashboardPage() {
       {/* ============================================================== */}
       {/* 2. KARTU JAM ISTIWA' (WIS) WILAYAH PARE                        */}
       {/* ============================================================== */}
-      <JamIstiwaCard />
+      <div className="no-print">
+        <JamIstiwaCard />
+      </div>
 
       {/* ============================================================== */}
       {/* 2.5 PUSAT NOTIFIKASI SISTEM (ONESIGNAL WEB PUSH)              */}
       {/* ============================================================== */}
-      <NotificationButton variant="card" />
+      <div className="no-print">
+        <NotificationButton variant="card" />
+      </div>
 
       {/* ============================================================== */}
       {/* 3. HIGHLIGHT KALENDER KERJA MMD (AGENDA TERDEKAT DARI HARI INI) */}
       {/* ============================================================== */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-xs border border-[#2A9D8F]/15">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="bg-white rounded-xl p-6 sm:p-7 border border-[#DCE5E0] shadow-xs print-avoid-break">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#DCE5E0]">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F5F3] text-[#1D7A6F] text-xs font-semibold mb-1">
-              <CalendarDays className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#E8F5F3] text-[#1D7A6F] text-[11px] font-bold border border-[#C8E3DC] mb-1.5">
+              <CalendarDays className="w-3.5 h-3.5 text-[#1D7A6F]" />
               Agenda Terdekat Madrasah
             </div>
-            <h3 className="font-extrabold text-xl text-[#2D3436]">
+            <h3 className="font-extrabold text-xl text-[#26332E] font-serif">
               Sorotan Agenda Kalender Kerja MMD
             </h3>
-            <p className="text-xs sm:text-sm text-[#636E72] mt-0.5">
+            <p className="text-xs sm:text-sm text-[#5C6E66] mt-0.5">
               Kegiatan terdekat dari tanggal sekarang &amp; hari mendatang ({kalenderData?.totalKegiatan || 0} agenda terdata)
             </p>
           </div>
 
           <Link
             href="/kalender"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2A9D8F] text-white hover:bg-[#1D7A6F] text-sm font-semibold transition-colors shadow-xs"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1D7A6F] text-white hover:bg-[#155D54] text-xs font-semibold transition-colors shadow-xs no-print"
           >
             <span>Buka Kalender Kerja Lengkap</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 text-[#C6A66B]" />
           </Link>
         </div>
 
@@ -459,30 +490,30 @@ export default function DashboardPage() {
             <AgendaSkeleton />
           </div>
         ) : upcomingActivities.length === 0 ? (
-          <div className="p-8 text-center text-gray-400 text-xs bg-[#FFFCF5] rounded-2xl border border-gray-100">
-            Belum ada agenda terdekat yang terdata.
+          <div className="p-8 text-center text-[#5C6E66] text-xs bg-[#F7F5EF] rounded-lg border border-[#DCE5E0]">
+            Belum ada agenda terdekat yang terdata di kalender.
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {upcomingActivities.map((act, index) => (
               <div
                 key={index}
-                className="p-4 rounded-2xl bg-[#FFFCF5] border border-[#2A9D8F]/15 flex flex-col justify-between hover:bg-[#FDF6E3] hover:border-[#2A9D8F]/40 transition-all shadow-xs"
+                className="p-4 rounded-lg bg-[#F7F5EF]/60 border border-[#DCE5E0] flex flex-col justify-between hover:bg-white hover:border-[#1D7A6F]/40 transition-colors shadow-xs"
               >
                 <div>
-                  <div className="flex items-center justify-between text-xs text-[#636E72] mb-2 gap-2">
+                  <div className="flex items-center justify-between text-xs text-[#5C6E66] mb-2 gap-2">
                     {act.statusLabel ? (
-                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shrink-0 ${act.statusBadge}`}>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded shrink-0 ${act.statusBadge}`}>
                         {act.statusLabel}
                       </span>
                     ) : (
-                      <span className="text-[10px] font-bold text-[#1D7A6F] bg-[#E8F5F3] px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-bold text-[#1D7A6F] bg-[#E8F5F3] px-2 py-0.5 rounded border border-[#C8E3DC]">
                         {act.hari}
                       </span>
                     )}
 
                     {act.waktu && act.waktu !== '-' && (
-                      <span className="text-[10px] bg-white px-2 py-0.5 rounded-md border border-gray-200 font-medium">
+                      <span className="text-[10px] bg-white px-2 py-0.5 rounded border border-[#DCE5E0] font-mono font-medium text-[#26332E]">
                         {act.waktu}
                       </span>
                     )}
@@ -492,14 +523,14 @@ export default function DashboardPage() {
                     {act.tanggalLengkap || `${act.hari}, ${act.tglM} M / ${act.tglH} H`}
                   </div>
 
-                  <h4 className="font-bold text-xs sm:text-sm text-[#2D3436] line-clamp-2 leading-snug">
+                  <h4 className="font-bold text-xs sm:text-sm text-[#26332E] line-clamp-2 leading-snug">
                     {act.kegiatan}
                   </h4>
                 </div>
 
-                <div className="mt-4 pt-2.5 border-t border-gray-100 flex items-center justify-between text-[11px]">
-                  <span className="text-[#636E72]">Koordinator:</span>
-                  <span className="font-semibold text-[#1D7A6F] bg-white px-2 py-0.5 rounded-md border border-[#2A9D8F]/20">
+                <div className="mt-4 pt-2.5 border-t border-[#DCE5E0] flex items-center justify-between text-[11px]">
+                  <span className="text-[#5C6E66]">Koordinator:</span>
+                  <span className="font-semibold text-[#1D7A6F] bg-white px-2 py-0.5 rounded border border-[#DCE5E0]">
                     {act.kordinator}
                   </span>
                 </div>
@@ -511,14 +542,14 @@ export default function DashboardPage() {
 
       {/* Alert Error Jika Ada Masalah Fetch */}
       {error && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 sm:p-5 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
+        <div className="bg-[#FAF0ED] border border-[#E8BCB0] text-[#8A2F1B] rounded-xl p-4 sm:p-5 flex items-start gap-3 no-print">
+          <AlertCircle className="w-5 h-5 shrink-0 text-[#8A2F1B] mt-0.5" />
           <div>
             <h4 className="font-semibold text-sm">Gagal Mengambil Data Google Sheets</h4>
-            <p className="text-xs mt-1 text-rose-700">{error}</p>
+            <p className="text-xs mt-1 text-[#8A2F1B]">{error}</p>
             <button
               onClick={() => loadData(true)}
-              className="mt-2 text-xs font-semibold text-rose-800 underline hover:no-underline"
+              className="mt-2 text-xs font-semibold text-[#8A2F1B] underline hover:no-underline"
             >
               Coba lagi sekarang
             </button>
@@ -527,29 +558,29 @@ export default function DashboardPage() {
       )}
 
       {/* ============================================================== */}
-      {/* 3. FILTER BULAN KEUANGAN INTERAKTIF                            */}
+      {/* 3. FILTER BULAN KEUANGAN INTERAKTIF (DISEMBUNYIKAN SAAT CETAK) */}
       {/* ============================================================== */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-[#2A9D8F]/20">
+      <div className="bg-white rounded-xl p-4 sm:p-5 border border-[#DCE5E0] shadow-xs no-print">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
-            <Wallet className="w-4 h-4 text-[#2A9D8F]" />
-            <span className="text-xs sm:text-sm font-bold text-[#2D3436]">
+            <Wallet className="w-4 h-4 text-[#1D7A6F]" />
+            <span className="text-xs sm:text-sm font-bold text-[#26332E]">
               Pilih Periode Anggaran Keuangan:
             </span>
           </div>
-          <span className="text-xs font-semibold text-[#1D7A6F] bg-[#E8F5F3] px-2.5 py-1 rounded-lg">
+          <span className="text-xs font-semibold text-[#1D7A6F] bg-[#E8F5F3] border border-[#C8E3DC] px-2.5 py-1 rounded">
             Aktif: {activeKeuangan.label}
           </span>
         </div>
 
         {/* Tab Tombol Pilihan Bulan */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
           <button
             onClick={() => setSelectedBulan('TOTAL')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+            className={`px-3 py-1.5 rounded text-xs font-bold transition-colors cursor-pointer shrink-0 border ${
               selectedBulan === 'TOTAL'
-                ? 'bg-[#2A9D8F] text-white shadow-xs'
-                : 'bg-[#FDF6E3] text-[#2D3436] hover:bg-[#E8F5F3] border border-[#2A9D8F]/20'
+                ? 'bg-[#1D7A6F] text-white border-[#1D7A6F] shadow-xs'
+                : 'bg-[#F7F5EF] text-[#26332E] hover:bg-[#E8F5F3] border-[#DCE5E0]'
             }`}
           >
             Semua Periode (Total)
@@ -559,10 +590,10 @@ export default function DashboardPage() {
             <button
               key={item.bulan}
               onClick={() => setSelectedBulan(item.bulan)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+              className={`px-3 py-1.5 rounded text-xs font-bold transition-colors cursor-pointer shrink-0 border ${
                 selectedBulan === item.bulan
-                  ? 'bg-[#2A9D8F] text-white shadow-xs'
-                  : 'bg-white text-[#2D3436] hover:bg-[#E8F5F3] border border-gray-200'
+                  ? 'bg-[#1D7A6F] text-white border-[#1D7A6F] shadow-xs'
+                  : 'bg-white text-[#26332E] hover:bg-[#F7F5EF] border-[#DCE5E0]'
               }`}
             >
               {item.bulan}
@@ -576,7 +607,7 @@ export default function DashboardPage() {
       {/* ============================================================== */}
       
       {/* BARIS A: RINGKASAN KEUANGAN (RAB, LPJ & SALDO KAS) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 print-avoid-break">
         
         {/* Kartu 1: RAB (Anggaran Masuk) */}
         <StatCard
@@ -585,9 +616,9 @@ export default function DashboardPage() {
           subvalue={activeKeuangan.label}
           icon={TrendingUp}
           iconBg="bg-[#E8F5F3]"
-          iconColor="text-[#2A9D8F]"
+          iconColor="text-[#1D7A6F]"
           badgeText="Subsidi Masuk"
-          badgeColor="bg-[#E8F5F3] text-[#1D7A6F]"
+          badgeColor="bg-[#E8F5F3] text-[#1D7A6F] border-[#C8E3DC]"
           isLoading={loading}
         />
 
@@ -597,10 +628,10 @@ export default function DashboardPage() {
           value={formatRupiah(activeKeuangan.pengeluaran)}
           subvalue={`Realisasi: ${activeKeuangan.subsidi > 0 ? ((activeKeuangan.pengeluaran / activeKeuangan.subsidi) * 100).toFixed(1) : 0}%`}
           icon={TrendingDown}
-          iconBg="bg-rose-50"
-          iconColor="text-rose-600"
+          iconBg="bg-[#FAF0ED]"
+          iconColor="text-[#8A2F1B]"
           badgeText="Pengeluaran"
-          badgeColor="bg-rose-50 text-rose-700"
+          badgeColor="bg-[#FAF0ED] text-[#8A2F1B] border-[#E8BCB0]"
           isLoading={loading}
         />
 
@@ -610,10 +641,10 @@ export default function DashboardPage() {
           value={formatRupiah(activeKeuangan.saldo)}
           subvalue="Sisa anggaran kas periode ini"
           icon={Wallet}
-          iconBg="bg-[#E8F5F3]"
-          iconColor="text-[#1D7A6F]"
-          badgeText="Saldo Kas"
-          badgeColor="bg-[#E8F5F3] text-[#1D7A6F]"
+          iconBg="bg-[#FAF3E6]"
+          iconColor="text-[#8C6D23]"
+          badgeText="Sisa Saldo"
+          badgeColor="bg-[#FAF3E6] text-[#8C6D23] border-[#E8D5A7]"
           isLoading={loading}
         />
 
@@ -622,16 +653,18 @@ export default function DashboardPage() {
       {/* ============================================================== */}
       {/* 4.B VISUALISASI DIAGRAM BULAT PENGELUARAN KEUANGAN (LPJ)       */}
       {/* ============================================================== */}
-      <KeuanganDonutChart
-        rekapitulasi={keuanganData?.rekapitulasi || []}
-        totalPengeluaran={keuanganData?.total?.pengeluaran || 0}
-        isLoading={loading}
-        selectedBulan={selectedBulan}
-        onSelectBulan={setSelectedBulan}
-      />
+      <div className="print-avoid-break">
+        <KeuanganDonutChart
+          rekapitulasi={keuanganData?.rekapitulasi || []}
+          totalPengeluaran={keuanganData?.total?.pengeluaran || 0}
+          isLoading={loading}
+          selectedBulan={selectedBulan}
+          onSelectBulan={setSelectedBulan}
+        />
+      </div>
 
       {/* BARIS B: RINGKASAN OPERASIONAL (SANTRI LBM, FORUM BAHSU & KALENDER) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 print-avoid-break">
         
         {/* Kartu 4: Total Anggota LBM (Selaras dengan Halaman /anggota) */}
         <StatCard
@@ -640,7 +673,7 @@ export default function DashboardPage() {
           subvalue="Terdaftar aktif di sistem MMD"
           icon={Users}
           badgeText="LBM MMD"
-          badgeColor="bg-[#E8F5F3] text-[#1D7A6F]"
+          badgeColor="bg-[#E8F5F3] text-[#1D7A6F] border-[#C8E3DC]"
           isLoading={loading}
         />
 
@@ -650,10 +683,10 @@ export default function DashboardPage() {
           value={`${bahsuData?.totalAgenda || 0} Forum`}
           subvalue={`${bahsuData?.totalSudahBerangkat || 0} Sudah • ${bahsuData?.totalBelumBerangkat || 0} Belum • ${bahsuData?.totalIzin || 0} Izin`}
           icon={BookOpen}
-          iconBg="bg-amber-50"
-          iconColor="text-amber-700"
+          iconBg="bg-[#FAF3E6]"
+          iconColor="text-[#8C6D23]"
           badgeText="Agenda 2026"
-          badgeColor="bg-amber-50 text-amber-800"
+          badgeColor="bg-[#FAF3E6] text-[#8C6D23] border-[#E8D5A7]"
           isLoading={loading}
         />
 
@@ -663,10 +696,10 @@ export default function DashboardPage() {
           value={`${kalenderData?.totalKegiatan || 0} Agenda`}
           subvalue={`${kalenderData?.totalWaka3 || 0} Agenda Khusus WAKA III`}
           icon={CalendarDays}
-          iconBg="bg-teal-50"
-          iconColor="text-teal-700"
+          iconBg="bg-[#EDF3F7]"
+          iconColor="text-[#224A63]"
           badgeText="1 Tahun Ajaran"
-          badgeColor="bg-teal-50 text-teal-800"
+          badgeColor="bg-[#EDF3F7] text-[#224A63] border-[#B9D1E0]"
           isLoading={loading}
         />
 
@@ -675,15 +708,15 @@ export default function DashboardPage() {
       {/* ============================================================== */}
       {/* 5. DISTRIBUSI STATUS ANGGOTA + PIE CHART                       */}
       {/* ============================================================== */}
-      <div className="grid grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 gap-6 print-avoid-break">
         {loading ? (
-          <div className="bg-white rounded-3xl p-8 border border-[#2A9D8F]/15 animate-pulse flex flex-col md:flex-row items-center justify-around gap-6 min-h-[280px]">
-            <div className="w-44 h-44 rounded-full bg-gray-200/80 animate-pulse"></div>
+          <div className="bg-white rounded-xl p-8 border border-[#DCE5E0] animate-pulse flex flex-col md:flex-row items-center justify-around gap-6 min-h-[260px]">
+            <div className="w-44 h-44 rounded-full bg-stone-200/80 animate-pulse"></div>
             <div className="space-y-3 w-full max-w-sm">
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/5"></div>
+              <div className="h-4 bg-stone-200 rounded w-3/4"></div>
+              <div className="h-4 bg-stone-200 rounded w-1/2"></div>
+              <div className="h-4 bg-stone-200 rounded w-2/3"></div>
+              <div className="h-4 bg-stone-200 rounded w-3/5"></div>
             </div>
           </div>
         ) : (
@@ -697,51 +730,51 @@ export default function DashboardPage() {
       {/* ============================================================== */}
       {/* 6. DUA KOLOM: REKAP KEUANGAN & FORUM BAHTSUL MASAIL            */}
       {/* ============================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Kolom Kiri (6 Kolom): Rekapitulasi Anggaran Bulanan (Termasuk Saldo Kas) */}
-        <div className="lg:col-span-6 bg-white rounded-2xl p-6 shadow-xs border border-[#2A9D8F]/15 flex flex-col justify-between">
+        <div className="lg:col-span-6 bg-white rounded-xl p-6 border border-[#DCE5E0] shadow-xs flex flex-col justify-between print-avoid-break">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#DCE5E0]">
               <div>
-                <h3 className="font-bold text-lg text-[#2D3436] flex items-center gap-2">
-                  <Wallet className="w-5 h-5 text-[#2A9D8F]" />
+                <h3 className="font-bold text-lg text-[#26332E] font-serif flex items-center gap-2">
+                  <Wallet className="w-4 h-4 text-[#1D7A6F]" />
                   Rekapitulasi Anggaran Bulanan
                 </h3>
-                <p className="text-xs text-[#636E72] mt-0.5">
+                <p className="text-xs text-[#5C6E66] mt-0.5">
                   Klik baris bulan untuk melihat detail angka masuk, keluar &amp; saldo di atas
                 </p>
               </div>
 
               <Link
                 href="/keuangan"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-[#1D7A6F] hover:text-[#2A9D8F] hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[#1D7A6F] hover:underline no-print"
               >
                 Laporan Penuh
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3.5 h-3.5 text-[#C6A66B]" />
               </Link>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 text-xs font-semibold text-[#636E72]">
+                  <tr className="border-b border-[#DCE5E0] text-[11px] font-bold text-[#5C6E66]">
                     <th className="py-2.5 px-3">Bulan / Periode</th>
                     <th className="py-2.5 px-3 text-right">RAB (Masuk)</th>
                     <th className="py-2.5 px-3 text-right">LPJ (Keluar)</th>
                     <th className="py-2.5 px-3 text-right font-bold text-[#1D7A6F]">Saldo Kas</th>
-                    <th className="py-2.5 px-3 text-center">Penyerapan</th>
+                    <th className="py-2.5 px-3 text-center">Serap</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-[#DCE5E0]/60">
                   {loading ? (
                     [1, 2, 3, 4].map((i) => (
                       <tr key={i} className="animate-pulse">
-                        <td className="py-3 px-3"><div className="h-4 bg-gray-200 rounded w-28"></div></td>
-                        <td className="py-3 px-3 text-right"><div className="h-4 bg-gray-200 rounded w-20 ml-auto"></div></td>
-                        <td className="py-3 px-3 text-right"><div className="h-4 bg-gray-200 rounded w-20 ml-auto"></div></td>
-                        <td className="py-3 px-3 text-right"><div className="h-4 bg-gray-200 rounded w-20 ml-auto"></div></td>
-                        <td className="py-3 px-3 text-center"><div className="h-4 bg-gray-200 rounded w-10 mx-auto"></div></td>
+                        <td className="py-3 px-3"><div className="h-4 bg-stone-200 rounded w-28"></div></td>
+                        <td className="py-3 px-3 text-right"><div className="h-4 bg-stone-200 rounded w-20 ml-auto"></div></td>
+                        <td className="py-3 px-3 text-right"><div className="h-4 bg-stone-200 rounded w-20 ml-auto"></div></td>
+                        <td className="py-3 px-3 text-right"><div className="h-4 bg-stone-200 rounded w-20 ml-auto"></div></td>
+                        <td className="py-3 px-3 text-center"><div className="h-4 bg-stone-200 rounded w-10 mx-auto"></div></td>
                       </tr>
                     ))
                   ) : keuanganData?.rekapitulasi?.map((item, idx) => {
@@ -754,24 +787,24 @@ export default function DashboardPage() {
                         className={`cursor-pointer transition-colors ${
                           isSelected
                             ? 'bg-[#E8F5F3] font-semibold text-[#1D7A6F]'
-                            : 'hover:bg-[#FFFCF5]'
+                            : 'hover:bg-[#F7F5EF]/60'
                         }`}
                       >
-                        <td className="py-3 px-3 font-semibold text-[#2D3436] flex items-center gap-1.5">
-                          {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#2A9D8F]"></span>}
+                        <td className="py-3 px-3 font-semibold text-[#26332E] flex items-center gap-1.5">
+                          {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#1D7A6F]"></span>}
                           <span>{item.bulan}</span>
                         </td>
-                        <td className="py-3 px-3 text-right text-xs text-[#2D3436] font-medium">
+                        <td className="py-3 px-3 text-right text-xs text-[#26332E] font-medium font-mono">
                           {formatRupiah(item.subsidi)}
                         </td>
-                        <td className="py-3 px-3 text-right text-xs text-rose-600 font-medium">
+                        <td className="py-3 px-3 text-right text-xs text-[#8A2F1B] font-medium font-mono">
                           {formatRupiah(item.pengeluaran)}
                         </td>
-                        <td className="py-3 px-3 text-right text-xs font-bold text-[#1D7A6F]">
+                        <td className="py-3 px-3 text-right text-xs font-bold text-[#1D7A6F] font-mono">
                           {formatRupiah(item.saldo)}
                         </td>
                         <td className="py-3 px-3 text-center">
-                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#EDF3F7] text-[#224A63] border border-[#B9D1E0]">
                             {persen}%
                           </span>
                         </td>
@@ -783,22 +816,22 @@ export default function DashboardPage() {
                   {!loading && (
                     <tr
                       onClick={() => setSelectedBulan('TOTAL')}
-                      className={`cursor-pointer border-t-2 border-[#2A9D8F] font-bold ${
-                        selectedBulan === 'TOTAL' ? 'bg-[#E8F5F3]' : 'bg-gray-50 hover:bg-[#FFFCF5]'
+                      className={`cursor-pointer border-t-2 border-[#1D7A6F] font-bold ${
+                        selectedBulan === 'TOTAL' ? 'bg-[#E8F5F3]' : 'bg-[#F7F5EF] hover:bg-[#E8F5F3]/70'
                       }`}
                     >
-                      <td className="py-3 px-3 text-[#1D7A6F]">TOTAL KESELURUHAN</td>
-                      <td className="py-3 px-3 text-right text-xs text-[#2D3436]">
+                      <td className="py-3 px-3 text-[#1D7A6F] text-xs font-bold">TOTAL KESELURUHAN</td>
+                      <td className="py-3 px-3 text-right text-xs text-[#26332E] font-mono">
                         {formatRupiah(keuanganData?.total?.subsidi || 0)}
                       </td>
-                      <td className="py-3 px-3 text-right text-xs text-rose-700 font-black">
+                      <td className="py-3 px-3 text-right text-xs text-[#8A2F1B] font-black font-mono">
                         {formatRupiah(keuanganData?.total?.pengeluaran || 0)}
                       </td>
-                      <td className="py-3 px-3 text-right text-xs text-[#1D7A6F] font-black">
+                      <td className="py-3 px-3 text-right text-xs text-[#1D7A6F] font-black font-mono">
                         {formatRupiah(keuanganData?.total?.saldo || 0)}
                       </td>
                       <td className="py-3 px-3 text-center">
-                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#2A9D8F] text-white">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#1D7A6F] text-white">
                           {keuanganData?.total?.subsidi > 0
                             ? ((keuanganData.total.pengeluaran / keuanganData.total.subsidi) * 100).toFixed(1)
                             : 0}%
@@ -811,59 +844,59 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-[#636E72] gap-1.5">
-            <span className="flex items-center gap-1 text-[11px] text-[#636E72]">
-              <Info className="w-3.5 h-3.5 text-[#2A9D8F] shrink-0" />
+          <div className="mt-4 pt-3 border-t border-[#DCE5E0] flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-[#5C6E66] gap-1.5">
+            <span className="flex items-center gap-1 text-[11px] text-[#5C6E66]">
+              <Info className="w-3.5 h-3.5 text-[#1D7A6F] shrink-0" />
               Sisa saldo kas disetor kembali ke kas umum pondok.
             </span>
             <span className="font-semibold text-[#1D7A6F]">
-              Saldo Aktif: {formatRupiah(activeKeuangan.saldo)}
+              Saldo Aktif: <strong className="font-mono">{formatRupiah(activeKeuangan.saldo)}</strong>
             </span>
           </div>
         </div>
 
         {/* Kolom Kanan (6 Kolom): AGENDA BAHTSUL MASAIL DENGAN TAB FILTER */}
-        <div className="lg:col-span-6 bg-white rounded-2xl p-6 shadow-xs border border-[#2A9D8F]/15 flex flex-col justify-between">
+        <div className="lg:col-span-6 bg-white rounded-xl p-6 border border-[#DCE5E0] shadow-xs flex flex-col justify-between print-avoid-break">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[#DCE5E0]">
               <div>
-                <h3 className="font-bold text-lg text-[#2D3436] flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-[#2A9D8F]" />
+                <h3 className="font-bold text-lg text-[#26332E] font-serif flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-[#1D7A6F]" />
                   Jadwal &amp; Delegasi Bahtsul Masail
                 </h3>
-                <p className="text-xs text-[#636E72] mt-0.5">
+                <p className="text-xs text-[#5C6E66] mt-0.5">
                   Total {bahsuData?.totalAgenda || 0} forum se-Jawa Madura
                 </p>
               </div>
 
               {/* Tab Filter Cepat Status Bahsu */}
-              <div className="inline-flex items-center p-1 rounded-xl bg-gray-100 text-xs font-semibold">
+              <div className="inline-flex items-center p-0.5 rounded bg-[#F7F5EF] border border-[#DCE5E0] text-[11px] font-semibold no-print">
                 <button
                   onClick={() => setBahsuFilter('BELUM')}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
                     bahsuFilter === 'BELUM'
-                      ? 'bg-amber-500 text-white shadow-xs'
-                      : 'text-gray-600 hover:text-black'
+                      ? 'bg-[#FAF3E6] text-[#8C6D23] font-bold border border-[#E8D5A7] shadow-xs'
+                      : 'text-[#5C6E66] hover:text-[#26332E]'
                   }`}
                 >
                   Belum ({bahsuData?.totalBelumBerangkat || 0})
                 </button>
                 <button
                   onClick={() => setBahsuFilter('SUDAH')}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
                     bahsuFilter === 'SUDAH'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'text-gray-600 hover:text-black'
+                      ? 'bg-[#E8F5F3] text-[#1D7A6F] font-bold border border-[#C8E3DC] shadow-xs'
+                      : 'text-[#5C6E66] hover:text-[#26332E]'
                   }`}
                 >
                   Sudah ({bahsuData?.totalSudahBerangkat || 0})
                 </button>
                 <button
                   onClick={() => setBahsuFilter('ALL')}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
                     bahsuFilter === 'ALL'
-                      ? 'bg-[#2A9D8F] text-white shadow-xs'
-                      : 'text-gray-600 hover:text-black'
+                      ? 'bg-[#1D7A6F] text-white font-bold shadow-xs'
+                      : 'text-[#5C6E66] hover:text-[#26332E]'
                   }`}
                 >
                   Semua ({bahsuData?.totalAgenda || 0})
@@ -871,28 +904,28 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {displayedBahsuEvents.length > 0 ? (
                 displayedBahsuEvents.slice(0, 5).map((item, idx) => (
                   <div
                     key={item.id || idx}
-                    className="p-3.5 rounded-xl bg-[#FFFCF5] border border-amber-200/70 flex items-start justify-between gap-3 hover:bg-[#FDF6E3] transition-colors"
+                    className="p-3 rounded-lg bg-white border border-[#DCE5E0] flex items-start justify-between gap-3 hover:bg-[#F7F5EF]/60 hover:border-[#1D7A6F]/30 transition-colors"
                   >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
+                        <span className="text-[10px] font-bold text-[#1D7A6F] bg-[#E8F5F3] border border-[#C8E3DC] px-1.5 py-0.2 rounded">
                           #{item.no || idx + 1}
                         </span>
-                        <span className="text-xs text-[#636E72] flex items-center gap-1 font-medium">
-                          <Clock className="w-3 h-3 text-[#2A9D8F]" />
+                        <span className="text-xs text-[#5C6E66] flex items-center gap-1 font-medium font-mono">
+                          <Clock className="w-3 h-3 text-[#C6A66B]" />
                           {item.tanggal}
                         </span>
                       </div>
-                      <h4 className="text-xs font-bold text-[#2D3436] line-clamp-1">
+                      <h4 className="text-xs font-bold text-[#26332E] line-clamp-1">
                         {item.acara}
                       </h4>
                       {item.delegasi && item.delegasi.length > 0 && (
-                        <p className="text-[11px] text-[#636E72] mt-1 line-clamp-1">
+                        <p className="text-[11px] text-[#5C6E66] mt-0.5 line-clamp-1">
                           Delegasi: {item.delegasi.join(', ')}
                         </p>
                       )}
@@ -900,20 +933,20 @@ export default function DashboardPage() {
 
                     <div className="shrink-0">
                       {item.statusKeberangkatan === 'BELUM_BERANGKAT' && (
-                        <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
-                          <Hourglass className="w-3 h-3" />
-                          Belum Berangkat
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#FAF3E6] text-[#8C6D23] border border-[#E8D5A7] flex items-center gap-1">
+                          <Hourglass className="w-3 h-3 text-[#8C6D23]" />
+                          Belum
                         </span>
                       )}
                       {item.statusKeberangkatan === 'SUDAH_BERANGKAT' && (
-                        <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Sudah Berangkat
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#E8F5F3] text-[#1D7A6F] border border-[#C8E3DC] flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-[#1D7A6F]" />
+                          Sudah
                         </span>
                       )}
                       {item.statusKeberangkatan === 'IZIN' && (
-                        <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">
-                          <XCircle className="w-3 h-3" />
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#FAF0ED] text-[#8A2F1B] border border-[#E8BCB0] flex items-center gap-1">
+                          <XCircle className="w-3.5 h-3.5 text-[#8A2F1B]" />
                           Izin / Batal
                         </span>
                       )}
@@ -921,23 +954,27 @@ export default function DashboardPage() {
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-gray-400 text-xs">
-                  Tidak ada forum dalam filter ini.
+                <div className="p-8 text-center text-[#5C6E66] text-xs">
+                  Tidak ada agenda forum dalam kategori ini.
                 </div>
               )}
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-[#636E72]">
+          <div className="mt-4 pt-3 border-t border-[#DCE5E0] flex items-center justify-between text-xs text-[#5C6E66] no-print">
             <span>Menampilkan {Math.min(5, displayedBahsuEvents.length)} dari {displayedBahsuEvents.length} forum</span>
             <Link href="/bahsu" className="font-semibold text-[#1D7A6F] hover:underline flex items-center gap-1">
-              Buka Seluruh Jadwal Bahsu <ArrowRight className="w-3 h-3" />
+              Buka Seluruh Jadwal Bahsu <ArrowRight className="w-3 h-3 text-[#C6A66B]" />
             </Link>
           </div>
         </div>
 
       </div>
 
+      {/* Tanda Tangan Resmi Pengesahan Laporan */}
+      <PrintSignatures leftRole="Kepala MMD Darussalamah" rightRole="WAKA III MMD Darussalamah" />
+
     </div>
   );
 }
+

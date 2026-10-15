@@ -45,37 +45,37 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto py-8 sm:py-12">
+    <div className="max-w-md mx-auto py-8 sm:py-14">
       
       {/* Jika Admin Sudah Login */}
       {isAdmin ? (
-        <div className="bg-white rounded-3xl p-8 shadow-xs border border-[#2A9D8F]/20 text-center space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-[#E8F5F3] text-[#2A9D8F] flex items-center justify-center mx-auto shadow-xs">
-            <ShieldCheck className="w-8 h-8" />
+        <div className="bg-white rounded-2xl p-8 shadow-xs border border-[#DCE5E0] text-center space-y-6">
+          <div className="w-14 h-14 rounded-2xl bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center mx-auto border border-[#1D7A6F]/15">
+            <ShieldCheck className="w-7 h-7" />
           </div>
 
           <div>
-            <h1 className="text-2xl font-black text-[#2D3436]">
+            <h1 className="text-xl sm:text-2xl font-bold font-serif text-[#1D7A6F]">
               Anda Sedang Login sebagai Admin
             </h1>
-            <p className="text-xs sm:text-sm text-[#636E72] mt-2">
-              Tombol <strong className="text-[#1D7A6F]">"Edit Data di Google Sheets"</strong> kini aktif di Dashboard, Halaman Anggota, dan Halaman Keuangan.
+            <p className="text-xs sm:text-sm text-[#5C6D66] mt-2">
+              Tombol <strong className="text-[#1D7A6F]">"Edit Data di Google Sheets"</strong> dan fitur penyiaran pesan khusus admin kini aktif.
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#FDF6E3] border border-[#2A9D8F]/20 text-xs text-left text-[#2D3436] space-y-2">
-            <p className="font-semibold text-[#1D7A6F]">Hak Akses Admin:</p>
-            <ul className="list-disc list-inside space-y-1 text-[#636E72]">
-              <li>Membuka lembar kerja Google Sheets untuk edit santri</li>
+          <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#DCE5E0] text-xs text-left text-[#26332E] space-y-2">
+            <p className="font-bold text-[#1D7A6F]">Hak Akses Administrator:</p>
+            <ul className="list-disc list-inside space-y-1 text-[#5C6D66]">
+              <li>Membuka lembar kerja Google Sheets untuk edit data santri</li>
               <li>Membuka spreadsheet rekapitulasi keuangan RAB & LPJ</li>
-              <li>Perubahan otomatis tampil ke publik setelah disimpan</li>
+              <li>Membuat dan mengirim penyiaran (broadcast) notifikasi resmi</li>
             </ul>
           </div>
 
           <div className="flex flex-col gap-3">
             <Link
               href="/"
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-white bg-[#2A9D8F] hover:bg-[#1D7A6F] transition-colors shadow-xs"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-white bg-[#1D7A6F] hover:bg-[#1A453B] transition-colors shadow-xs"
             >
               <span>Buka Dashboard</span>
               <ArrowRight className="w-4 h-4" />
@@ -83,7 +83,7 @@ export default function LoginPage() {
 
             <button
               onClick={logout}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-[#8A2F1B] bg-[#FAF0ED] hover:bg-[#F5E2DC] border border-[#F1D3CC] transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               <span>Keluar (Logout)</span>
@@ -92,30 +92,30 @@ export default function LoginPage() {
         </div>
       ) : (
         /* Form Login */
-        <div className="bg-white rounded-3xl p-8 shadow-xs border border-[#2A9D8F]/20">
+        <div className="bg-white rounded-2xl p-8 shadow-xs border border-[#DCE5E0]">
           
           <div className="text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-[#E8F5F3] text-[#2A9D8F] flex items-center justify-center mx-auto mb-3 shadow-xs">
-              <Lock className="w-7 h-7" />
+            <div className="w-14 h-14 rounded-2xl bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center mx-auto mb-3.5 border border-[#1D7A6F]/15">
+              <Lock className="w-6 h-6" />
             </div>
-            <h1 className="text-2xl font-black text-[#2D3436]">
+            <h1 className="text-2xl font-bold font-serif text-[#1D7A6F]">
               Login Administrator
             </h1>
-            <p className="text-xs sm:text-sm text-[#636E72] mt-1">
-              Masuk untuk memunculkan tautan edit Google Sheets
+            <p className="text-xs sm:text-sm text-[#5C6D66] mt-1">
+              Masuk untuk memunculkan tautan kelola Google Sheets dan Broadcast
             </p>
           </div>
 
           {error && (
-            <div className="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
+            <div className="mb-4 p-3.5 rounded-xl bg-[#FAF0ED] border border-[#F1D3CC] text-[#8A2F1B] text-xs flex items-start gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="mb-4 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 font-medium">
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+            <div className="mb-4 p-3.5 rounded-xl bg-[#E8F5F3] border border-[#DCE5E0] text-[#1D7A6F] text-xs flex items-center gap-2 font-medium">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-[#1D7A6F]" />
               <span>Login berhasil! Mengalihkan ke dashboard...</span>
             </div>
           )}
@@ -124,36 +124,36 @@ export default function LoginPage() {
             
             {/* Input Username */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#636E72] mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#5C6D66] mb-1.5">
                 Username
               </label>
               <div className="relative">
-                <User className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <User className="w-4 h-4 text-[#5C6D66] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Masukkan username"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-hidden focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 text-[#2D3436]"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#DCE5E0] text-sm focus:outline-hidden focus:border-[#1D7A6F] focus:ring-2 focus:ring-[#1D7A6F]/20 text-[#26332E] bg-white"
                 />
               </div>
             </div>
 
             {/* Input Password */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#636E72] mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#5C6D66] mb-1.5">
                 Password
               </label>
               <div className="relative">
-                <KeyRound className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <KeyRound className="w-4 h-4 text-[#5C6D66] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-hidden focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 text-[#2D3436]"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#DCE5E0] text-sm focus:outline-hidden focus:border-[#1D7A6F] focus:ring-2 focus:ring-[#1D7A6F]/20 text-[#26332E] bg-white"
                 />
               </div>
             </div>
@@ -161,7 +161,7 @@ export default function LoginPage() {
             {/* Tombol Submit */}
             <button
               type="submit"
-              className="w-full mt-2 py-3 px-4 rounded-xl font-bold text-white bg-[#2A9D8F] hover:bg-[#1D7A6F] transition-all duration-150 shadow-sm hover:shadow-md cursor-pointer flex items-center justify-center gap-2"
+              className="w-full mt-2 py-3 px-4 rounded-xl font-semibold text-white bg-[#1D7A6F] hover:bg-[#1A453B] transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-2"
             >
               <ShieldCheck className="w-4 h-4" />
               <span>Masuk sebagai Admin</span>

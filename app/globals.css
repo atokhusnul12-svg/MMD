@@ -1,29 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --bg-cream: #FDF6E3;
+  --bg-cream: #F7F5EF;
   --bg-cream-card: #FFFFFF;
-  --color-tosca: #2A9D8F;
-  --color-tosca-dark: #1D7A6F;
-  --color-tosca-light: #E8F5F3;
-  --color-text-dark: #2D3436;
-  --color-text-muted: #636E72;
+  --color-primary: #1D7A6F;
+  --color-primary-dark: #155D54;
+  --color-primary-light: #E8F5F3;
+  --color-accent: #C6A66B;
+  --color-accent-light: #FAF3E6;
+  --color-text-dark: #26332E;
+  --color-text-muted: #5C6B64;
+  --color-border: #DCE5E0;
 }
 
 @theme {
-  --color-cream: #FDF6E3;
-  --color-cream-light: #FFFCF5;
-  --color-cream-dark: #F5E8C7;
-  --color-tosca: #2A9D8F;
-  --color-tosca-dark: #1D7A6F;
-  --color-tosca-light: #E8F5F3;
-  --color-dark: #2D3436;
-  --color-muted: #636E72;
+  --color-cream: #F7F5EF;
+  --color-cream-light: #FFFFFF;
+  --color-cream-dark: #EDE9DE;
+  --color-primary: #1D7A6F;
+  --color-primary-dark: #155D54;
+  --color-primary-light: #E8F5F3;
+  --color-accent: #C6A66B;
+  --color-accent-light: #FAF3E6;
+  --color-dark: #26332E;
+  --color-muted: #5C6B64;
+  --color-border: #DCE5E0;
 }
 
 body {
-  background-color: #FDF6E3;
-  color: #2D3436;
+  background-color: #F7F5EF;
+  color: #26332E;
   min-height: 100vh;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -36,14 +42,14 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #FDF6E3;
+  background: #F7F5EF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2A9D8F;
+  background: #1D7A6F;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #1D7A6F;
+  background: #155D54;
 }
 
 /* Styling Cetak Laporan (Print / PDF) */
@@ -54,7 +60,7 @@ body {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 15mm 15mm 15mm 15mm;
+    margin: 12mm 15mm 15mm 15mm;
   }
   
   body {
@@ -88,6 +94,15 @@ body {
     border-collapse: collapse !important;
   }
 
+  thead {
+    display: table-header-group !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto;
+  }
+
   th, td {
     border: 1px solid #D1D5DB !important;
     padding: 6px 10px !important;
@@ -99,4 +114,17 @@ body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+
+  .print-show-block {
+    display: block !important;
+  }
+
+  .print-show-table {
+    display: table !important;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+  }
 }
+

@@ -13,12 +13,20 @@ import {
   Sparkles,
   BookOpen,
   Hourglass,
+  Printer,
 } from 'lucide-react';
 import AdminButton from './AdminButton';
+import { PrintHeader, PrintSignatures } from './PrintHeaderFooter';
 
 export default function BahsuTable({ events = [], title, editUrl }) {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL'); // 'ALL' | 'BELUM' | 'SUDAH' | 'IZIN'
+
+  const handlePrint = () => {
+    if (typeof window !== 'undefined') {
+      window.print();
+    }
+  };
 
   // Filter pencarian dan status
   const filteredEvents = useMemo(() => {
@@ -53,126 +61,155 @@ export default function BahsuTable({ events = [], title, editUrl }) {
     return events.filter(e => e.statusKeberangkatan === 'IZIN').length;
   }, [events]);
 
+  const filterDescription = useMemo(() => {
+    const parts = [];
+    if (search) parts.push(`Pencarian: "${search}"`);
+    if (filterStatus === 'BELUM') parts.push('Status: Belum Berangkat');
+    if (filterStatus === 'SUDAH') parts.push('Status: Sudah Berangkat');
+    if (filterStatus === 'IZIN') parts.push('Status: Izin / Berhalangan');
+    return parts.length > 0 ? parts.join(' | ') : 'Semua Agenda Terjadwal';
+  }, [search, filterStatus]);
+
   return (
     <div className="space-y-6">
       
+      {/* KOP SURAT RESMI CETAK (HANYA MUNCUL DI PRINT / PDF) */}
+      <PrintHeader
+        title="Laporan Jadwal Pemberangkatan & Delegasi Bahtsul Masail"
+        subtitle="Pondok Pesantren Darussalam Sumbersari Kencong Pare Kediri"
+        filterInfo={filterDescription}
+        totalInfo={`${filteredEvents.length} Forum (${totalBelumBerangkat} Belum Berangkat, ${totalSudahBerangkat} Selesai, ${totalIzin} Izin)`}
+      />
+
       {/* 4 Kartu Ringkasan Atas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 no-print">
         
-        <div className="bg-white rounded-2xl p-5 border border-[#2A9D8F]/20 shadow-xs flex items-center justify-between">
+        <div className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#636E72]">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66]">
               Total Forum Bahsu
             </span>
-            <div className="text-2xl font-black text-[#2D3436] mt-1">
+            <div className="text-2xl font-black text-[#26332E] mt-1 font-serif">
               {events.length} Agenda
             </div>
-            <p className="text-xs text-[#636E72] mt-0.5">Sepanjang tahun 2026</p>
+            <p className="text-xs text-[#5C6E66] mt-0.5">Sepanjang tahun 2026</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-[#E8F5F3] text-[#2A9D8F] flex items-center justify-center shrink-0">
-            <BookOpen className="w-6 h-6" />
+          <div className="w-11 h-11 rounded-lg bg-[#F7F5EF] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0]">
+            <BookOpen className="w-5 h-5" />
           </div>
         </div>
 
         <div
           onClick={() => setFilterStatus(filterStatus === 'BELUM' ? 'ALL' : 'BELUM')}
-          className={`cursor-pointer rounded-2xl p-5 border shadow-xs flex items-center justify-between transition-all ${
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-colors ${
             filterStatus === 'BELUM'
-              ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-400'
-              : 'bg-white border-amber-200 hover:border-amber-400'
+              ? 'bg-[#FAF3E6] border-[#E8D5A7] ring-1 ring-[#C6A66B]'
+              : 'bg-white border-[#DCE5E0] hover:border-[#C6A66B]'
           }`}
         >
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#8C6D23]">
               Belum Berangkat
             </span>
-            <div className="text-2xl font-black text-amber-700 mt-1">
+            <div className="text-2xl font-black text-[#8C6D23] mt-1 font-serif">
               {totalBelumBerangkat} Forum
             </div>
-            <p className="text-xs text-amber-800 mt-0.5">Klik untuk filter</p>
+            <p className="text-xs text-[#8C6D23]/80 mt-0.5">Klik untuk filter</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-            <Hourglass className="w-6 h-6" />
+          <div className="w-11 h-11 rounded-lg bg-[#FAF3E6] text-[#8C6D23] flex items-center justify-center shrink-0 border border-[#E8D5A7]">
+            <Hourglass className="w-5 h-5" />
           </div>
         </div>
 
         <div
           onClick={() => setFilterStatus(filterStatus === 'SUDAH' ? 'ALL' : 'SUDAH')}
-          className={`cursor-pointer rounded-2xl p-5 border shadow-xs flex items-center justify-between transition-all ${
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-colors ${
             filterStatus === 'SUDAH'
-              ? 'bg-emerald-50 border-emerald-400 ring-2 ring-emerald-400'
-              : 'bg-white border-emerald-200 hover:border-emerald-400'
+              ? 'bg-[#E8F5F3] border-[#C8E3DC] ring-1 ring-[#1D7A6F]'
+              : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F]'
           }`}
         >
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#1D7A6F]">
               Sudah Berangkat
             </span>
-            <div className="text-2xl font-black text-emerald-600 mt-1">
+            <div className="text-2xl font-black text-[#1D7A6F] mt-1 font-serif">
               {totalSudahBerangkat} Forum
             </div>
-            <p className="text-xs text-emerald-700 mt-0.5">Klik untuk filter</p>
+            <p className="text-xs text-[#1D7A6F]/80 mt-0.5">Klik untuk filter</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-6 h-6" />
+          <div className="w-11 h-11 rounded-lg bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#C8E3DC]">
+            <CheckCircle2 className="w-5 h-5" />
           </div>
         </div>
 
         <div
           onClick={() => setFilterStatus(filterStatus === 'IZIN' ? 'ALL' : 'IZIN')}
-          className={`cursor-pointer rounded-2xl p-5 border shadow-xs flex items-center justify-between transition-all ${
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-colors ${
             filterStatus === 'IZIN'
-              ? 'bg-rose-50 border-rose-400 ring-2 ring-rose-400'
-              : 'bg-white border-rose-200 hover:border-rose-400'
+              ? 'bg-[#FAF0ED] border-[#E8BCB0] ring-1 ring-[#A8382B]'
+              : 'bg-white border-[#DCE5E0] hover:border-[#A8382B]'
           }`}
         >
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-rose-800">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#8A2F1B]">
               Izin / Batal
             </span>
-            <div className="text-2xl font-black text-rose-600 mt-1">
+            <div className="text-2xl font-black text-[#8A2F1B] mt-1 font-serif">
               {totalIzin} Forum
             </div>
-            <p className="text-xs text-rose-700 mt-0.5">Surat mepet / ujian</p>
+            <p className="text-xs text-[#8A2F1B]/80 mt-0.5">Surat mepet / ujian</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-            <XCircle className="w-6 h-6" />
+          <div className="w-11 h-11 rounded-lg bg-[#FAF0ED] text-[#8A2F1B] flex items-center justify-center shrink-0 border border-[#E8BCB0]">
+            <XCircle className="w-5 h-5" />
           </div>
         </div>
 
       </div>
 
       {/* Kontainer Utama Tabel / List */}
-      <div className="bg-white rounded-2xl shadow-xs border border-[#2A9D8F]/15 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-xs border border-[#DCE5E0] overflow-hidden card-print">
         
         {/* Header & Tombol Edit */}
-        <div className="p-5 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FFFCF5]">
+        <div className="p-5 sm:p-6 border-b border-[#DCE5E0] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#F7F5EF]/60 no-print">
           <div>
-            <h2 className="text-xl font-bold text-[#2D3436] flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-[#2A9D8F]" />
-              Daftar Pemberangkatan & Delegasi Bahtsul Masail
+            <h2 className="text-xl font-bold text-[#26332E] font-serif flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-[#1D7A6F]" />
+              Daftar Pemberangkatan &amp; Delegasi Bahtsul Masail
             </h2>
-            <p className="text-xs text-[#636E72] mt-0.5">
+            <p className="text-xs text-[#5C6E66] mt-0.5">
               Jadwal pelaksanaan forum Bahtsul Masail, lokasi, serta utusan santri LBM Darussalamah
             </p>
           </div>
 
-          <AdminButton editUrl={editUrl} title="Edit Bahsu di Sheets" />
+          <div className="flex items-center gap-2">
+            {/* Tombol Cetak Laporan */}
+            <button
+              onClick={handlePrint}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white border border-[#DCE5E0] text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F] shadow-xs transition-all cursor-pointer"
+              title="Cetak Laporan Bahtsul Masail atau Simpan sebagai PDF"
+            >
+              <Printer className="w-4 h-4 text-[#1D7A6F]" />
+              <span>Cetak Laporan</span>
+            </button>
+
+            <AdminButton editUrl={editUrl} title="Edit Bahsu di Sheets" />
+          </div>
         </div>
 
         {/* Baris Pencarian & Filter Status */}
-        <div className="p-4 sm:p-6 bg-white border-b border-gray-100 space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+        <div className="p-4 sm:p-5 bg-white border-b border-[#DCE5E0] space-y-3 no-print">
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
             
             {/* Input Search */}
             <div className="sm:col-span-8 relative">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#5C6E66] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Cari nama forum, lokasi (Lirboyo, Ploso, Tuban), atau nama santri..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-hidden focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 text-[#2D3436]"
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-[#DCE5E0] text-sm focus:outline-hidden focus:border-[#1D7A6F] focus:ring-1 focus:ring-[#1D7A6F]/20 text-[#26332E] placeholder-[#5C6E66]/60 bg-white"
               />
             </div>
 
@@ -181,7 +218,7 @@ export default function BahsuTable({ events = [], title, editUrl }) {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-hidden focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 text-[#2D3436] bg-white font-medium"
+                className="w-full px-3 py-2 rounded-lg border border-[#DCE5E0] text-sm focus:outline-hidden focus:border-[#1D7A6F] focus:ring-1 focus:ring-[#1D7A6F]/20 text-[#26332E] bg-white font-medium cursor-pointer"
               >
                 <option value="ALL">Semua Status ({events.length})</option>
                 <option value="BELUM">★ Belum Berangkat ({totalBelumBerangkat})</option>
@@ -199,7 +236,7 @@ export default function BahsuTable({ events = [], title, editUrl }) {
                     setFilterStatus('ALL');
                   }}
                   title="Reset Filter"
-                  className="w-full sm:w-auto p-2.5 rounded-xl text-gray-500 hover:text-rose-600 hover:bg-rose-50 border border-gray-200 transition-colors flex items-center justify-center cursor-pointer"
+                  className="w-full sm:w-auto p-2 rounded-lg text-[#5C6E66] hover:text-[#8A2F1B] hover:bg-[#FAF0ED] border border-[#DCE5E0] transition-colors flex items-center justify-center cursor-pointer"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
@@ -209,47 +246,47 @@ export default function BahsuTable({ events = [], title, editUrl }) {
           </div>
 
           {(search || filterStatus !== 'ALL') && (
-            <div className="text-xs text-[#636E72] flex items-center gap-2">
+            <div className="text-xs text-[#5C6E66] flex items-center gap-2 pt-0.5">
               <span>Menemukan <strong>{filteredEvents.length}</strong> dari {events.length} agenda</span>
             </div>
           )}
         </div>
 
         {/* Tabel Tampilan Desktop */}
-        <div className="overflow-x-auto hidden md:block">
+        <div className="overflow-x-auto hidden md:block print:block">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-[#FDF6E3] border-b border-[#2A9D8F]/20 text-xs font-semibold text-[#636E72] uppercase tracking-wider">
-                <th className="py-3.5 px-4 w-12 text-center">No</th>
-                <th className="py-3.5 px-5 w-1/3">Forum Bahtsul Masail & Tempat</th>
-                <th className="py-3.5 px-4 w-44">Tanggal Pelaksanaan</th>
-                <th className="py-3.5 px-5">Delegasi Santri</th>
-                <th className="py-3.5 px-4 w-44 text-center">Status</th>
+              <tr className="bg-[#F7F5EF] border-b border-[#DCE5E0] text-[11px] font-bold text-[#5C6E66] uppercase tracking-wider">
+                <th className="py-3 px-4 w-12 text-center">No</th>
+                <th className="py-3 px-5 w-1/3">Forum Bahtsul Masail &amp; Tempat</th>
+                <th className="py-3 px-4 w-44">Tanggal Pelaksanaan</th>
+                <th className="py-3 px-5">Delegasi Santri</th>
+                <th className="py-3 px-4 w-44 text-center">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-[#DCE5E0]/60">
               {filteredEvents.length > 0 ? (
                 filteredEvents.map((item, idx) => {
                   const isBelum = item.statusKeberangkatan === 'BELUM_BERANGKAT';
                   const isIzin = item.statusKeberangkatan === 'IZIN';
 
                   return (
-                    <tr key={item.id || idx} className="hover:bg-[#FFFCF5] transition-colors">
-                      <td className="py-4 px-4 text-center font-bold text-gray-400">
+                    <tr key={item.id || idx} className="hover:bg-[#F7F5EF]/50 transition-colors">
+                      <td className="py-3.5 px-4 text-center font-mono text-xs font-bold text-[#5C6E66]">
                         {item.no || idx + 1}
                       </td>
-                      <td className="py-4 px-5">
-                        <div className="font-bold text-[#2D3436] text-sm">
+                      <td className="py-3.5 px-5">
+                        <div className="font-bold text-[#26332E] text-sm leading-snug">
                           {item.acara}
                         </div>
                       </td>
-                      <td className="py-4 px-4">
-                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#2D3436] bg-[#FDF6E3] px-2.5 py-1 rounded-lg border border-[#2A9D8F]/15">
-                          <Clock className="w-3.5 h-3.5 text-[#2A9D8F]" />
+                      <td className="py-3.5 px-4">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#26332E] bg-[#F7F5EF] px-2.5 py-1 rounded border border-[#DCE5E0] font-mono">
+                          <Clock className="w-3.5 h-3.5 text-[#C6A66B]" />
                           {item.tanggal}
                         </span>
                       </td>
-                      <td className="py-4 px-5">
+                      <td className="py-3.5 px-5">
                         {item.delegasi && item.delegasi.length > 0 ? (
                           <div className="space-y-1">
                             {item.delegasi.map((del, dIdx) => {
@@ -259,12 +296,12 @@ export default function BahsuTable({ events = [], title, editUrl }) {
                                   key={dIdx}
                                   className={`text-xs ${
                                     isKomisi
-                                      ? 'font-bold text-[#1D7A6F] mt-1 pt-1 border-t border-gray-100'
-                                      : 'text-[#2D3436] flex items-center gap-1.5'
+                                      ? 'font-bold text-[#1D7A6F] mt-1 pt-1 border-t border-[#DCE5E0]'
+                                      : 'text-[#26332E] flex items-center gap-1.5'
                                   }`}
                                 >
                                   {!isKomisi && (
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#2A9D8F] shrink-0" />
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#1D7A6F] shrink-0" />
                                   )}
                                   <span>{del}</span>
                                 </div>
@@ -272,23 +309,23 @@ export default function BahsuTable({ events = [], title, editUrl }) {
                             })}
                           </div>
                         ) : (
-                          <span className="text-gray-400 text-xs italic">-</span>
+                          <span className="text-[#5C6E66] text-xs italic">-</span>
                         )}
                       </td>
-                      <td className="py-4 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center">
                         {isIzin ? (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-[#FAF0ED] text-[#8A2F1B] border border-[#E8BCB0]">
                             <XCircle className="w-3.5 h-3.5" />
                             {item.keterangan}
                           </span>
                         ) : isBelum ? (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300">
-                            <Hourglass className="w-3.5 h-3.5" />
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-[#FAF3E6] text-[#8C6D23] border border-[#E8D5A7]">
+                            <Hourglass className="w-3.5 h-3.5 text-[#8C6D23]" />
                             Belum Berangkat
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[#2A9D8F]/15 text-[#1D7A6F] border border-[#2A9D8F]/30">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-[#E8F5F3] text-[#1D7A6F] border border-[#C8E3DC]">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#1D7A6F]" />
                             {item.keterangan || 'Delegasi'}
                           </span>
                         )}
@@ -298,7 +335,7 @@ export default function BahsuTable({ events = [], title, editUrl }) {
                 })
               ) : (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-gray-400 text-sm">
+                  <td colSpan={5} className="py-12 text-center text-[#5C6E66] text-sm">
                     Tidak ada agenda Bahtsul Masail yang cocok dengan pencarian Anda.
                   </td>
                 </tr>
@@ -307,48 +344,48 @@ export default function BahsuTable({ events = [], title, editUrl }) {
           </table>
         </div>
 
-        {/* Tampilan Kartu Khusus Mobile */}
-        <div className="md:hidden divide-y divide-gray-100">
+        {/* Tampilan Kartu Khusus Mobile (Disembunyikan saat cetak) */}
+        <div className="md:hidden divide-y divide-[#DCE5E0]/60 no-print">
           {filteredEvents.length > 0 ? (
             filteredEvents.map((item, idx) => {
               const isBelum = item.statusKeberangkatan === 'BELUM_BERANGKAT';
               const isIzin = item.statusKeberangkatan === 'IZIN';
 
               return (
-                <div key={item.id || idx} className="p-4 space-y-3 hover:bg-[#FFFCF5]">
+                <div key={item.id || idx} className="p-4 space-y-2.5 hover:bg-[#F7F5EF]/50">
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-gray-100 text-gray-600">
+                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#F7F5EF] text-[#5C6E66] border border-[#DCE5E0]">
                       #{item.no || idx + 1}
                     </span>
                     {isIzin ? (
-                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-[#FAF0ED] text-[#8A2F1B] border border-[#E8BCB0]">
                         {item.keterangan}
                       </span>
                     ) : isBelum ? (
-                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300">
+                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-[#FAF3E6] text-[#8C6D23] border border-[#E8D5A7]">
                         Belum Berangkat
                       </span>
                     ) : (
-                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#2A9D8F]/15 text-[#1D7A6F]">
+                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-[#E8F5F3] text-[#1D7A6F] border border-[#C8E3DC]">
                         {item.keterangan || 'Delegasi'}
                       </span>
                     )}
                   </div>
 
-                  <h3 className="font-bold text-[#2D3436] text-sm">
+                  <h3 className="font-bold text-[#26332E] text-sm">
                     {item.acara}
                   </h3>
 
-                  <div className="text-xs text-[#636E72] flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-[#2A9D8F]" />
+                  <div className="text-xs text-[#5C6E66] flex items-center gap-1.5 font-mono">
+                    <Clock className="w-3.5 h-3.5 text-[#C6A66B]" />
                     <span>{item.tanggal}</span>
                   </div>
 
                   {item.delegasi && item.delegasi.length > 0 && (
-                    <div className="p-3 rounded-xl bg-[#FDF6E3] border border-[#2A9D8F]/15 text-xs space-y-1">
+                    <div className="p-3 rounded-lg bg-[#F7F5EF] border border-[#DCE5E0] text-xs space-y-1">
                       <span className="font-semibold text-[#1D7A6F] block mb-1">Delegasi:</span>
                       {item.delegasi.map((del, dIdx) => (
-                        <p key={dIdx} className="text-[#2D3436]">
+                        <p key={dIdx} className="text-[#26332E]">
                           {del}
                         </p>
                       ))}
@@ -358,7 +395,7 @@ export default function BahsuTable({ events = [], title, editUrl }) {
               );
             })
           ) : (
-            <div className="p-8 text-center text-gray-400 text-sm">
+            <div className="p-8 text-center text-[#5C6E66] text-sm">
               Tidak ada agenda Bahtsul Masail yang cocok.
             </div>
           )}
@@ -366,6 +403,10 @@ export default function BahsuTable({ events = [], title, editUrl }) {
 
       </div>
 
+      {/* Tanda Tangan Resmi Pengesahan Laporan */}
+      <PrintSignatures rightRole="WAKA III / Koordinator Bahtsul Masail" />
+
     </div>
   );
 }
+
