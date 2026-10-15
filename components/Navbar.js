@@ -18,6 +18,7 @@ import {
   Building2,
 } from 'lucide-react';
 import JamIstiwaTopBar from '@/components/JamIstiwaTopBar';
+import NotificationButton from '@/components/NotificationButton';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -93,8 +94,10 @@ export default function Navbar() {
               );
             })}
 
-            {/* Menu Login / Logout Desktop */}
-            <div className="ml-2 pl-2 border-l border-[#2D3436]/10">
+            {/* Tombol Notifikasi & Menu Login / Logout Desktop */}
+            <div className="ml-2 pl-2 border-l border-[#2D3436]/10 flex items-center gap-2">
+              <NotificationButton variant="header" />
+
               {isAdmin ? (
                 <button
                   onClick={logout}
@@ -118,8 +121,9 @@ export default function Navbar() {
             </div>
           </nav>
 
-          {/* Tombol Hamburger Menu Mobile */}
-          <div className="flex lg:hidden items-center gap-2">
+          {/* Tombol Hamburger & Notifikasi Menu Mobile */}
+          <div className="flex lg:hidden items-center gap-1.5">
+            <NotificationButton variant="header" />
             {isAdmin && (
               <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#2A9D8F]/15 text-[#1D7A6F]">
                 Admin

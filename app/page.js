@@ -15,6 +15,7 @@ import PieChart from '@/components/PieChart';
 import KeuanganDonutChart from '@/components/KeuanganDonutChart';
 import AdminButton from '@/components/AdminButton';
 import JamIstiwaCard from '@/components/JamIstiwaCard';
+import NotificationButton from '@/components/NotificationButton';
 import { AgendaSkeleton } from '@/components/Skeleton';
 import {
   Users,
@@ -338,6 +339,11 @@ export default function DashboardPage() {
       {/* 2. KARTU JAM ISTIWA' (WIS) WILAYAH PARE                        */}
       {/* ============================================================== */}
       <JamIstiwaCard />
+
+      {/* ============================================================== */}
+      {/* 2.5 PUSAT NOTIFIKASI SISTEM (ONESIGNAL WEB PUSH)              */}
+      {/* ============================================================== */}
+      <NotificationButton variant="card" />
 
       {/* ============================================================== */}
       {/* 3. HIGHLIGHT KALENDER KERJA MMD (AGENDA TERDEKAT DARI HARI INI) */}
