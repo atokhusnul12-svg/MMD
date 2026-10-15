@@ -12,6 +12,7 @@ import {
 } from '@/lib/fetchCSV';
 import StatCard from '@/components/StatCard';
 import PieChart from '@/components/PieChart';
+import KeuanganDonutChart from '@/components/KeuanganDonutChart';
 import AdminButton from '@/components/AdminButton';
 import JamIstiwaCard from '@/components/JamIstiwaCard';
 import { AgendaSkeleton } from '@/components/Skeleton';
@@ -532,6 +533,17 @@ export default function DashboardPage() {
         />
 
       </div>
+
+      {/* ============================================================== */}
+      {/* 4.B VISUALISASI DIAGRAM BULAT PENGELUARAN KEUANGAN (LPJ)       */}
+      {/* ============================================================== */}
+      <KeuanganDonutChart
+        rekapitulasi={keuanganData?.rekapitulasi || []}
+        totalPengeluaran={keuanganData?.total?.pengeluaran || 0}
+        isLoading={loading}
+        selectedBulan={selectedBulan}
+        onSelectBulan={setSelectedBulan}
+      />
 
       {/* BARIS B: RINGKASAN OPERASIONAL (SANTRI LBM, FORUM BAHSU & KALENDER) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
