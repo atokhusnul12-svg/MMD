@@ -14,6 +14,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useNotification } from './NotificationProvider';
+import { useAuth } from '@/lib/auth';
 import NotificationBroadcastModal from './NotificationBroadcastModal';
 
 /**
@@ -24,6 +25,7 @@ import NotificationBroadcastModal from './NotificationBroadcastModal';
  * 100% mandiri dan langsung berfungsi.
  */
 export default function NotificationButton({ variant = 'header', showBroadcastButton = true }) {
+  const { isAdmin } = useAuth();
   const {
     isSupported,
     permission,
@@ -191,14 +193,14 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
                 {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               </button>
 
-              {/* Tombol Kirim Uji Coba Broadcast */}
-              {showBroadcastButton && (
+              {/* Tombol Kirim Uji Coba Broadcast (Hanya Admin) */}
+              {showBroadcastButton && isAdmin && (
                 <button
                   onClick={() => {
                     setMenuOpen(false);
                     setBroadcastOpen(true);
                   }}
-                  className="w-full flex items-center gap-2 p-2 rounded-xl text-[#1D7A6F] hover:bg-[#E8F5F3] transition-colors font-medium text-left"
+                  className="w-full flex items-center gap-2 p-2 rounded-xl text-[#1D7A6F] hover:bg-[#E8F5F3] transition-colors font-medium text-left cursor-pointer"
                 >
                   <Send className="w-4 h-4 text-[#2A9D8F]" />
                   <span>Kirim Broadcast Notifikasi...</span>
@@ -208,11 +210,13 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
           </div>
         )}
 
-        {/* Modal Broadcast Notifikasi */}
-        <NotificationBroadcastModal
-          isOpen={broadcastOpen}
-          onClose={() => setBroadcastOpen(false)}
-        />
+        {/* Modal Broadcast Notifikasi (Hanya Admin) */}
+        {isAdmin && (
+          <NotificationBroadcastModal
+            isOpen={broadcastOpen}
+            onClose={() => setBroadcastOpen(false)}
+          />
+        )}
       </div>
     );
   }
@@ -305,14 +309,17 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
             {isSubscribed ? (
               <>
-                <button
-                  onClick={() => setBroadcastOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#2A9D8F]/30 text-[#1D7A6F] hover:bg-[#E8F5F3] text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer"
-                  title="Kirim notifikasi broadcast ke seluruh santri"
-                >
-                  <Send className="w-4 h-4 text-[#2A9D8F]" />
-                  <span>Kirim Broadcast</span>
-                </button>
+                {/* Tombol Kirim Broadcast (Hanya Admin) */}
+                {isAdmin && (
+                  <button
+                    onClick={() => setBroadcastOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#2A9D8F]/30 text-[#1D7A6F] hover:bg-[#E8F5F3] text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer"
+                    title="Kirim notifikasi broadcast ke seluruh santri"
+                  >
+                    <Send className="w-4 h-4 text-[#2A9D8F]" />
+                    <span>Kirim Broadcast</span>
+                  </button>
+                )}
 
                 <button
                   onClick={handleToggleSubscribe}
@@ -361,11 +368,13 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
         </div>
       </div>
 
-      {/* Modal Broadcast Notifikasi */}
-      <NotificationBroadcastModal
-        isOpen={broadcastOpen}
-        onClose={() => setBroadcastOpen(false)}
-      />
+      {/* Modal Broadcast Notifikasi (Hanya Admin) */}
+      {isAdmin && (
+        <NotificationBroadcastModal
+          isOpen={broadcastOpen}
+          onClose={() => setBroadcastOpen(false)}
+        />
+      )}
     </>
   );
 }

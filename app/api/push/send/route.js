@@ -5,6 +5,21 @@ import { getSubscriptions, deleteSubscription } from '@/lib/subscriptionStore';
 
 export async function POST(request) {
   try {
+    // 1. Guard hak akses: Hanya Admin yang diizinkan mengirim broadcast
+    const cookieSession = request.cookies?.get('waka3_admin_session')?.value;
+    const headerAuth = request.headers?.get('x-admin-auth');
+    const isAdmin = cookieSession === 'true' || headerAuth === 'true';
+
+    if (!isAdmin) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Hanya Admin yang dapat mengirim broadcast.',
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { title, message, url, type, targetSubscription } = body;
 

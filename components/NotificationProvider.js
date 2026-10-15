@@ -209,9 +209,17 @@ export function NotificationProvider({ children }) {
 
   // Handler: Kirim Notifikasi via Server API
   const sendNotification = async ({ title, message, url, type, targetCurrentDevice = false }) => {
+    const isAdminSession = typeof window !== 'undefined' && localStorage.getItem('waka3_admin_session') === 'true';
+    if (!isAdminSession) {
+      throw new Error('Hanya Admin yang dapat mengirim broadcast.');
+    }
+
     const res = await fetch('/api/push/send', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-auth': 'true',
+      },
       body: JSON.stringify({
         title,
         message,

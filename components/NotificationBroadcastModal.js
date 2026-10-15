@@ -15,8 +15,10 @@ import {
   Users,
 } from 'lucide-react';
 import { useNotification } from './NotificationProvider';
+import { useAuth } from '@/lib/auth';
 
 export default function NotificationBroadcastModal({ isOpen, onClose }) {
+  const { isAdmin } = useAuth();
   const { isSubscribed, subscriberCount, sendNotification } = useNotification();
 
   const [title, setTitle] = useState('📅 Agenda WAKA III Terdekat');
@@ -28,6 +30,32 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
   const [result, setResult] = useState(null);
 
   if (!isOpen) return null;
+
+  // Guard: Blokir jika user bukan admin
+  if (!isAdmin) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-rose-200 text-center space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-[#2D3436]">Akses Dibatasi</h3>
+            <p className="text-xs text-rose-600 font-semibold mt-1">
+              Hanya Admin yang dapat mengirim broadcast.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-semibold text-gray-700 transition-colors cursor-pointer"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Preset Template Notifikasi Siap Pakai
   const templates = [
