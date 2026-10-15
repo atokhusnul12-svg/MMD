@@ -8,35 +8,31 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  Settings,
   Send,
-  HelpCircle,
   Smartphone,
-  ShieldCheck,
   ChevronDown,
+  Users,
 } from 'lucide-react';
-import { useOneSignal } from './OneSignalProvider';
+import { useNotification } from './NotificationProvider';
 import NotificationBroadcastModal from './NotificationBroadcastModal';
 
 /**
  * ==============================================================================
- * KOMPONEN: TOMBOL & STATUS PUSH NOTIFIKASI ONESIGNAL
+ * KOMPONEN: TOMBOL & STATUS PUSH NOTIFIKASI MANDIRI (WAKA III)
  * ==============================================================================
- * Tersedia dalam 2 varian:
- * 1. variant="header": Tampilan ringkas untuk Header/Navbar (Desktop & Mobile)
- * 2. variant="card"  : Tampilan kartu interaktif terdedikasi untuk Dashboard
+ * Tidak memerlukan OneSignal atau akun pihak ketiga.
+ * 100% mandiri dan langsung berfungsi.
  */
 export default function NotificationButton({ variant = 'header', showBroadcastButton = true }) {
   const {
     isSupported,
-    appIdConfigured,
     permission,
     isSubscribed,
-    subscriptionId,
+    subscriberCount,
     isLoading,
     subscribe,
     unsubscribe,
-  } = useOneSignal();
+  } = useNotification();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [broadcastOpen, setBroadcastOpen] = useState(false);
@@ -98,7 +94,7 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
               ? 'Notifikasi aktif. Klik untuk opsi.'
               : permission === 'denied'
               ? 'Notifikasi diblokir di browser. Klik untuk petunjuk.'
-              : 'Klik untuk mengaktifkan notifikasi'
+              : 'Klik untuk mengaktifkan notifikasi sistem'
           }
         >
           {isLoading ? (
@@ -153,6 +149,17 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
               </span>
             </div>
 
+            {/* Info Jumlah Pengguna Terdaftar */}
+            <div className="flex items-center justify-between text-[11px] text-[#636E72] mb-3 px-1">
+              <span className="flex items-center gap-1">
+                <Users className="w-3.5 h-3.5 text-[#2A9D8F]" />
+                Total Perangkat Terhubung:
+              </span>
+              <span className="font-bold text-[#2D3436] bg-[#E8F5F3] px-2 py-0.5 rounded-md text-[10px] text-[#1D7A6F]">
+                {subscriberCount} HP/Laptop
+              </span>
+            </div>
+
             {/* Panduan jika diblokir oleh browser */}
             {permission === 'denied' && (
               <div className="mb-3 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
@@ -161,20 +168,7 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
                   Izin Notifikasi Diblokir di Browser
                 </p>
                 <p className="text-[11px] leading-relaxed text-amber-800">
-                  Untuk mengaktifkannya: klik ikon gembok / setelan di bilah alamat (URL bar) browser Anda, lalu ubah <strong>Notifikasi</strong> menjadi <strong>Izinkan (Allow)</strong>.
-                </p>
-              </div>
-            )}
-
-            {/* Panduan jika App ID belum diset */}
-            {!appIdConfigured && (
-              <div className="mb-3 p-2.5 rounded-xl bg-teal-50 border border-teal-200 text-xs text-teal-900 space-y-1">
-                <p className="font-semibold flex items-center gap-1">
-                  <Settings className="w-3.5 h-3.5 text-[#2A9D8F]" />
-                  Menunggu OneSignal App ID
-                </p>
-                <p className="text-[11px] leading-relaxed text-teal-800">
-                  Tambahkan <code>NEXT_PUBLIC_ONESIGNAL_APP_ID</code> di Environment Variables Vercel atau <code>.env.local</code>.
+                  Untuk mengaktifkannya: klik ikon gembok / setelan di bilah URL browser Anda, lalu ubah <strong>Notifikasi</strong> menjadi <strong>Izinkan (Allow)</strong>.
                 </p>
               </div>
             )}
@@ -211,12 +205,6 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
                 </button>
               )}
             </div>
-
-            {subscriptionId && (
-              <div className="mt-2.5 pt-2 border-t border-gray-100 text-[10px] text-[#636E72] truncate">
-                Device ID: <span className="font-mono text-[#2D3436]">{subscriptionId.slice(0, 14)}...</span>
-              </div>
-            )}
           </div>
         )}
 
@@ -283,10 +271,17 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
                     'Belum Diaktifkan'
                   )}
                 </span>
+                
+                {subscriberCount > 0 && (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-[#1D7A6F] bg-white border border-[#2A9D8F]/30 px-2 py-0.5 rounded-full font-medium">
+                    <Users className="w-3 h-3 text-[#2A9D8F]" />
+                    {subscriberCount} Terhubung
+                  </span>
+                )}
               </div>
 
               <p className="text-xs sm:text-sm text-[#636E72] mt-1.5 leading-relaxed max-w-2xl">
-                Dapatkan pemberitahuan otomatis di layar HP (Android/iOS) dan Laptop saat ada agenda Bahtsul Masail terdekat, kegiatan tahunan Kalender Kerja MMD, maupun pembaruan data keuangan santri.
+                Dapatkan pemberitahuan otomatis di layar HP (Android &amp; iOS) dan Laptop saat ada agenda Bahtsul Masail terdekat, kegiatan tahunan Kalender Kerja MMD, maupun pembaruan data keuangan santri.
               </p>
 
               {/* Feedback Pesan */}
@@ -339,7 +334,7 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
                   Cara Mengizinkan:
                 </span>
                 <span className="text-amber-800 text-[11px] block">
-                  Klik ikon gembok di sebelah kiri alamat web browser Anda, lalu izinkan opsi <strong>Notifikasi</strong>.
+                  Klik ikon gembok di sebelah kiri alamat web browser Anda, lalu ubah <strong>Notifikasi</strong> menjadi <strong>Izinkan</strong>.
                 </span>
               </div>
             ) : (

@@ -12,15 +12,15 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  ExternalLink,
+  Users,
 } from 'lucide-react';
-import { useOneSignal } from './OneSignalProvider';
+import { useNotification } from './NotificationProvider';
 
 export default function NotificationBroadcastModal({ isOpen, onClose }) {
-  const { appIdConfigured, subscriptionId } = useOneSignal();
+  const { isSubscribed, subscriberCount, sendNotification } = useNotification();
 
   const [title, setTitle] = useState('📅 Agenda WAKA III Terdekat');
-  const [message, setMessage] = useState('Ada agenda kegiatan terdekat di Kalender Kerja MMD. Silakan cek detail agenda.');
+  const [message, setMessage] = useState('Ada agenda kegiatan terdekat di Kalender Kerja MMD. Silakan buka kalender untuk detail lengkap.');
   const [targetUrl, setTargetUrl] = useState('/kalender');
   const [notificationType, setNotificationType] = useState('agenda');
   const [targetMode, setTargetMode] = useState('all'); // 'all' | 'me'
@@ -29,21 +29,21 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  // Preset Template Cepat
+  // Preset Template Notifikasi Siap Pakai
   const templates = [
     {
       id: 'agenda',
       label: 'Agenda / Kalender',
       icon: Calendar,
       title: '📅 Agenda WAKA III Terdekat',
-      message: 'Pemberitahuan agenda terdekat di Kalender Kerja MMD Darussalamah. Silakan buka kalender.',
+      message: 'Ada agenda kegiatan penting terdekat di Kalender Kerja MMD Darussalamah. Silakan buka kalender.',
       url: '/kalender',
     },
     {
       id: 'keuangan',
       label: 'Data Keuangan',
       icon: Wallet,
-      title: '💰 Update Laporan Keuangan LPJ/RAB',
+      title: '💰 Update Laporan Keuangan LPJ & RAB',
       message: 'Rekapitulasi keuangan periode terbaru telah diperbarui. Silakan cek rincian saldo dan anggaran.',
       url: '/keuangan',
     },
@@ -79,38 +79,22 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
     setResult(null);
 
     try {
-      const payload = {
+      const data = await sendNotification({
         title,
         message,
         url: targetUrl,
         type: notificationType,
-        targetSubscriptionId: targetMode === 'me' ? subscriptionId : null,
-      };
-
-      const res = await fetch('/api/notifications/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        targetCurrentDevice: targetMode === 'me',
       });
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setResult({
-          type: 'success',
-          text: `Notifikasi berhasil dikirim! (${data.recipients || 1} penerima tercatat di OneSignal)`,
-        });
-      } else {
-        setResult({
-          type: 'error',
-          text: data.error || 'Gagal mengirim notifikasi',
-          code: data.code,
-        });
-      }
+      setResult({
+        type: 'success',
+        text: data.message || `Notifikasi berhasil dikirimkan ke ${data.sent || 1} perangkat!`,
+      });
     } catch (err) {
       setResult({
         type: 'error',
-        text: err.message || 'Terjadi kesalahan jaringan',
+        text: err.message || 'Terjadi kesalahan saat mengirim notifikasi.',
       });
     } finally {
       setIsSending(false);
@@ -129,10 +113,15 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
             </div>
             <div>
               <h3 className="text-lg font-bold text-[#2D3436]">
-                Broadcast Push Notifikasi
+                Broadcast Push Notifikasi Mandiri
               </h3>
-              <p className="text-xs text-[#636E72]">
-                Kirim notifikasi langsung ke layar HP &amp; laptop santri/pengurus
+              <p className="text-xs text-[#636E72] flex items-center gap-1.5 mt-0.5">
+                <span>Notifikasi sistem langsung ke HP &amp; laptop</span>
+                <span className="text-gray-300">•</span>
+                <span className="inline-flex items-center gap-1 font-semibold text-[#1D7A6F]">
+                  <Users className="w-3 h-3" />
+                  {subscriberCount} perangkat terdaftar
+                </span>
               </p>
             </div>
           </div>
@@ -239,10 +228,10 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
                     onChange={() => setTargetMode('all')}
                     className="text-[#2A9D8F] focus:ring-[#2A9D8F]"
                   />
-                  <span>Semua Pengguna Terdaftar</span>
+                  <span>Semua Pengguna Terdaftar ({subscriberCount} HP/PC)</span>
                 </label>
 
-                {subscriptionId && (
+                {isSubscribed && (
                   <label className="flex items-center gap-1.5 cursor-pointer">
                     <input
                       type="radio"
@@ -252,7 +241,7 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
                       onChange={() => setTargetMode('me')}
                       className="text-[#2A9D8F] focus:ring-[#2A9D8F]"
                     />
-                    <span>Hanya Perangkat Saya Sendiri (Test)</span>
+                    <span>Hanya Perangkat Saya Sendiri (Uji Coba)</span>
                   </label>
                 )}
               </div>
@@ -276,11 +265,6 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
               )}
               <div className="flex-1">
                 <p className="font-semibold">{result.text}</p>
-                {result.code === 'MISSING_API_KEY' && (
-                  <p className="mt-1 text-[11px] text-rose-700">
-                    💡 <em>Petunjuk:</em> Tambahkan <code>ONESIGNAL_REST_API_KEY</code> di pengaturan Environment Variables Vercel atau file <code>.env.local</code>.
-                  </p>
-                )}
               </div>
             </div>
           )}

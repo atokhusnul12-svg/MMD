@@ -111,12 +111,91 @@ export default function DashboardPage() {
       }
 
       setLastRefreshed(new Date().toLocaleTimeString('id-ID'));
+
+      // Deteksi & kirim notifikasi otomatis jika data berubah atau ada agenda terdekat
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator) {
+        checkAutoNotificationAlerts(resKalender?.value, resKeuangan?.value, resBahsu?.value);
+      }
     } catch (err) {
       console.error('Gagal mengambil data CSV Google Sheets:', err);
       setError('Terjadi kendala saat mengambil data langsung dari Google Sheets. Pastikan koneksi internet aktif.');
     } finally {
       setLoading(false);
       setIsRefreshing(false);
+    }
+  };
+
+  /**
+   * Pemeriksa otomatis notifikasi sistem:
+   * 1. Agenda kegiatan hari ini di kalender kerja
+   * 2. Perubahan saldo / data keuangan
+   * 3. Pembaruan data agenda Bahtsul Masail
+   */
+  const checkAutoNotificationAlerts = (kalender, keuangan, bahsu) => {
+    try {
+      const todayKey = new Date().toISOString().slice(0, 10);
+
+      // 1. Alert Agenda Hari Ini
+      if (kalender?.allActivities?.length) {
+        const lastNotifDate = localStorage.getItem('waka3_last_agenda_notif_date');
+        if (lastNotifDate !== todayKey) {
+          const now = new Date();
+          const todayActivity = kalender.allActivities.find((act) => {
+            if (!act.tanggalLengkap) return false;
+            const greg = act.tanggalLengkap.split('/')[0].trim();
+            const d = parseInt(greg.split(' ')[0]);
+            return d === now.getDate();
+          });
+
+          if (todayActivity) {
+            navigator.serviceWorker.ready.then((reg) => {
+              reg.showNotification('📅 Agenda WAKA III Hari Ini', {
+                body: `${todayActivity.kegiatan || 'Ada agenda madrasah'} (Koord: ${todayActivity.koordinator || 'WAKA III'})`,
+                icon: '/icon.png',
+                badge: '/icon.png',
+                data: { url: '/kalender' },
+              });
+              localStorage.setItem('waka3_last_agenda_notif_date', todayKey);
+            });
+          }
+        }
+      }
+
+      // 2. Alert Perubahan Data Keuangan
+      if (keuangan?.total) {
+        const prevSaldo = localStorage.getItem('waka3_last_saldo');
+        const currentSaldo = String(keuangan.total.saldo);
+        if (prevSaldo !== null && prevSaldo !== currentSaldo) {
+          navigator.serviceWorker.ready.then((reg) => {
+            reg.showNotification('💰 Update Keuangan WAKA III', {
+              body: `Saldo kas madrasah diperbarui: ${formatRupiah(keuangan.total.saldo)}`,
+              icon: '/icon.png',
+              badge: '/icon.png',
+              data: { url: '/keuangan' },
+            });
+          });
+        }
+        localStorage.setItem('waka3_last_saldo', currentSaldo);
+      }
+
+      // 3. Alert Agenda Bahsu Baru
+      if (bahsu?.events?.length) {
+        const prevBahsuCount = localStorage.getItem('waka3_last_bahsu_count');
+        const currentCount = String(bahsu.events.length);
+        if (prevBahsuCount !== null && parseInt(currentCount) > parseInt(prevBahsuCount)) {
+          navigator.serviceWorker.ready.then((reg) => {
+            reg.showNotification('📖 Jadwal Bahtsul Masail Baru', {
+              body: `Terdapat ${parseInt(currentCount) - parseInt(prevBahsuCount)} agenda delegasi Bahtsul Masail baru ditambahkan!`,
+              icon: '/icon.png',
+              badge: '/icon.png',
+              data: { url: '/bahsu' },
+            });
+          });
+        }
+        localStorage.setItem('waka3_last_bahsu_count', currentCount);
+      }
+    } catch {
+      // Non-fatal
     }
   };
 
