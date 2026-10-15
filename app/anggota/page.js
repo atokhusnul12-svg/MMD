@@ -21,7 +21,7 @@ export default function AnggotaPage() {
       setData(res);
     } catch (err) {
       console.error(err);
-      setError('Gagal memuat data anggota dari Google Sheets. Pastikan spreadsheet telah dipublikasikan sebagai CSV.');
+      setError(err?.message || 'Gagal memuat data anggota dari Google Sheets.');
     } finally {
       setLoading(false);
     }

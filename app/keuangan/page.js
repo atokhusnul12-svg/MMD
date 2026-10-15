@@ -21,7 +21,7 @@ export default function KeuanganPage() {
       setData(res);
     } catch (err) {
       console.error(err);
-      setError('Gagal memuat rekapitulasi keuangan dari Google Sheets. Pastikan link spreadsheet telah dipublikasikan sebagai CSV.');
+      setError(err?.message || 'Gagal memuat rekapitulasi keuangan dari Google Sheets.');
     } finally {
       setLoading(false);
     }

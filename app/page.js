@@ -14,6 +14,7 @@ import StatCard from '@/components/StatCard';
 import PieChart from '@/components/PieChart';
 import AdminButton from '@/components/AdminButton';
 import JamIstiwaCard from '@/components/JamIstiwaCard';
+import { AgendaSkeleton } from '@/components/Skeleton';
 import {
   Users,
   Wallet,
@@ -64,17 +65,49 @@ export default function DashboardPage() {
       }
       setError(null);
 
-      const [resAnggota, resKeuangan, resBahsu, resKalender] = await Promise.all([
+      const [resAnggota, resKeuangan, resBahsu, resKalender] = await Promise.allSettled([
         getAnggotaData(DATA_LINKS.anggota.csvUrl),
         getKeuanganData(DATA_LINKS.keuangan.csvUrl),
         getBahsuData(DATA_LINKS.bahsu.csvUrl),
         getKalenderData(DATA_LINKS.kalender.csvUrl),
       ]);
 
-      setAnggotaData(resAnggota);
-      setKeuanganData(resKeuangan);
-      setBahsuData(resBahsu);
-      setKalenderData(resKalender);
+      const failedSources = [];
+
+      if (resAnggota.status === 'fulfilled') {
+        setAnggotaData(resAnggota.value);
+      } else {
+        console.error('Gagal memuat anggota:', resAnggota.reason);
+        failedSources.push(`Anggota LBM (${resAnggota.reason?.message || 'Error'})`);
+      }
+
+      if (resKeuangan.status === 'fulfilled') {
+        setKeuanganData(resKeuangan.value);
+      } else {
+        console.error('Gagal memuat keuangan:', resKeuangan.reason);
+        failedSources.push(`Keuangan (${resKeuangan.reason?.message || 'Error'})`);
+      }
+
+      if (resBahsu.status === 'fulfilled') {
+        setBahsuData(resBahsu.value);
+      } else {
+        console.error('Gagal memuat bahsu:', resBahsu.reason);
+        failedSources.push(`Bahtsul Masail (${resBahsu.reason?.message || 'Error'})`);
+      }
+
+      if (resKalender.status === 'fulfilled') {
+        setKalenderData(resKalender.value);
+      } else {
+        console.error('Gagal memuat kalender:', resKalender.reason);
+        failedSources.push(`Kalender Kerja (${resKalender.reason?.message || 'Error'})`);
+      }
+
+      if (failedSources.length === 4) {
+        setError(`Seluruh data source gagal dimuat. Detail: ${failedSources.join('; ')}`);
+      } else if (failedSources.length > 0) {
+        console.warn('Sebagian data gagal dimuat:', failedSources);
+      }
+
       setLastRefreshed(new Date().toLocaleTimeString('id-ID'));
     } catch (err) {
       console.error('Gagal mengambil data CSV Google Sheets:', err);
@@ -333,9 +366,11 @@ export default function DashboardPage() {
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-gray-400 text-xs bg-[#FFFCF5] rounded-2xl border border-gray-100">
-            <RefreshCw className="w-5 h-5 animate-spin mx-auto text-[#2A9D8F] mb-2" />
-            <span>Memuat jadwal kegiatan terdekat...</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <AgendaSkeleton />
+            <AgendaSkeleton />
+            <AgendaSkeleton />
+            <AgendaSkeleton />
           </div>
         ) : upcomingActivities.length === 0 ? (
           <div className="p-8 text-center text-gray-400 text-xs bg-[#FFFCF5] rounded-2xl border border-gray-100">
@@ -460,37 +495,40 @@ export default function DashboardPage() {
         {/* Kartu 1: RAB (Anggaran Masuk) */}
         <StatCard
           title="Angka Masuk (RAB)"
-          value={loading ? '...' : formatRupiah(activeKeuangan.subsidi)}
+          value={formatRupiah(activeKeuangan.subsidi)}
           subvalue={activeKeuangan.label}
           icon={TrendingUp}
           iconBg="bg-[#E8F5F3]"
           iconColor="text-[#2A9D8F]"
           badgeText="Subsidi Masuk"
           badgeColor="bg-[#E8F5F3] text-[#1D7A6F]"
+          isLoading={loading}
         />
 
         {/* Kartu 2: LPJ (Pengeluaran Realisasi) */}
         <StatCard
           title="Pengeluaran (LPJ)"
-          value={loading ? '...' : formatRupiah(activeKeuangan.pengeluaran)}
+          value={formatRupiah(activeKeuangan.pengeluaran)}
           subvalue={`Realisasi: ${activeKeuangan.subsidi > 0 ? ((activeKeuangan.pengeluaran / activeKeuangan.subsidi) * 100).toFixed(1) : 0}%`}
           icon={TrendingDown}
           iconBg="bg-rose-50"
           iconColor="text-rose-600"
           badgeText="Pengeluaran"
           badgeColor="bg-rose-50 text-rose-700"
+          isLoading={loading}
         />
 
         {/* Kartu 3: Saldo Kas (Selaras dengan Halaman /keuangan) */}
         <StatCard
           title="Saldo Kas (Sisa Dana)"
-          value={loading ? '...' : formatRupiah(activeKeuangan.saldo)}
+          value={formatRupiah(activeKeuangan.saldo)}
           subvalue="Sisa anggaran kas periode ini"
           icon={Wallet}
           iconBg="bg-[#E8F5F3]"
           iconColor="text-[#1D7A6F]"
           badgeText="Saldo Kas"
           badgeColor="bg-[#E8F5F3] text-[#1D7A6F]"
+          isLoading={loading}
         />
 
       </div>
@@ -501,35 +539,38 @@ export default function DashboardPage() {
         {/* Kartu 4: Total Anggota LBM (Selaras dengan Halaman /anggota) */}
         <StatCard
           title="Total Anggota LBM"
-          value={loading ? '...' : `${anggotaData?.total || 0} Santri`}
+          value={`${anggotaData?.total || 0} Santri`}
           subvalue="Terdaftar aktif di sistem MMD"
           icon={Users}
           badgeText="LBM MMD"
           badgeColor="bg-[#E8F5F3] text-[#1D7A6F]"
+          isLoading={loading}
         />
 
         {/* Kartu 5: Agenda Bahtsul Masail (Selaras dengan Halaman /bahsu) */}
         <StatCard
           title="Forum Bahtsul Masail"
-          value={loading ? '...' : `${bahsuData?.totalAgenda || 0} Forum`}
+          value={`${bahsuData?.totalAgenda || 0} Forum`}
           subvalue={`${bahsuData?.totalSudahBerangkat || 0} Sudah • ${bahsuData?.totalBelumBerangkat || 0} Belum • ${bahsuData?.totalIzin || 0} Izin`}
           icon={BookOpen}
           iconBg="bg-amber-50"
           iconColor="text-amber-700"
           badgeText="Agenda 2026"
           badgeColor="bg-amber-50 text-amber-800"
+          isLoading={loading}
         />
 
         {/* Kartu 6: Agenda Kalender Kerja (Selaras dengan Halaman /kalender) */}
         <StatCard
           title="Kalender Kerja MMD"
-          value={loading ? '...' : `${kalenderData?.totalKegiatan || 0} Agenda`}
+          value={`${kalenderData?.totalKegiatan || 0} Agenda`}
           subvalue={`${kalenderData?.totalWaka3 || 0} Agenda Khusus WAKA III`}
           icon={CalendarDays}
           iconBg="bg-teal-50"
           iconColor="text-teal-700"
           badgeText="1 Tahun Ajaran"
           badgeColor="bg-teal-50 text-teal-800"
+          isLoading={loading}
         />
 
       </div>
@@ -539,9 +580,14 @@ export default function DashboardPage() {
       {/* ============================================================== */}
       <div className="grid grid-cols-1 gap-8">
         {loading ? (
-          <div className="bg-white rounded-2xl p-12 text-center text-gray-400 border border-[#2A9D8F]/15">
-            <RefreshCw className="w-8 h-8 animate-spin mx-auto text-[#2A9D8F] mb-3" />
-            <p className="text-sm font-medium">Memuat data anggota dari Google Sheets...</p>
+          <div className="bg-white rounded-3xl p-8 border border-[#2A9D8F]/15 animate-pulse flex flex-col md:flex-row items-center justify-around gap-6 min-h-[280px]">
+            <div className="w-44 h-44 rounded-full bg-gray-200/80 animate-pulse"></div>
+            <div className="space-y-3 w-full max-w-sm">
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/5"></div>
+            </div>
           </div>
         ) : (
           <PieChart
@@ -591,7 +637,17 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {keuanganData?.rekapitulasi?.map((item, idx) => {
+                  {loading ? (
+                    [1, 2, 3, 4].map((i) => (
+                      <tr key={i} className="animate-pulse">
+                        <td className="py-3 px-3"><div className="h-4 bg-gray-200 rounded w-28"></div></td>
+                        <td className="py-3 px-3 text-right"><div className="h-4 bg-gray-200 rounded w-20 ml-auto"></div></td>
+                        <td className="py-3 px-3 text-right"><div className="h-4 bg-gray-200 rounded w-20 ml-auto"></div></td>
+                        <td className="py-3 px-3 text-right"><div className="h-4 bg-gray-200 rounded w-20 ml-auto"></div></td>
+                        <td className="py-3 px-3 text-center"><div className="h-4 bg-gray-200 rounded w-10 mx-auto"></div></td>
+                      </tr>
+                    ))
+                  ) : keuanganData?.rekapitulasi?.map((item, idx) => {
                     const isSelected = selectedBulan === item.bulan;
                     const persen = item.subsidi > 0 ? ((item.pengeluaran / item.subsidi) * 100).toFixed(1) : 0;
                     return (
@@ -627,30 +683,32 @@ export default function DashboardPage() {
                   })}
 
                   {/* Baris Total (Akumulasi Seluruh Periode) */}
-                  <tr
-                    onClick={() => setSelectedBulan('TOTAL')}
-                    className={`cursor-pointer border-t-2 border-[#2A9D8F] font-bold ${
-                      selectedBulan === 'TOTAL' ? 'bg-[#E8F5F3]' : 'bg-gray-50 hover:bg-[#FFFCF5]'
-                    }`}
-                  >
-                    <td className="py-3 px-3 text-[#1D7A6F]">TOTAL KESELURUHAN</td>
-                    <td className="py-3 px-3 text-right text-xs text-[#2D3436]">
-                      {formatRupiah(keuanganData?.total?.subsidi || 0)}
-                    </td>
-                    <td className="py-3 px-3 text-right text-xs text-rose-700 font-black">
-                      {formatRupiah(keuanganData?.total?.pengeluaran || 0)}
-                    </td>
-                    <td className="py-3 px-3 text-right text-xs text-[#1D7A6F] font-black">
-                      {formatRupiah(keuanganData?.total?.saldo || 0)}
-                    </td>
-                    <td className="py-3 px-3 text-center">
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#2A9D8F] text-white">
-                        {keuanganData?.total?.subsidi > 0
-                          ? ((keuanganData.total.pengeluaran / keuanganData.total.subsidi) * 100).toFixed(1)
-                          : 0}%
-                      </span>
-                    </td>
-                  </tr>
+                  {!loading && (
+                    <tr
+                      onClick={() => setSelectedBulan('TOTAL')}
+                      className={`cursor-pointer border-t-2 border-[#2A9D8F] font-bold ${
+                        selectedBulan === 'TOTAL' ? 'bg-[#E8F5F3]' : 'bg-gray-50 hover:bg-[#FFFCF5]'
+                      }`}
+                    >
+                      <td className="py-3 px-3 text-[#1D7A6F]">TOTAL KESELURUHAN</td>
+                      <td className="py-3 px-3 text-right text-xs text-[#2D3436]">
+                        {formatRupiah(keuanganData?.total?.subsidi || 0)}
+                      </td>
+                      <td className="py-3 px-3 text-right text-xs text-rose-700 font-black">
+                        {formatRupiah(keuanganData?.total?.pengeluaran || 0)}
+                      </td>
+                      <td className="py-3 px-3 text-right text-xs text-[#1D7A6F] font-black">
+                        {formatRupiah(keuanganData?.total?.saldo || 0)}
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#2A9D8F] text-white">
+                          {keuanganData?.total?.subsidi > 0
+                            ? ((keuanganData.total.pengeluaran / keuanganData.total.subsidi) * 100).toFixed(1)
+                            : 0}%
+                        </span>
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

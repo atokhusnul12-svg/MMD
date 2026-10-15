@@ -21,7 +21,7 @@ export default function KalenderPage() {
       setData(res);
     } catch (err) {
       console.error(err);
-      setError('Gagal memuat Kalender Kerja dari Google Sheets. Pastikan link spreadsheet telah dipublikasikan sebagai CSV.');
+      setError(err?.message || 'Gagal memuat Kalender Kerja dari Google Sheets.');
     } finally {
       setLoading(false);
     }

@@ -21,7 +21,7 @@ export default function BahsuPage() {
       setData(res);
     } catch (err) {
       console.error(err);
-      setError('Gagal memuat jadwal & delegasi Bahtsul Masail dari Google Sheets. Pastikan sheet DAFTAR PEMBERANGKATAN BAHSU telah dipublikasikan sebagai CSV.');
+      setError(err?.message || 'Gagal memuat jadwal & delegasi Bahtsul Masail dari Google Sheets.');
     } finally {
       setLoading(false);
     }
