@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { formatRupiah } from '@/lib/fetchCSV';
 import { Wallet, PieChart as PieChartIcon, TrendingDown, Info, ArrowUpRight } from 'lucide-react';
 
@@ -188,10 +189,17 @@ export default function KeuanganDonutChart({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <span className="text-xs font-bold text-[#1D7A6F] bg-[#E8F5F3] px-3 py-1 rounded border border-[#C8E3DC]">
             {chartData.length} Periode Terdata
           </span>
+          <Link
+            href="/keuangan"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[#1D7A6F] hover:underline no-print"
+          >
+            <span>Buka Laporan Penuh</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-[#C6A66B]" />
+          </Link>
         </div>
       </div>
 

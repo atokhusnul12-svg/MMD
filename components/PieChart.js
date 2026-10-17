@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 
 // Pemetaan warna dan gaya untuk tiap status perkembangan (Islamic Contemporary Palette)
 export const STATUS_COLORS = {
@@ -80,7 +82,7 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
 
   return (
     <div className="bg-white rounded-xl p-5 sm:p-6 border border-[#DCE5E0] shadow-xs">
-      <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#DCE5E0]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-3 border-b border-[#DCE5E0]">
         <div>
           <h3 className="text-lg font-bold text-[#26332E] font-serif">
             Distribusi Status Perkembangan Anggota
@@ -89,6 +91,14 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
             Proporsi kondisi evaluasi {total} santri Lembaga Bahtsul Masail
           </p>
         </div>
+
+        <Link
+          href="/anggota"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1D7A6F] hover:underline no-print"
+        >
+          <span>Buka Data Anggota Lengkap</span>
+          <ArrowRight className="w-3.5 h-3.5 text-[#C6A66B]" />
+        </Link>
       </div>
 
       <div className="flex flex-col lg:flex-row items-center gap-6 sm:gap-8 justify-around">
@@ -132,10 +142,15 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
           </svg>
 
           {/* Teks di tengah Donut */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+          <Link
+            href="/anggota"
+            className="absolute inset-0 flex flex-col items-center justify-center text-center cursor-pointer group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] rounded-full"
+            title="Klik untuk membuka Halaman Data Anggota LBM"
+            aria-label={`Buka data anggota LBM (${total} santri terdaftar)`}
+          >
             {hoveredIndex !== null ? (
               <>
-                <span className="text-2xl font-black text-[#26332E] font-serif">
+                <span className="text-2xl font-black text-[#26332E] font-serif group-hover:text-[#1D7A6F] transition-colors">
                   {data[hoveredIndex].count}
                 </span>
                 <span className="text-xs font-bold text-[#1D7A6F]">
@@ -147,15 +162,15 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
               </>
             ) : (
               <>
-                <span className="text-3xl font-black text-[#26332E] tracking-tight font-serif">
+                <span className="text-3xl font-black text-[#26332E] tracking-tight font-serif group-hover:text-[#1D7A6F] transition-colors">
                   {total}
                 </span>
-                <span className="text-xs font-semibold text-[#5C6E66]">
+                <span className="text-xs font-semibold text-[#5C6E66] group-hover:underline">
                   Total Anggota
                 </span>
               </>
             )}
-          </div>
+          </Link>
         </div>
 
         {/* Legend / Daftar Keterangan Status */}
@@ -163,22 +178,25 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
           {data.map((item, index) => {
             const isHovered = hoveredIndex === index;
             return (
-              <div
+              <Link
                 key={item.status}
+                href="/anggota"
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
-                className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer border ${
+                className={`flex items-center justify-between p-2.5 rounded-lg transition-all duration-150 cursor-pointer border group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] select-none ${
                   isHovered
-                    ? 'bg-[#F7F5EF] border-[#1D7A6F]/40 shadow-xs'
-                    : 'bg-white border-[#DCE5E0] hover:bg-[#F7F5EF]/60'
+                    ? 'bg-[#F7F5EF] border-[#1D7A6F] shadow-xs'
+                    : 'bg-white border-[#DCE5E0] hover:bg-[#F7F5EF]/80 hover:border-[#1D7A6F]/40'
                 }`}
+                title={`Lihat santri dengan status ${item.status} di Halaman Anggota`}
+                aria-label={`Lihat santri dengan status ${item.status} (${item.count} santri)`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span
                     className="w-3 h-3 rounded-sm shrink-0"
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="text-xs font-semibold text-[#26332E] truncate">
+                  <span className="text-xs font-semibold text-[#26332E] truncate group-hover:text-[#1D7A6F] transition-colors">
                     {item.status}
                   </span>
                 </div>
@@ -190,7 +208,7 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
                     ({item.percentage}%)
                   </span>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

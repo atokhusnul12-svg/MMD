@@ -98,7 +98,7 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
       />
 
       {/* TAB NAVIGASI KEUANGAN */}
-      <div className="no-print overflow-x-auto pb-1">
+      <div id="section-tabel-keuangan" className="no-print overflow-x-auto pb-1 scroll-mt-28">
         <div className="inline-flex p-1 rounded-xl bg-white border border-[#DCE5E0] shadow-xs min-w-max">
           <button
             onClick={() => handleTabChange('KOMPARASI')}
@@ -146,23 +146,73 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
       {/* 3 KARTU RINGKASAN METRIK KEUANGAN */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 card-print">
         
-        <div className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs">
+        {/* Kartu 1: RAB / Total Subsidi */}
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            handleTabChange('RAB');
+            const el = document.getElementById('section-tabel-keuangan');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleTabChange('RAB');
+              const el = document.getElementById('section-tabel-keuangan');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+          className={`bg-white rounded-xl p-5 border shadow-xs transition-all duration-200 cursor-pointer select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
+            activeTab === 'RAB'
+              ? 'border-[#1D7A6F] ring-1 ring-[#1D7A6F] bg-[#E8F5F3]/30'
+              : 'border-[#DCE5E0] hover:border-[#1D7A6F] hover:shadow-xs'
+          }`}
+          title="Klik untuk melihat tabel rincian alokasi anggaran RAB"
+          aria-label={`RAB Total Subsidi ${formatRupiah(total?.subsidi || 0)}. Klik untuk membuka tab RAB.`}
+        >
           <div className="flex items-center justify-between text-xs font-semibold text-[#5C6D66] uppercase tracking-wider">
-            <span>RAB / Total Subsidi</span>
-            <div className="w-8 h-8 rounded-lg bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center">
+            <span className="group-hover:text-[#1D7A6F] transition-colors">RAB / Total Subsidi</span>
+            <div className="w-8 h-8 rounded-lg bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center group-hover:scale-105 transition-transform">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className="text-2xl font-bold font-serif text-[#26332E] mt-2">
             {formatRupiah(total?.subsidi || 0)}
           </div>
-          <p className="text-xs text-[#5C6D66] mt-1">Total alokasi anggaran masuk</p>
+          <p className="text-xs text-[#5C6D66] mt-1">
+            {activeTab === 'RAB' ? 'Tab aktif (klik untuk refresh)' : 'Klik untuk rincian RAB ↓'}
+          </p>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs">
+        {/* Kartu 2: LPJ / Realisasi Belanja */}
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            handleTabChange('LPJ');
+            const el = document.getElementById('section-tabel-keuangan');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleTabChange('LPJ');
+              const el = document.getElementById('section-tabel-keuangan');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+          className={`bg-white rounded-xl p-5 border shadow-xs transition-all duration-200 cursor-pointer select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8A2F1B] ${
+            activeTab === 'LPJ'
+              ? 'border-[#8A2F1B] ring-1 ring-[#8A2F1B] bg-[#FAF0ED]/30'
+              : 'border-[#DCE5E0] hover:border-[#8A2F1B] hover:shadow-xs'
+          }`}
+          title="Klik untuk melihat tabel rincian realisasi pengeluaran LPJ"
+          aria-label={`LPJ Realisasi Belanja ${formatRupiah(total?.pengeluaran || 0)}. Klik untuk membuka tab LPJ.`}
+        >
           <div className="flex items-center justify-between text-xs font-semibold text-[#5C6D66] uppercase tracking-wider">
-            <span>LPJ / Realisasi Belanja</span>
-            <div className="w-8 h-8 rounded-lg bg-[#FAF0ED] text-[#8A2F1B] flex items-center justify-center">
+            <span className="group-hover:text-[#8A2F1B] transition-colors">LPJ / Realisasi Belanja</span>
+            <div className="w-8 h-8 rounded-lg bg-[#FAF0ED] text-[#8A2F1B] flex items-center justify-center group-hover:scale-105 transition-transform">
               <TrendingDown className="w-4 h-4" />
             </div>
           </div>
@@ -170,22 +220,46 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
             {formatRupiah(total?.pengeluaran || 0)}
           </div>
           <p className="text-xs text-[#5C6D66] mt-1">
-            Realisasi: <strong className="text-[#8A2F1B] font-semibold">{persenRealisasiTotal}%</strong> dari RAB
+            Realisasi: <strong className="text-[#8A2F1B] font-semibold">{persenRealisasiTotal}%</strong> (Klik rincian LPJ ↓)
           </p>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border-2 border-[#1D7A6F] shadow-xs relative overflow-hidden">
+        {/* Kartu 3: Saldo (Dikembalikan) */}
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            handleTabChange('KOMPARASI');
+            const el = document.getElementById('section-tabel-keuangan');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleTabChange('KOMPARASI');
+              const el = document.getElementById('section-tabel-keuangan');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+          className={`bg-white rounded-xl p-5 border-2 shadow-xs relative overflow-hidden transition-all duration-200 cursor-pointer select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
+            activeTab === 'KOMPARASI'
+              ? 'border-[#1D7A6F] bg-[#E8F5F3]/20 shadow-sm'
+              : 'border-[#1D7A6F]/60 hover:border-[#1D7A6F] hover:shadow-xs'
+          }`}
+          title="Klik untuk melihat tabel komparasi RAB vs LPJ dan saldo"
+          aria-label={`Saldo Kas ${formatRupiah(total?.saldo || 0)}. Klik untuk membuka tab komparasi.`}
+        >
           <div className="absolute top-0 left-0 right-0 h-1 bg-[#C6A66B]" />
           <div className="flex items-center justify-between text-xs font-bold text-[#1D7A6F] uppercase tracking-wider">
             <span>Saldo (Dikembalikan)</span>
-            <div className="w-8 h-8 rounded-lg bg-[#1D7A6F] text-[#C6A66B] flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-lg bg-[#1D7A6F] text-[#C6A66B] flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
               <Wallet className="w-4 h-4" />
             </div>
           </div>
           <div className="text-2xl font-bold font-serif text-[#1D7A6F] mt-2">
             {formatRupiah(total?.saldo || 0)}
           </div>
-          <p className="text-xs text-[#5C6E66] mt-1">Sisa dana disetor kembali ke kas pusat pondok</p>
+          <p className="text-xs text-[#5C6E66] mt-1">Sisa dana disetor ke kas pusat (Klik komparasi ↓)</p>
         </div>
 
       </div>

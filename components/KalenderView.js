@@ -121,57 +121,118 @@ export default function KalenderView({
       {/* 3 KARTU STATISTIK ATAS */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         
-        <div className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs flex items-center justify-between">
+        {/* Kartu 1: Total Kegiatan (Reset Filter & Tampilkan Semua) */}
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            setSelectedKordinator('');
+            setShowAllBulan(true);
+            const el = document.getElementById('section-kalender-agenda');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setSelectedKordinator('');
+              setShowAllBulan(true);
+              const el = document.getElementById('section-kalender-agenda');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+          className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs flex items-center justify-between cursor-pointer hover:border-[#1D7A6F] hover:shadow-xs transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F]"
+          title="Klik untuk melihat seluruh agenda kegiatan madrasah"
+          aria-label={`Total ${totalKegiatan} Agenda Kegiatan. Klik untuk melihat daftar lengkap.`}
+        >
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66]">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66] group-hover:text-[#1D7A6F] transition-colors">
               Total Kegiatan MMD
             </span>
             <div className="text-2xl sm:text-3xl font-black text-[#26332E] mt-1 font-serif">
               {totalKegiatan} Agenda
             </div>
-            <p className="text-xs text-[#5C6E66] mt-0.5">Tercatat dalam 1 tahun ajaran</p>
+            <p className="text-xs text-[#5C6E66] mt-0.5">Tercatat dalam 1 tahun ajaran (Klik detail ↓)</p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#F7F5EF] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0]">
+          <div className="w-11 h-11 rounded-lg bg-[#F7F5EF] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0] group-hover:scale-105 transition-transform">
             <CalendarIcon className="w-5 h-5" />
           </div>
         </div>
 
+        {/* Kartu 2: Filter Agenda Khusus WAKA III */}
         <div
-          onClick={() => setSelectedKordinator(selectedKordinator === 'WAKA_III' ? '' : 'WAKA_III')}
-          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-colors ${
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            setSelectedKordinator(selectedKordinator === 'WAKA_III' ? '' : 'WAKA_III');
+            const el = document.getElementById('section-kalender-agenda');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setSelectedKordinator(selectedKordinator === 'WAKA_III' ? '' : 'WAKA_III');
+              const el = document.getElementById('section-kalender-agenda');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
             selectedKordinator === 'WAKA_III'
               ? 'bg-[#E8F5F3] border-[#C8E3DC] ring-1 ring-[#1D7A6F]'
-              : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F]'
+              : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F] hover:shadow-xs'
           }`}
+          title="Klik untuk memfilter agenda khusus WAKA III"
+          aria-label={`${totalWaka3} Kegiatan khusus WAKA III. Klik untuk filter.`}
         >
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#1D7A6F]">
                 Agenda Khusus WAKA III
               </span>
-              <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#1D7A6F] text-white font-bold">Filter</span>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#1D7A6F] text-white font-bold">
+                {selectedKordinator === 'WAKA_III' ? 'Aktif' : 'Filter'}
+              </span>
             </div>
             <div className="text-2xl sm:text-3xl font-black text-[#1D7A6F] mt-1 font-serif">
               {totalWaka3} Kegiatan
             </div>
             <p className="text-xs text-[#1D7A6F]/80 mt-0.5">LBM, Bahtsu Santri, Ubudiyah, dll</p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#1D7A6F] text-[#C6A66B] flex items-center justify-center shrink-0 border border-[#C6A66B]/30 shadow-xs">
+          <div className="w-11 h-11 rounded-lg bg-[#1D7A6F] text-[#C6A66B] flex items-center justify-center shrink-0 border border-[#C6A66B]/30 shadow-xs group-hover:scale-105 transition-transform">
             <Sparkles className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs flex items-center justify-between">
+        {/* Kartu 3: Rentang Periode (Buka Tampilan Semua Bulan) */}
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            setShowAllBulan(true);
+            const el = document.getElementById('section-kalender-agenda');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setShowAllBulan(true);
+              const el = document.getElementById('section-kalender-agenda');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+          className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs flex items-center justify-between cursor-pointer hover:border-[#8C6D23] hover:shadow-xs transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8C6D23]"
+          title="Klik untuk membuka kalender seluruh rentang periode"
+          aria-label={`Rentang Periode ${bulanList.length} Bulan. Klik untuk melihat daftar bulan.`}
+        >
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66]">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66] group-hover:text-[#8C6D23] transition-colors">
               Rentang Periode
             </span>
             <div className="text-2xl sm:text-3xl font-black text-[#8C6D23] mt-1 font-serif">
               {bulanList.length} Bulan
             </div>
-            <p className="text-xs text-[#5C6E66] mt-0.5">Mulai Syawwal hingga Sya&apos;ban</p>
+            <p className="text-xs text-[#5C6E66] mt-0.5">Mulai Syawwal hingga Sya&apos;ban (Lihat ↓)</p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#FAF3E6] text-[#8C6D23] flex items-center justify-center shrink-0 border border-[#E8D5A7]">
+          <div className="w-11 h-11 rounded-lg bg-[#FAF3E6] text-[#8C6D23] flex items-center justify-center shrink-0 border border-[#E8D5A7] group-hover:scale-105 transition-transform">
             <Layers className="w-5 h-5" />
           </div>
         </div>
@@ -179,7 +240,7 @@ export default function KalenderView({
       </div>
 
       {/* CONTAINER UTAMA KALENDER */}
-      <div className="bg-white rounded-xl shadow-xs border border-[#DCE5E0] overflow-hidden">
+      <div id="section-kalender-agenda" className="bg-white rounded-xl shadow-xs border border-[#DCE5E0] overflow-hidden scroll-mt-28">
         
 
         {/* TAB PILIHAN BULAN (Horizontal Scrollable) */}

@@ -362,6 +362,15 @@ export default function DashboardPage() {
     return future.slice(0, 4);
   }, [kalenderData]);
 
+  // Handler auto-scroll halus ke bagian konten dengan sticky header offset
+  const scrollToSection = (id) => {
+    if (typeof window === 'undefined') return;
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div className="space-y-7">
       
@@ -496,9 +505,12 @@ export default function DashboardPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {upcomingActivities.map((act, index) => (
-              <div
+              <Link
                 key={index}
-                className="p-4 rounded-lg bg-[#F7F5EF]/60 border border-[#DCE5E0] flex flex-col justify-between hover:bg-white hover:border-[#1D7A6F]/40 transition-colors shadow-xs"
+                href="/kalender"
+                className="p-4 rounded-lg bg-[#F7F5EF]/60 border border-[#DCE5E0] flex flex-col justify-between hover:bg-white hover:border-[#1D7A6F] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all duration-200 shadow-xs cursor-pointer group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] select-none"
+                title={`Buka agenda "${act.kegiatan}" di Kalender Kerja`}
+                aria-label={`Buka agenda ${act.kegiatan} pada halaman Kalender Kerja`}
               >
                 <div>
                   <div className="flex items-center justify-between text-xs text-[#5C6E66] mb-2 gap-2">
@@ -523,18 +535,18 @@ export default function DashboardPage() {
                     {act.tanggalLengkap || `${act.hari}, ${act.tglM} M / ${act.tglH} H`}
                   </div>
 
-                  <h4 className="font-bold text-xs sm:text-sm text-[#26332E] line-clamp-2 leading-snug">
+                  <h4 className="font-bold text-xs sm:text-sm text-[#26332E] line-clamp-2 leading-snug group-hover:text-[#1D7A6F] transition-colors">
                     {act.kegiatan}
                   </h4>
                 </div>
 
                 <div className="mt-4 pt-2.5 border-t border-[#DCE5E0] flex items-center justify-between text-[11px]">
                   <span className="text-[#5C6E66]">Koordinator:</span>
-                  <span className="font-semibold text-[#1D7A6F] bg-white px-2 py-0.5 rounded border border-[#DCE5E0]">
+                  <span className="font-semibold text-[#1D7A6F] bg-white px-2 py-0.5 rounded border border-[#DCE5E0] group-hover:border-[#1D7A6F]/40 transition-colors">
                     {act.kordinator}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
@@ -620,6 +632,10 @@ export default function DashboardPage() {
           badgeText="Subsidi Masuk"
           badgeColor="bg-[#E8F5F3] text-[#1D7A6F] border-[#C8E3DC]"
           isLoading={loading}
+          onClick={() => scrollToSection('section-rekap-keuangan')}
+          actionHint="Lihat Rekap ↓"
+          titleTooltip="Klik untuk menggulir ke Rekapitulasi Anggaran Bulanan"
+          ariaLabel="Gulir ke tabel Rekapitulasi Anggaran Bulanan"
         />
 
         {/* Kartu 2: LPJ (Pengeluaran Realisasi) */}
@@ -633,6 +649,10 @@ export default function DashboardPage() {
           badgeText="Pengeluaran"
           badgeColor="bg-[#FAF0ED] text-[#8A2F1B] border-[#E8BCB0]"
           isLoading={loading}
+          onClick={() => scrollToSection('section-chart-keuangan')}
+          actionHint="Lihat Diagram ↓"
+          titleTooltip="Klik untuk menggulir ke Visualisasi Diagram Realisasi LPJ"
+          ariaLabel="Gulir ke diagram proporsi realisasi pengeluaran LPJ"
         />
 
         {/* Kartu 3: Saldo Kas (Selaras dengan Halaman /keuangan) */}
@@ -646,6 +666,10 @@ export default function DashboardPage() {
           badgeText="Sisa Saldo"
           badgeColor="bg-[#FAF3E6] text-[#8C6D23] border-[#E8D5A7]"
           isLoading={loading}
+          onClick={() => scrollToSection('section-rekap-keuangan')}
+          actionHint="Lihat Rekap ↓"
+          titleTooltip="Klik untuk menggulir ke Rekapitulasi Saldo Kas Bulanan"
+          ariaLabel="Gulir ke rincian sisa saldo kas bulanan"
         />
 
       </div>
@@ -653,7 +677,7 @@ export default function DashboardPage() {
       {/* ============================================================== */}
       {/* 4.B VISUALISASI DIAGRAM BULAT PENGELUARAN KEUANGAN (LPJ)       */}
       {/* ============================================================== */}
-      <div className="print-avoid-break">
+      <div id="section-chart-keuangan" className="print-avoid-break scroll-mt-28">
         <KeuanganDonutChart
           rekapitulasi={keuanganData?.rekapitulasi || []}
           totalPengeluaran={keuanganData?.total?.pengeluaran || 0}
@@ -675,6 +699,10 @@ export default function DashboardPage() {
           badgeText="LBM MMD"
           badgeColor="bg-[#E8F5F3] text-[#1D7A6F] border-[#C8E3DC]"
           isLoading={loading}
+          href="/anggota"
+          actionHint="Buka Data →"
+          titleTooltip="Klik untuk membuka Halaman Data Anggota LBM"
+          ariaLabel="Buka halaman Data Anggota LBM"
         />
 
         {/* Kartu 5: Agenda Bahtsul Masail (Selaras dengan Halaman /bahsu) */}
@@ -688,6 +716,10 @@ export default function DashboardPage() {
           badgeText="Agenda 2026"
           badgeColor="bg-[#FAF3E6] text-[#8C6D23] border-[#E8D5A7]"
           isLoading={loading}
+          href="/bahsu"
+          actionHint="Buka Jadwal →"
+          titleTooltip="Klik untuk membuka Halaman Jadwal & Delegasi Bahtsul Masail"
+          ariaLabel="Buka halaman Pemberangkatan Bahtsul Masail"
         />
 
         {/* Kartu 6: Agenda Kalender Kerja (Selaras dengan Halaman /kalender) */}
@@ -701,6 +733,10 @@ export default function DashboardPage() {
           badgeText="1 Tahun Ajaran"
           badgeColor="bg-[#EDF3F7] text-[#224A63] border-[#B9D1E0]"
           isLoading={loading}
+          href="/kalender"
+          actionHint="Buka Kalender →"
+          titleTooltip="Klik untuk membuka Halaman Kalender Kerja MMD"
+          ariaLabel="Buka halaman Kalender Kerja MMD"
         />
 
       </div>
@@ -733,7 +769,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
         
         {/* Kolom Kiri (6 Kolom): Rekapitulasi Anggaran Bulanan (Termasuk Saldo Kas) */}
-        <div className="lg:col-span-6 bg-white rounded-xl p-5 sm:p-6 border border-[#DCE5E0] shadow-xs flex flex-col justify-between print-avoid-break">
+        <div id="section-rekap-keuangan" className="lg:col-span-6 bg-white rounded-xl p-5 sm:p-6 border border-[#DCE5E0] shadow-xs flex flex-col justify-between print-avoid-break scroll-mt-28">
           <div>
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#DCE5E0]">
               <div>
@@ -907,9 +943,12 @@ export default function DashboardPage() {
             <div className="space-y-2.5">
               {displayedBahsuEvents.length > 0 ? (
                 displayedBahsuEvents.slice(0, 5).map((item, idx) => (
-                  <div
+                  <Link
                     key={item.id || idx}
-                    className="p-3 rounded-lg bg-white border border-[#DCE5E0] flex items-start justify-between gap-3 hover:bg-[#F7F5EF]/60 hover:border-[#1D7A6F]/30 transition-colors"
+                    href="/bahsu"
+                    className="p-3 rounded-lg bg-white border border-[#DCE5E0] flex items-start justify-between gap-3 hover:bg-[#F7F5EF]/80 hover:border-[#1D7A6F] hover:shadow-xs transition-all duration-150 cursor-pointer group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] select-none"
+                    title={`Buka detail agenda forum "${item.acara}" di Halaman Bahtsul Masail`}
+                    aria-label={`Buka detail agenda forum ${item.acara}`}
                   >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 mb-1">
@@ -921,7 +960,7 @@ export default function DashboardPage() {
                           {item.tanggal}
                         </span>
                       </div>
-                      <h4 className="text-xs font-bold text-[#26332E] line-clamp-1">
+                      <h4 className="text-xs font-bold text-[#26332E] line-clamp-1 group-hover:text-[#1D7A6F] transition-colors">
                         {item.acara}
                       </h4>
                       {item.delegasi && item.delegasi.length > 0 && (
@@ -951,7 +990,7 @@ export default function DashboardPage() {
                         </span>
                       )}
                     </div>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <div className="p-8 text-center text-[#5C6E66] text-xs">

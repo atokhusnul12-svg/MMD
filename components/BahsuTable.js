@@ -108,28 +108,71 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
       {/* 4 Kartu Ringkasan Atas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 no-print">
         
-        <div className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs flex items-center justify-between">
+        {/* Kartu 1: Total Forum (Reset Filter ke ALL) */}
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            setFilterStatus('ALL');
+            const el = document.getElementById('table-bahsu-agenda');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setFilterStatus('ALL');
+              const el = document.getElementById('table-bahsu-agenda');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
+            filterStatus === 'ALL'
+              ? 'bg-[#E8F5F3] border-[#C8E3DC] ring-1 ring-[#1D7A6F]'
+              : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F] hover:shadow-xs'
+          }`}
+          title="Klik untuk menampilkan semua agenda forum Bahtsul Masail"
+          aria-label={`Total ${events.length} Forum Bahsu. Klik untuk menampilkan semua agenda.`}
+        >
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66]">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66] group-hover:text-[#1D7A6F] transition-colors">
               Total Forum Bahsu
             </span>
             <div className="text-2xl font-black text-[#26332E] mt-1 font-serif">
               {events.length} Agenda
             </div>
-            <p className="text-xs text-[#5C6E66] mt-0.5">Sepanjang tahun 2026</p>
+            <p className="text-xs text-[#5C6E66] mt-0.5">
+              {filterStatus === 'ALL' ? 'Menampilkan semua' : 'Klik untuk tampilkan semua'}
+            </p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#F7F5EF] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0]">
+          <div className="w-11 h-11 rounded-lg bg-[#F7F5EF] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0] group-hover:scale-105 transition-transform">
             <BookOpen className="w-5 h-5" />
           </div>
         </div>
 
+        {/* Kartu 2: Filter Belum Berangkat */}
         <div
-          onClick={() => setFilterStatus(filterStatus === 'BELUM' ? 'ALL' : 'BELUM')}
-          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-colors ${
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            setFilterStatus(filterStatus === 'BELUM' ? 'ALL' : 'BELUM');
+            const el = document.getElementById('table-bahsu-agenda');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setFilterStatus(filterStatus === 'BELUM' ? 'ALL' : 'BELUM');
+              const el = document.getElementById('table-bahsu-agenda');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#C6A66B] ${
             filterStatus === 'BELUM'
               ? 'bg-[#FAF3E6] border-[#E8D5A7] ring-1 ring-[#C6A66B]'
-              : 'bg-white border-[#DCE5E0] hover:border-[#C6A66B]'
+              : 'bg-white border-[#DCE5E0] hover:border-[#C6A66B] hover:shadow-xs'
           }`}
+          title="Klik untuk memfilter agenda yang belum berangkat"
+          aria-label={`${totalBelumBerangkat} forum belum berangkat. Klik untuk filter.`}
         >
           <div>
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#8C6D23]">
@@ -138,20 +181,39 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
             <div className="text-2xl font-black text-[#8C6D23] mt-1 font-serif">
               {totalBelumBerangkat} Forum
             </div>
-            <p className="text-xs text-[#8C6D23]/80 mt-0.5">Klik untuk filter</p>
+            <p className="text-xs text-[#8C6D23]/80 mt-0.5">
+              {filterStatus === 'BELUM' ? 'Filter aktif' : 'Klik untuk filter'}
+            </p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#FAF3E6] text-[#8C6D23] flex items-center justify-center shrink-0 border border-[#E8D5A7]">
+          <div className="w-11 h-11 rounded-lg bg-[#FAF3E6] text-[#8C6D23] flex items-center justify-center shrink-0 border border-[#E8D5A7] group-hover:scale-105 transition-transform">
             <Hourglass className="w-5 h-5" />
           </div>
         </div>
 
+        {/* Kartu 3: Filter Sudah Berangkat */}
         <div
-          onClick={() => setFilterStatus(filterStatus === 'SUDAH' ? 'ALL' : 'SUDAH')}
-          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-colors ${
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            setFilterStatus(filterStatus === 'SUDAH' ? 'ALL' : 'SUDAH');
+            const el = document.getElementById('table-bahsu-agenda');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setFilterStatus(filterStatus === 'SUDAH' ? 'ALL' : 'SUDAH');
+              const el = document.getElementById('table-bahsu-agenda');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
             filterStatus === 'SUDAH'
               ? 'bg-[#E8F5F3] border-[#C8E3DC] ring-1 ring-[#1D7A6F]'
-              : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F]'
+              : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F] hover:shadow-xs'
           }`}
+          title="Klik untuk memfilter agenda yang sudah berangkat"
+          aria-label={`${totalSudahBerangkat} forum sudah berangkat. Klik untuk filter.`}
         >
           <div>
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#1D7A6F]">
@@ -160,20 +222,39 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
             <div className="text-2xl font-black text-[#1D7A6F] mt-1 font-serif">
               {totalSudahBerangkat} Forum
             </div>
-            <p className="text-xs text-[#1D7A6F]/80 mt-0.5">Klik untuk filter</p>
+            <p className="text-xs text-[#1D7A6F]/80 mt-0.5">
+              {filterStatus === 'SUDAH' ? 'Filter aktif' : 'Klik untuk filter'}
+            </p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#C8E3DC]">
+          <div className="w-11 h-11 rounded-lg bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#C8E3DC] group-hover:scale-105 transition-transform">
             <CheckCircle2 className="w-5 h-5" />
           </div>
         </div>
 
+        {/* Kartu 4: Filter Izin / Batal */}
         <div
-          onClick={() => setFilterStatus(filterStatus === 'IZIN' ? 'ALL' : 'IZIN')}
-          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-colors ${
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            setFilterStatus(filterStatus === 'IZIN' ? 'ALL' : 'IZIN');
+            const el = document.getElementById('table-bahsu-agenda');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setFilterStatus(filterStatus === 'IZIN' ? 'ALL' : 'IZIN');
+              const el = document.getElementById('table-bahsu-agenda');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#A8382B] ${
             filterStatus === 'IZIN'
               ? 'bg-[#FAF0ED] border-[#E8BCB0] ring-1 ring-[#A8382B]'
-              : 'bg-white border-[#DCE5E0] hover:border-[#A8382B]'
+              : 'bg-white border-[#DCE5E0] hover:border-[#A8382B] hover:shadow-xs'
           }`}
+          title="Klik untuk memfilter agenda yang izin / batal"
+          aria-label={`${totalIzin} forum izin / batal. Klik untuk filter.`}
         >
           <div>
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#8A2F1B]">
@@ -182,9 +263,11 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
             <div className="text-2xl font-black text-[#8A2F1B] mt-1 font-serif">
               {totalIzin} Forum
             </div>
-            <p className="text-xs text-[#8A2F1B]/80 mt-0.5">Surat mepet / ujian</p>
+            <p className="text-xs text-[#8A2F1B]/80 mt-0.5">
+              {filterStatus === 'IZIN' ? 'Filter aktif' : 'Surat mepet / ujian'}
+            </p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#FAF0ED] text-[#8A2F1B] flex items-center justify-center shrink-0 border border-[#E8BCB0]">
+          <div className="w-11 h-11 rounded-lg bg-[#FAF0ED] text-[#8A2F1B] flex items-center justify-center shrink-0 border border-[#E8BCB0] group-hover:scale-105 transition-transform">
             <XCircle className="w-5 h-5" />
           </div>
         </div>
@@ -192,7 +275,7 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
       </div>
 
       {/* Kontainer Utama Tabel / List */}
-      <div className="bg-white rounded-xl shadow-xs border border-[#DCE5E0] overflow-hidden card-print">
+      <div id="table-bahsu-agenda" className="bg-white rounded-xl shadow-xs border border-[#DCE5E0] overflow-hidden card-print scroll-mt-28">
         {/* Baris Pencarian & Filter Status */}
         <div className="p-4 sm:p-5 bg-white border-b border-[#DCE5E0] space-y-3 no-print">
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
