@@ -1,17 +1,6 @@
 import { NextResponse } from 'next/server';
 import { DATA_LINKS } from '@/lib/dataLinks';
 
-// Whitelist kolom biodata yang diizinkan untuk diedit
-const ALLOWED_BIODATA_FIELDS = [
-  'nama',
-  'kelas',
-  'perkembangan',
-  'ttl',
-  'alamat',
-  'domisili',
-  'ayahIbu',
-];
-
 const ACTIVE_APPS_SCRIPT_URL =
   'https://script.google.com/macros/s/AKfycbz71opCqhjCVNsjH5VbRo4qrpUKd701Ap-6sIEkmkwCME_f7FGMTCWQoRKmBgZLynxL0w/exec';
 
@@ -280,57 +269,15 @@ export async function POST(request) {
         },
       };
     } else {
-      // Aksi 2: Pembaruan Biodata Anggota
-      if (!id || typeof id !== 'string' || id.trim().length === 0) {
-        return NextResponse.json(
-          { success: false, error: 'Parameter ID anggota unik wajib disertakan.' },
-          { status: 400 }
-        );
-      }
-
-      const trimmedId = id.trim().toUpperCase();
-
-      if (!/^[A-Z0-9_\-]+$/.test(trimmedId)) {
-        return NextResponse.json(
-          { success: false, error: 'Format ID anggota tidak valid.' },
-          { status: 400 }
-        );
-      }
-
-      if (!changes || typeof changes !== 'object' || Array.isArray(changes) || Object.keys(changes).length === 0) {
-        return NextResponse.json(
-          { success: false, error: 'Objek changes berisi perubahan biodata wajib disertakan.' },
-          { status: 400 }
-        );
-      }
-
-      const sanitizedChanges = {};
-      for (const key of Object.keys(changes)) {
-        if (ALLOWED_BIODATA_FIELDS.includes(key)) {
-          const val = changes[key];
-          if (typeof val === 'string') {
-            sanitizedChanges[key] = val.trim().slice(0, 500);
-          } else if (val !== null && val !== undefined) {
-            sanitizedChanges[key] = String(val).trim().slice(0, 500);
-          }
-        }
-      }
-
-      if (Object.keys(sanitizedChanges).length === 0) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Tidak ada kolom yang diizinkan untuk diedit dalam permintaan ini.',
-          },
-          { status: 400 }
-        );
-      }
-
-      appsScriptPayload = {
-        id: trimmedId,
-        changes: sanitizedChanges,
-        token: secretToken,
-      };
+      // Fitur pengeditan biodata santri dinonaktifkan secara permanen
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Fitur pengeditan biodata santri dinonaktifkan. Data biodata santri pada Google Sheets bersifat tetap (read-only) dan tidak dapat diubah melalui website.',
+        },
+        { status: 403 }
+      );
     }
 
     let appsScriptRes;

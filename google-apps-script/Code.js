@@ -107,8 +107,8 @@ function doPost(e) {
       return handleSyncBahsuEvent(ss, payload);
     }
 
-    // Default action: Pembaruan Biodata Anggota
-    return handleUpdateBiodata(ss, payload);
+    // Penolakan Pembaruan Biodata Santri (Sesuai Kebijakan Data Bersifat Read-Only)
+    return createJsonResponse(false, "Fitur pengeditan biodata santri dinonaktifkan. Data biodata santri pada tab PERKEMBANGAN bersifat tetap (read-only) dan tidak dapat diubah melalui API.", 403);
 
   } catch (err) {
     return createJsonResponse(false, "Terjadi kesalahan sistem saat memproses permintaan: " + err.message, 500);

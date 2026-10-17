@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Award,
-  Edit3,
 } from 'lucide-react';
 import { STATUS_COLORS } from './PieChart';
 
@@ -77,7 +76,7 @@ const itemVariants = {
   },
 };
 
-export default function AnggotaDetailModal({ anggota, onClose, onEdit }) {
+export default function AnggotaDetailModal({ anggota, onClose }) {
   // Tutup modal jika tombol Escape ditekan & kunci scroll halaman
   useEffect(() => {
     if (!anggota) return;
@@ -361,17 +360,6 @@ export default function AnggotaDetailModal({ anggota, onClose, onEdit }) {
               Data terhubung langsung ke Google Sheets WAKA III
             </span>
             <div className="flex items-center gap-2">
-              {onEdit && (
-                <button
-                  type="button"
-                  onClick={() => onEdit(anggota)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#C8E3DC] text-[#1D7A6F] hover:bg-[#E8F5F3] text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
-                  title="Edit data anggota ini di Google Sheets"
-                >
-                  <Edit3 className="w-3.5 h-3.5" />
-                  <span>Edit Biodata</span>
-                </button>
-              )}
               <button
                 type="button"
                 onClick={onClose}
