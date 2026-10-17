@@ -76,6 +76,9 @@ export async function GET(request) {
 
         // Kasus 1: Mengembalikan HTML login karena akses belum disetel 'Anyone'
         if (text.includes('<!DOCTYPE') || text.includes('<html') || text.includes('accounts.google.com') || contentType.includes('text/html')) {
+          const titleMatch = text.match(/<title>(.*?)<\/title>/i);
+          checks.pageTitle = titleMatch ? titleMatch[1] : '';
+          checks.textSnippet = text.slice(0, 150).replace(/\s+/g, ' ');
           checks.statusMessage = 'Google Apps Script merespons dengan halaman login. Pada editor Apps Script, pastikan saat Deploy Web App, pilihan "Who has access" disetel ke "Anyone" (Siapa saja). Jika Anda membuat New Deployment, pastikan URL /exec yang baru sudah disalin dan di-redeploy di Vercel.';
           return NextResponse.json({ success: false, checks });
         }
