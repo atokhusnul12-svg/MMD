@@ -63,17 +63,33 @@ export async function GET(request) {
 
         if (testRes.ok) {
           checks.scriptReachable = true;
-          const json = await testRes.json().catch(() => null);
+          const text = await testRes.text();
+          let json = null;
+          try {
+            json = JSON.parse(text);
+          } catch {}
+
+          // Kasus 1: Mengembalikan HTML login karena akses belum disetel 'Anyone'
+          if (text.includes('<!DOCTYPE') || text.includes('<html') || text.includes('accounts.google.com')) {
+            checks.statusMessage = 'Google Apps Script merespons dengan halaman login. Pada editor Apps Script, pastikan saat Deploy Web App, pilihan "Who has access" disetel ke "Anyone" (Siapa saja).';
+            return NextResponse.json({ success: false, checks });
+          }
+
+          // Kasus 2: Berhasil mengembalikan JSON dari doGet
           if (json && json.status === 'online') {
             checks.scriptTokenConfigured = Boolean(json.configured);
             if (checks.scriptTokenConfigured) {
-              checks.statusMessage = 'Koneksi sempurna! Google Apps Script siap menerima pembaruan data secara aman.';
+              checks.statusMessage = 'Koneksi sempurna! Google Apps Script dan token keamanan telah terverifikasi dan siap digunakan.';
               return NextResponse.json({ success: true, checks });
             } else {
-              checks.statusMessage = 'Web App Google Sheets aktif, namun Properti Skrip (SHEETS_API_SECRET_TOKEN) belum disetel di Google Apps Script.';
+              checks.statusMessage = 'Web App Google Sheets aktif, namun Script Property "SHEETS_API_SECRET_TOKEN" belum disetel pada Project Settings Google Apps Script.';
               return NextResponse.json({ success: false, checks });
             }
           }
+
+          // Kasus 3: Deployment masih menggunakan kode versi lama sebelum doGet diperbarui
+          checks.statusMessage = 'Web App Google Sheets terhubung, tetapi masih menjalankan kode versi lama. Silakan buka editor Apps Script, lalu klik Deploy > Manage deployments > Edit > New version > Deploy.';
+          return NextResponse.json({ success: false, checks });
         }
         checks.statusMessage = `Google Apps Script merespons dengan HTTP ${testRes.status}. Pastikan deployment disetel ke 'Anyone'.`;
         return NextResponse.json({ success: false, checks });
