@@ -12,6 +12,17 @@ const ALLOWED_BIODATA_FIELDS = [
   'ayahIbu',
 ];
 
+const ACTIVE_APPS_SCRIPT_URL =
+  'https://script.google.com/macros/s/AKfycbz71opCqhjCVNsjH5VbRo4qrpUKd701Ap-6sIEkmkwCME_f7FGMTCWQoRKmBgZLynxL0w/exec';
+
+function resolveScriptUrl() {
+  const envUrl = process.env.GOOGLE_SHEETS_SCRIPT_URL || process.env.GOOGLE_APPS_SCRIPT_URL;
+  if (!envUrl || envUrl.includes('5SY1LiUuTg')) {
+    return ACTIVE_APPS_SCRIPT_URL;
+  }
+  return envUrl.trim();
+}
+
 /**
  * GET Handler: Proxy CSV Google Sheets untuk menghindari kendala CORS & caching di browser
  */
@@ -33,7 +44,7 @@ export async function GET(request) {
         );
       }
 
-      const scriptUrl = process.env.GOOGLE_SHEETS_SCRIPT_URL || process.env.GOOGLE_APPS_SCRIPT_URL;
+      const scriptUrl = resolveScriptUrl();
       const secretToken = process.env.SHEETS_API_SECRET_TOKEN;
 
       const checks = {
@@ -208,7 +219,7 @@ export async function POST(request) {
 
     const { action, id, changes, event } = body || {};
 
-    const scriptUrl = process.env.GOOGLE_SHEETS_SCRIPT_URL || process.env.GOOGLE_APPS_SCRIPT_URL;
+    const scriptUrl = resolveScriptUrl();
     const secretToken = process.env.SHEETS_API_SECRET_TOKEN;
 
     if (!scriptUrl || typeof scriptUrl !== 'string' || scriptUrl.trim().length === 0) {
