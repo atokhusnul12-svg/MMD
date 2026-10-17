@@ -376,7 +376,7 @@ export default function DashboardPage() {
       {/* ============================================================== */}
       {/* 1. BANNER SAMBUTAN, STATUS LIVE REAL-TIME & SINKRONISASI         */}
       {/* ============================================================== */}
-      <div className="bg-white rounded-xl p-6 sm:p-7 border border-[#DCE5E0] shadow-xs relative overflow-hidden no-print">
+      <div className="bg-white rounded-xl p-5 sm:p-7 border border-[#DCE5E0] shadow-xs relative overflow-hidden no-print">
         {/* Garis aksen emas di bagian atas */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1D7A6F] via-[#C6A66B] to-[#1D7A6F]" />
 
@@ -394,12 +394,12 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-2.5">
             {/* Tombol Cetak Laporan */}
             <button
               onClick={handlePrint}
               disabled={loading || isRefreshing}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-[#DCE5E0] bg-white text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F] text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-[#DCE5E0] bg-white text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F] text-xs sm:text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
               title="Cetak Laporan Eksekutif Dashboard atau Simpan sebagai PDF"
             >
               <Printer className="w-4 h-4 text-[#1D7A6F]" />
@@ -408,7 +408,7 @@ export default function DashboardPage() {
             <button
               onClick={() => loadData(true)}
               disabled={loading || isRefreshing}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-[#DCE5E0] bg-white text-[#1D7A6F] hover:bg-[#F7F5EF] text-sm font-semibold transition-colors duration-150 disabled:opacity-50 shadow-xs cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-[#DCE5E0] bg-white text-[#1D7A6F] hover:bg-[#F7F5EF] text-xs sm:text-sm font-semibold transition-colors duration-150 disabled:opacity-50 shadow-xs cursor-pointer"
               title="Perbarui data langsung dari Google Sheets sekarang"
             >
               <RefreshCw className={`w-4 h-4 text-[#1D7A6F] ${loading || isRefreshing ? 'animate-spin' : ''}`} />
@@ -458,7 +458,7 @@ export default function DashboardPage() {
       {/* ============================================================== */}
       {/* 3. HIGHLIGHT KALENDER KERJA MMD (AGENDA TERDEKAT DARI HARI INI) */}
       {/* ============================================================== */}
-      <div className="bg-white rounded-xl p-6 sm:p-7 border border-[#DCE5E0] shadow-xs print-avoid-break">
+      <div className="bg-white rounded-xl p-5 sm:p-7 border border-[#DCE5E0] shadow-xs print-avoid-break">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#DCE5E0]">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#E8F5F3] text-[#1D7A6F] text-[11px] font-bold border border-[#C8E3DC] mb-1.5">
@@ -730,10 +730,10 @@ export default function DashboardPage() {
       {/* ============================================================== */}
       {/* 6. DUA KOLOM: REKAP KEUANGAN & FORUM BAHTSUL MASAIL            */}
       {/* ============================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
         
         {/* Kolom Kiri (6 Kolom): Rekapitulasi Anggaran Bulanan (Termasuk Saldo Kas) */}
-        <div className="lg:col-span-6 bg-white rounded-xl p-6 border border-[#DCE5E0] shadow-xs flex flex-col justify-between print-avoid-break">
+        <div className="lg:col-span-6 bg-white rounded-xl p-5 sm:p-6 border border-[#DCE5E0] shadow-xs flex flex-col justify-between print-avoid-break">
           <div>
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#DCE5E0]">
               <div>
@@ -856,7 +856,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Kolom Kanan (6 Kolom): AGENDA BAHTSUL MASAIL DENGAN TAB FILTER */}
-        <div className="lg:col-span-6 bg-white rounded-xl p-6 border border-[#DCE5E0] shadow-xs flex flex-col justify-between print-avoid-break">
+        <div className="lg:col-span-6 bg-white rounded-xl p-5 sm:p-6 border border-[#DCE5E0] shadow-xs flex flex-col justify-between print-avoid-break">
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[#DCE5E0]">
               <div>

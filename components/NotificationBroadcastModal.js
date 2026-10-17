@@ -130,8 +130,8 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-[#DCE5E0] relative overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white rounded-xl sm:rounded-2xl max-w-xl w-full p-5 sm:p-7 shadow-2xl border border-[#DCE5E0] relative overflow-hidden flex flex-col max-h-[92vh]">
         
         {/* Header Modal */}
         <div className="flex items-start justify-between pb-4 border-b border-[#DCE5E0]">
@@ -169,7 +169,7 @@ export default function NotificationBroadcastModal({ isOpen, onClose }) {
             <label className="block text-xs font-bold text-[#5C6D66] mb-2 uppercase tracking-wider">
               Pilih Template Notifikasi:
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {templates.map((tpl) => {
                 const Icon = tpl.icon;
                 const isSelected = notificationType === tpl.id;

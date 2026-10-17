@@ -106,7 +106,7 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
       />
 
       {/* 4 Kartu Ringkasan Atas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 no-print">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 no-print">
         
         <div className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs flex items-center justify-between">
           <div>
@@ -193,8 +193,6 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
 
       {/* Kontainer Utama Tabel / List */}
       <div className="bg-white rounded-xl shadow-xs border border-[#DCE5E0] overflow-hidden card-print">
-        
-
         {/* Baris Pencarian & Filter Status */}
         <div className="p-4 sm:p-5 bg-white border-b border-[#DCE5E0] space-y-3 no-print">
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">

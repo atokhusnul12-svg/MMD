@@ -97,12 +97,12 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
         totalInfo={`RAB: ${formatRupiah(total?.subsidi || 0)} | LPJ: ${formatRupiah(total?.pengeluaran || 0)} | Saldo: ${formatRupiah(total?.saldo || 0)} (Realisasi ${persenRealisasiTotal}%)`}
       />
 
-      {/* HEADER SECTION & TOMBOL AKSI */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
-        <div className="inline-flex p-1 rounded-xl bg-white border border-[#DCE5E0] shadow-xs max-w-full overflow-x-auto">
+      {/* TAB NAVIGASI KEUANGAN */}
+      <div className="no-print overflow-x-auto pb-1">
+        <div className="inline-flex p-1 rounded-xl bg-white border border-[#DCE5E0] shadow-xs min-w-max">
           <button
             onClick={() => handleTabChange('KOMPARASI')}
-            className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer shrink-0 ${
+            className={`px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer shrink-0 ${
               activeTab === 'KOMPARASI'
                 ? 'bg-[#1D7A6F] text-white shadow-xs'
                 : 'text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F]'
@@ -112,7 +112,7 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
           </button>
           <button
             onClick={() => handleTabChange('RAB')}
-            className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer shrink-0 ${
+            className={`px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer shrink-0 ${
               activeTab === 'RAB'
                 ? 'bg-[#1D7A6F] text-white shadow-xs'
                 : 'text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F]'
@@ -122,7 +122,7 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
           </button>
           <button
             onClick={() => handleTabChange('LPJ')}
-            className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer shrink-0 ${
+            className={`px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer shrink-0 ${
               activeTab === 'LPJ'
                 ? 'bg-[#1D7A6F] text-white shadow-xs'
                 : 'text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F]'
@@ -132,7 +132,7 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
           </button>
           <button
             onClick={() => handleTabChange('DETAIL')}
-            className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer shrink-0 ${
+            className={`px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer shrink-0 ${
               activeTab === 'DETAIL'
                 ? 'bg-[#1D7A6F] text-white shadow-xs'
                 : 'text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F]'
@@ -141,26 +141,12 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
             Rincian Belanja Detail
           </button>
         </div>
-
-        <div className="flex items-center gap-2">
-          {/* Tombol Cetak Laporan */}
-          <button
-            onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-white border border-[#DCE5E0] text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F] shadow-xs transition-all cursor-pointer"
-            title="Cetak Laporan Keuangan atau Simpan sebagai PDF"
-          >
-            <Printer className="w-4 h-4 text-[#1D7A6F]" />
-            <span>Cetak Laporan</span>
-          </button>
-
-          <AdminButton editUrl={editUrl} title="Edit di Sheets" />
-        </div>
       </div>
 
       {/* 3 KARTU RINGKASAN METRIK KEUANGAN */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 card-print">
         
-        <div className="bg-white rounded-2xl p-5 border border-[#DCE5E0] shadow-xs">
+        <div className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs">
           <div className="flex items-center justify-between text-xs font-semibold text-[#5C6D66] uppercase tracking-wider">
             <span>RAB / Total Subsidi</span>
             <div className="w-8 h-8 rounded-lg bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center">
@@ -173,7 +159,7 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
           <p className="text-xs text-[#5C6D66] mt-1">Total alokasi anggaran masuk</p>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-[#DCE5E0] shadow-xs">
+        <div className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs">
           <div className="flex items-center justify-between text-xs font-semibold text-[#5C6D66] uppercase tracking-wider">
             <span>LPJ / Realisasi Belanja</span>
             <div className="w-8 h-8 rounded-lg bg-[#FAF0ED] text-[#8A2F1B] flex items-center justify-center">
@@ -188,7 +174,7 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border-2 border-[#1D7A6F] shadow-xs relative overflow-hidden">
+        <div className="bg-white rounded-xl p-5 border-2 border-[#1D7A6F] shadow-xs relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-[#C6A66B]" />
           <div className="flex items-center justify-between text-xs font-bold text-[#1D7A6F] uppercase tracking-wider">
             <span>Saldo (Dikembalikan)</span>
@@ -199,7 +185,7 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
           <div className="text-2xl font-bold font-serif text-[#1D7A6F] mt-2">
             {formatRupiah(total?.saldo || 0)}
           </div>
-          <p className="text-xs text-[#5C6D66] mt-1">Sisa dana disetor kembali ke kas pusat pondok</p>
+          <p className="text-xs text-[#5C6E66] mt-1">Sisa dana disetor kembali ke kas pusat pondok</p>
         </div>
 
       </div>
@@ -208,7 +194,7 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
       {/* KONTEN TAB 1: KOMPARASI REKAPITULASI RAB VS LPJ                */}
       {/* ============================================================== */}
       {activeTab === 'KOMPARASI' && (
-        <div className="bg-white rounded-2xl shadow-xs border border-[#DCE5E0] overflow-hidden card-print">
+        <div className="bg-white rounded-xl shadow-xs border border-[#DCE5E0] overflow-hidden card-print">
           <div className="p-5 border-b border-[#DCE5E0] flex items-center justify-between bg-[#FAF8F5]">
             <div>
               <h2 className="text-lg font-bold font-serif text-[#1D7A6F]">

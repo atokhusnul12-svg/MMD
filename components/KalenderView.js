@@ -181,20 +181,6 @@ export default function KalenderView({
       {/* CONTAINER UTAMA KALENDER */}
       <div className="bg-white rounded-xl shadow-xs border border-[#DCE5E0] overflow-hidden">
         
-        {/* Header Section */}
-        <div className="p-5 sm:p-6 border-b border-[#DCE5E0] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#F7F5EF]/60">
-          <div>
-            <h2 className="text-xl font-bold text-[#26332E] font-serif flex items-center gap-2">
-              <CalendarIcon className="w-5 h-5 text-[#1D7A6F]" />
-              Kalender Kerja MMD Darussalamah
-            </h2>
-            <p className="text-xs text-[#5C6E66] mt-0.5">
-              Jadwal kegiatan madrasah, musyawarah, takror, ujian, dan rutinitas LBM tahun 1447-1448 H / 2026-2027 M
-            </p>
-          </div>
-
-          <AdminButton editUrl={editUrl} title="Edit Kalender di Sheets" />
-        </div>
 
         {/* TAB PILIHAN BULAN (Horizontal Scrollable) */}
         <div className="p-3 sm:p-4 bg-[#F7F5EF]/50 border-b border-[#DCE5E0] overflow-x-auto">
@@ -375,7 +361,8 @@ export default function KalenderView({
                   </div>
 
                   {/* Kolom Kanan: Koordinator */}
-                  <div className="shrink-0 sm:text-right pl-17 sm:pl-0">
+                  <div className="shrink-0 flex items-center justify-between sm:justify-end gap-2 pt-1 sm:pt-0 border-t sm:border-0 border-[#DCE5E0]/40">
+                    <span className="text-[11px] text-[#5C6E66] sm:hidden">Koordinator:</span>
                     <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded ${kordStyle}`}>
                       <ShieldCheck className="w-3.5 h-3.5 shrink-0 opacity-80" />
                       <span>{item.kordinator}</span>

@@ -47,7 +47,7 @@ export default function JamIstiwaCard() {
   }
 
   return (
-    <div className="bg-white rounded-xl p-6 sm:p-7 border border-[#DCE5E0] shadow-xs relative overflow-hidden">
+    <div className="bg-white rounded-xl p-5 sm:p-7 border border-[#DCE5E0] shadow-xs relative overflow-hidden">
       {/* Aksen garis emas halus di bagian atas */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1D7A6F] via-[#C6A66B] to-[#1D7A6F]" />
 
@@ -77,11 +77,11 @@ export default function JamIstiwaCard() {
           </div>
 
           {/* Tampilan Jam Istiwa' (Font Jumbo & Monospace) */}
-          <div className="flex items-baseline gap-3">
-            <div className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#1D7A6F] tracking-tight font-mono">
+          <div className="flex items-baseline gap-2 sm:gap-3">
+            <div className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#1D7A6F] tracking-tight font-mono">
               {dataWaktu.wis.teks}
             </div>
-            <span className="text-xl sm:text-2xl font-black text-[#C6A66B] tracking-wide">
+            <span className="text-lg sm:text-2xl font-black text-[#C6A66B] tracking-wide">
               WIS
             </span>
           </div>

@@ -203,10 +203,8 @@ export default function KeuanganDonutChart({
         {/* ============================================================== */}
         <div className="relative flex items-center justify-center shrink-0">
           <svg
-            width={size}
-            height={size}
             viewBox={`0 0 ${size} ${size}`}
-            className="transform -rotate-90 drop-shadow-xs"
+            className="w-56 h-56 sm:w-68 sm:h-68 max-w-full transform -rotate-90 drop-shadow-xs"
           >
             {/* Background Ring Track */}
             <circle

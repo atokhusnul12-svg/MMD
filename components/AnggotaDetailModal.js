@@ -133,7 +133,7 @@ export default function AnggotaDetailModal({ anggota, onClose }) {
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1D7A6F] via-[#C6A66B] to-[#1D7A6F]" />
           
           {/* Header Modal */}
-          <div className="relative px-6 pt-7 pb-6 bg-[#F7F5EF] border-b border-[#DCE5E0] shrink-0">
+          <div className="relative px-4 sm:px-6 pt-6 sm:pt-7 pb-5 sm:pb-6 bg-[#F7F5EF] border-b border-[#DCE5E0] shrink-0">
             {/* Tombol Close (X) */}
             <motion.button
               type="button"
@@ -214,7 +214,7 @@ export default function AnggotaDetailModal({ anggota, onClose }) {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="p-6 space-y-6 overflow-y-auto max-h-[calc(92vh-180px)]"
+            className="p-4 sm:p-6 space-y-5 sm:space-y-6 overflow-y-auto max-h-[calc(92vh-180px)]"
           >
             
             {/* Bagian 1: Informasi Pribadi */}

@@ -12,10 +12,10 @@ export default function StatCard({
   isLoading = false,
 }) {
   return (
-    <div className="bg-white rounded-xl p-5 sm:p-6 border border-[#DCE5E0] shadow-xs hover:border-[#1D7A6F]/40 transition-colors duration-150 flex flex-col justify-between">
+    <div className="bg-white rounded-xl p-4 sm:p-5 lg:p-6 border border-[#DCE5E0] shadow-xs hover:border-[#1D7A6F]/40 transition-colors duration-150 flex flex-col justify-between">
       <div className="flex items-start justify-between">
-        <div className="flex-1 mr-3">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66]">
+        <div className="flex-1 mr-3 min-w-0">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66] block truncate">
             {title}
           </span>
           {isLoading ? (
@@ -23,7 +23,7 @@ export default function StatCard({
               <div className="h-8 bg-stone-200/80 rounded w-3/4"></div>
             </div>
           ) : (
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-[#26332E] mt-1.5 tracking-tight font-serif">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#26332E] mt-1.5 tracking-tight font-serif break-words">
               {value}
             </h3>
           )}

@@ -44,7 +44,7 @@ export default function KalenderPage() {
     <div className="space-y-6">
       
       {/* Header Halaman */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
         <div>
           <div className="flex items-center gap-2 text-xs text-[#5C6E66] mb-1">
             <Link href="/" className="hover:text-[#1D7A6F] flex items-center gap-1 transition-colors">
@@ -61,11 +61,11 @@ export default function KalenderPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <button
-            onClick={fetchKalender}
+            onClick={() => fetchKalender(true)}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#DCE5E0] bg-white text-[#1D7A6F] hover:bg-[#F7F5EF] text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#DCE5E0] bg-white text-[#1D7A6F] hover:bg-[#F7F5EF] text-xs sm:text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 text-[#1D7A6F] ${loading ? 'animate-spin' : ''}`} />
             <span>{loading ? 'Menyinkronkan...' : 'Perbarui'}</span>

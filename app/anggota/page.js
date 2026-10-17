@@ -61,11 +61,11 @@ export default function AnggotaPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 no-print">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 no-print">
           <button
             onClick={() => { if (typeof window !== 'undefined') window.print(); }}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#DCE5E0] bg-white text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F] text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#DCE5E0] bg-white text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F] text-xs sm:text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
             title="Cetak Laporan Data Anggota atau Simpan sebagai PDF"
           >
             <Printer className="w-4 h-4 text-[#1D7A6F]" />
@@ -74,7 +74,7 @@ export default function AnggotaPage() {
           <button
             onClick={() => fetchAnggota(true)}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#DCE5E0] bg-white text-[#1D7A6F] hover:bg-[#F7F5EF] text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#DCE5E0] bg-white text-[#1D7A6F] hover:bg-[#F7F5EF] text-xs sm:text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 text-[#1D7A6F] ${loading ? 'animate-spin' : ''}`} />
             <span>{loading ? 'Menyinkronkan...' : 'Perbarui'}</span>

@@ -7,8 +7,8 @@ export default function Footer() {
   const currentYear = 2026;
 
   return (
-    <footer className="mt-auto border-t border-[#DCE5E0] bg-[#FFFFFF] py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer className="mt-auto border-t border-[#DCE5E0] bg-[#FFFFFF] py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           
           <div>

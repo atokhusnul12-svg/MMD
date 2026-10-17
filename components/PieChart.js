@@ -79,7 +79,7 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
   let accumulatedPercent = 0;
 
   return (
-    <div className="bg-white rounded-xl p-6 border border-[#DCE5E0] shadow-xs">
+    <div className="bg-white rounded-xl p-5 sm:p-6 border border-[#DCE5E0] shadow-xs">
       <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#DCE5E0]">
         <div>
           <h3 className="text-lg font-bold text-[#26332E] font-serif">
@@ -91,11 +91,11 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row items-center gap-8 justify-around">
+      <div className="flex flex-col lg:flex-row items-center gap-6 sm:gap-8 justify-around">
         
         {/* Visualisasi Donut Chart Menggunakan SVG */}
         <div className="relative flex items-center justify-center shrink-0">
-          <svg width={size} height={size} className="transform -rotate-90">
+          <svg viewBox={`0 0 ${size} ${size}`} className="w-52 h-52 sm:w-64 sm:h-64 max-w-full transform -rotate-90">
             {/* Background ring */}
             <circle
               cx={size / 2}

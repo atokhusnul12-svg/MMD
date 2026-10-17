@@ -132,7 +132,7 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
 
         {/* Dropdown Menu Opsi Notifikasi */}
         {menuOpen && (
-          <div className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-white shadow-xl border border-[#DCE5E0] p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+          <div className="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-28px)] rounded-2xl bg-white shadow-xl border border-[#DCE5E0] p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-[#DCE5E0]">
               <span className="text-xs font-bold font-serif text-[#1D7A6F] flex items-center gap-1.5">
                 <Smartphone className="w-4 h-4 text-[#1D7A6F]" />

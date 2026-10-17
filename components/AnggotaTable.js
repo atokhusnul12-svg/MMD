@@ -115,33 +115,6 @@ export default function AnggotaTable({ anggota = [], editUrl, onRefresh }) {
 
       <div className="bg-white rounded-xl shadow-xs border border-[#DCE5E0] overflow-hidden card-print">
         
-        {/* Header Tabel & Tombol Aksi */}
-        <div className="p-5 sm:p-6 border-b border-[#DCE5E0] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#F7F5EF]/60 no-print">
-          <div>
-            <h2 className="text-xl font-bold text-[#26332E] font-serif flex items-center gap-2">
-              <User className="w-5 h-5 text-[#1D7A6F]" />
-              Daftar Anggota LBM
-            </h2>
-            <p className="text-xs text-[#5C6E66] mt-0.5">
-              Menampilkan {filteredAnggota.length} dari {anggota.length} santri LBM • Klik nama santri untuk melihat biodata lengkap
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Tombol Cetak Laporan */}
-            <button
-              onClick={handlePrint}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white border border-[#DCE5E0] text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F] shadow-xs transition-all cursor-pointer"
-              title="Cetak Laporan Data Anggota atau Simpan sebagai PDF"
-            >
-              <Printer className="w-4 h-4 text-[#1D7A6F]" />
-              <span>Cetak Laporan</span>
-            </button>
-
-            {/* Tombol Admin Google Sheets */}
-            <AdminButton editUrl={editUrl} title="Edit Anggota di Sheets" />
-          </div>
-        </div>
 
         {/* Baris Pencarian & Filter */}
         <div className="p-4 sm:p-5 bg-white border-b border-[#DCE5E0] space-y-3 no-print">
@@ -217,8 +190,8 @@ export default function AnggotaTable({ anggota = [], editUrl, onRefresh }) {
         )}
       </div>
 
-      {/* Tabel Data Anggota */}
-      <div className="overflow-x-auto">
+      {/* Tabel Data Anggota (Desktop & Tablet) */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-[#F7F5EF] border-b border-[#DCE5E0] text-[11px] font-bold text-[#5C6E66] uppercase tracking-wider">
@@ -327,6 +300,77 @@ export default function AnggotaTable({ anggota = [], editUrl, onRefresh }) {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Tampilan Kartu Khusus Layar HP / Mobile */}
+      <div className="md:hidden divide-y divide-[#DCE5E0]/60 no-print">
+        {filteredAnggota.length > 0 ? (
+          filteredAnggota.map((item, idx) => {
+            const styling = STATUS_COLORS[item.perkembangan] || {
+              color: '#6E7C77',
+              bgBadge: 'bg-[#F7F5EF]',
+              textBadge: 'text-[#26332E]',
+              border: 'border-[#DCE5E0]',
+            };
+
+            return (
+              <div
+                key={item.id || idx}
+                onClick={() => setSelectedAnggota(item)}
+                className="p-4 space-y-2.5 hover:bg-[#F7F5EF]/60 transition-colors cursor-pointer active:bg-[#E8F5F3]/50"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[#F7F5EF] text-[#5C6E66] border border-[#DCE5E0] shrink-0">
+                      #{idx + 1}
+                    </span>
+                    <h3 className="font-bold text-[#26332E] text-sm truncate">
+                      {item.nama}
+                    </h3>
+                  </div>
+
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold border shrink-0 ${styling.bgBadge} ${styling.textBadge} ${styling.border}`}
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{ backgroundColor: styling.color }}
+                    />
+                    {item.perkembangan}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs pt-0.5">
+                  <div className="flex items-center gap-1.5">
+                    {item.kelas && item.kelas !== '-' ? (
+                      <span className="inline-flex items-center gap-1 font-semibold text-[#1D7A6F] bg-[#E8F5F3] px-2 py-0.5 rounded text-[11px] border border-[#C8E3DC]">
+                        <GraduationCap className="w-3 h-3 text-[#1D7A6F]" />
+                        {item.kelas}
+                      </span>
+                    ) : (
+                      <span className="text-[#5C6E66] text-xs italic">-</span>
+                    )}
+
+                    {item.bahtsuList && item.bahtsuList.length > 0 && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#FAF3E6] text-[#8C6D23] border border-[#E8D5A7] font-mono">
+                        {item.bahtsuList.length} BM
+                      </span>
+                    )}
+                  </div>
+
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1D7A6F]">
+                    <span>Profil</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="p-8 text-center text-[#5C6E66] text-sm">
+            Tidak ada anggota yang sesuai dengan filter atau pencarian.
+          </div>
+        )}
       </div>
 
       {/* Footer Ringkasan */}

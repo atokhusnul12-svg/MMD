@@ -197,11 +197,11 @@ export default function EditBahsuModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto no-print">
-      <div className="bg-white rounded-2xl max-w-2xl w-full border border-[#DCE5E0] shadow-2xl overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto no-print">
+      <div className="bg-white rounded-xl sm:rounded-2xl max-w-2xl w-full border border-[#DCE5E0] shadow-2xl overflow-hidden my-4 sm:my-8 animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header Modal */}
-        <div className="flex items-center justify-between px-6 py-4.5 bg-[#F7F5EF] border-b border-[#DCE5E0]">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4.5 bg-[#F7F5EF] border-b border-[#DCE5E0]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white text-[#1D7A6F] flex items-center justify-center border border-[#DCE5E0] shadow-2xs">
               <Calendar className="w-5 h-5" />
@@ -227,7 +227,7 @@ export default function EditBahsuModal({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-5 max-h-[75vh] overflow-y-auto">
           
           {/* Status Messages */}
           {errorMsg && (
