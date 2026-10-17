@@ -74,12 +74,24 @@ export async function GET(request) {
         checks.redirected = testRes.redirected;
         checks.diagnoseTime = new Date().toISOString();
 
-        // Kasus 1: Mengembalikan HTML login karena akses belum disetel 'Anyone'
+        // Kasus 1: Mengembalikan HTML login / error dari Apps Script
         if (text.includes('<!DOCTYPE') || text.includes('<html') || text.includes('accounts.google.com') || contentType.includes('text/html')) {
           const titleMatch = text.match(/<title>(.*?)<\/title>/i);
           checks.pageTitle = titleMatch ? titleMatch[1] : '';
-          checks.textSnippet = text.slice(0, 150).replace(/\s+/g, ' ');
-          checks.statusMessage = 'Google Apps Script merespons dengan halaman login. Pada editor Apps Script, pastikan saat Deploy Web App, pilihan "Who has access" disetel ke "Anyone" (Siapa saja). Jika Anda membuat New Deployment, pastikan URL /exec yang baru sudah disalin dan di-redeploy di Vercel.';
+          
+          // Ambil isi teks dari body atau div error
+          const bodyText = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                               .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+                               .replace(/<[^>]+>/g, ' ')
+                               .replace(/\s+/g, ' ')
+                               .trim();
+          checks.bodySnippet = bodyText.slice(0, 300);
+
+          if (checks.pageTitle.toLowerCase().includes('error')) {
+            checks.statusMessage = `Google Apps Script menghasilkan Error saat dijalankan: "${checks.bodySnippet}".`;
+          } else {
+            checks.statusMessage = 'Google Apps Script merespons dengan halaman login. Pada editor Apps Script, pastikan saat Deploy Web App, pilihan "Who has access" disetel ke "Anyone" (Siapa saja). Jika Anda membuat New Deployment, pastikan URL /exec yang baru sudah disalin dan di-redeploy di Vercel.';
+          }
           return NextResponse.json({ success: false, checks });
         }
 
