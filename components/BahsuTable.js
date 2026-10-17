@@ -17,9 +17,11 @@ import {
   Edit3,
   UserCheck,
   ChevronDown,
+  Plus,
 } from 'lucide-react';
 import AdminButton from './AdminButton';
 import EditBiodataModal from './EditBiodataModal';
+import EditBahsuModal from './EditBahsuModal';
 import { PrintHeader, PrintSignatures } from './PrintHeaderFooter';
 import { useAuth } from '@/lib/auth';
 import { findAnggotaByDelegasiName } from '@/lib/fetchCSV';
@@ -29,8 +31,20 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL'); // 'ALL' | 'BELUM' | 'SUDAH' | 'IZIN'
   const [editingAnggota, setEditingAnggota] = useState(null);
+  const [editingBahsuEvent, setEditingBahsuEvent] = useState(null);
+  const [isBahsuModalOpen, setIsBahsuModalOpen] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [pickerSearch, setPickerSearch] = useState('');
+
+  const handleOpenAddEvent = () => {
+    setEditingBahsuEvent(null);
+    setIsBahsuModalOpen(true);
+  };
+
+  const handleOpenEditEvent = (eventItem) => {
+    setEditingBahsuEvent(eventItem);
+    setIsBahsuModalOpen(true);
+  };
 
   const handlePrint = () => {
     if (typeof window !== 'undefined') {
@@ -221,6 +235,19 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
               <span>Cetak Laporan</span>
             </button>
 
+            {/* Tombol Tambah Agenda Bahsu Khusus Admin */}
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={handleOpenAddEvent}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-[#1D7A6F] text-white hover:bg-[#165E55] shadow-xs transition-colors cursor-pointer"
+                title="Tambah Agenda Bahtsul Masail Baru dan Sinkronkan ke Sheets"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Tambah Agenda</span>
+              </button>
+            )}
+
             {/* Tombol Cepat Admin: Edit Biodata Santri */}
             {isAdmin && anggotaList.length > 0 && (
               <div className="relative">
@@ -370,8 +397,21 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
                         {item.no || idx + 1}
                       </td>
                       <td className="py-3.5 px-5">
-                        <div className="font-bold text-[#26332E] text-sm leading-snug">
-                          {item.acara}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="font-bold text-[#26332E] text-sm leading-snug">
+                            {item.acara}
+                          </div>
+                          {isAdmin && (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditEvent(item)}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold text-[#1D7A6F] bg-white hover:bg-[#1D7A6F] hover:text-white border border-[#C8E3DC] transition-colors shrink-0 cursor-pointer no-print shadow-2xs"
+                              title="Edit kegiatan & sinkronkan ke sheet PERKEMBANGAN"
+                            >
+                              <Edit3 className="w-3 h-3" />
+                              <span>Edit Agenda</span>
+                            </button>
+                          )}
                         </div>
                       </td>
                       <td className="py-3.5 px-4">
@@ -486,19 +526,32 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
                     <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#F7F5EF] text-[#5C6E66] border border-[#DCE5E0]">
                       #{item.no || idx + 1}
                     </span>
-                    {isIzin ? (
-                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-[#FAF0ED] text-[#8A2F1B] border border-[#E8BCB0]">
-                        {item.keterangan}
-                      </span>
-                    ) : isBelum ? (
-                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-[#FAF3E6] text-[#8C6D23] border border-[#E8D5A7]">
-                        Belum Berangkat
-                      </span>
-                    ) : (
-                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-[#E8F5F3] text-[#1D7A6F] border border-[#C8E3DC]">
-                        {item.keterangan || 'Delegasi'}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1.5">
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditEvent(item)}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold text-[#1D7A6F] bg-white hover:bg-[#1D7A6F] hover:text-white border border-[#C8E3DC] transition-colors shadow-2xs"
+                          title="Edit agenda"
+                        >
+                          <Edit3 className="w-2.5 h-2.5" />
+                          <span>Edit</span>
+                        </button>
+                      )}
+                      {isIzin ? (
+                        <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-[#FAF0ED] text-[#8A2F1B] border border-[#E8BCB0]">
+                          {item.keterangan}
+                        </span>
+                      ) : isBelum ? (
+                        <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-[#FAF3E6] text-[#8C6D23] border border-[#E8D5A7]">
+                          Belum Berangkat
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-[#E8F5F3] text-[#1D7A6F] border border-[#C8E3DC]">
+                          {item.keterangan || 'Delegasi'}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <h3 className="font-bold text-[#26332E] text-sm">
@@ -564,6 +617,15 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
         anggota={editingAnggota}
         isOpen={!!editingAnggota}
         onClose={() => setEditingAnggota(null)}
+        onSuccess={handleEditSuccess}
+      />
+
+      {/* Modal Edit / Tambah Kegiatan Bahtsul Masail & Sinkronisasi */}
+      <EditBahsuModal
+        isOpen={isBahsuModalOpen}
+        onClose={() => setIsBahsuModalOpen(false)}
+        event={editingBahsuEvent}
+        anggotaList={anggotaList}
         onSuccess={handleEditSuccess}
       />
 

@@ -206,56 +206,8 @@ export async function POST(request) {
       );
     }
 
-    const { id, changes } = body || {};
+    const { action, id, changes, event } = body || {};
 
-    if (!id || typeof id !== 'string' || id.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Parameter ID anggota unik wajib disertakan.' },
-        { status: 400 }
-      );
-    }
-
-    const trimmedId = id.trim().toUpperCase();
-
-    // Validasi format ID anggota (alfanumerik standar, tanda hubung, atau garis bawah)
-    if (!/^[A-Z0-9_\-]+$/.test(trimmedId)) {
-      return NextResponse.json(
-        { success: false, error: 'Format ID anggota tidak valid.' },
-        { status: 400 }
-      );
-    }
-
-    if (!changes || typeof changes !== 'object' || Array.isArray(changes) || Object.keys(changes).length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Objek changes berisi perubahan biodata wajib disertakan.' },
-        { status: 400 }
-      );
-    }
-
-    // 3. Filter Kolom yang Diizinkan (Whitelist) & Sanitasi Nilai Input
-    const sanitizedChanges = {};
-    for (const key of Object.keys(changes)) {
-      if (ALLOWED_BIODATA_FIELDS.includes(key)) {
-        const val = changes[key];
-        if (typeof val === 'string') {
-          sanitizedChanges[key] = val.trim().slice(0, 500);
-        } else if (val !== null && val !== undefined) {
-          sanitizedChanges[key] = String(val).trim().slice(0, 500);
-        }
-      }
-    }
-
-    if (Object.keys(sanitizedChanges).length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Tidak ada kolom yang diizinkan untuk diedit dalam permintaan ini.',
-        },
-        { status: 400 }
-      );
-    }
-
-    // 4. Periksa Ketersediaan Konfigurasi Server (URL & Secret Token Wajib)
     const scriptUrl = process.env.GOOGLE_SHEETS_SCRIPT_URL || process.env.GOOGLE_APPS_SCRIPT_URL;
     const secretToken = process.env.SHEETS_API_SECRET_TOKEN;
 
@@ -279,12 +231,96 @@ export async function POST(request) {
       );
     }
 
-    // 5. Kirim Perubahan ke Google Apps Script Web App (Token dikirim via body payload HTTPS)
-    const appsScriptPayload = {
-      id: trimmedId,
-      changes: sanitizedChanges,
-      token: secretToken,
-    };
+    let appsScriptPayload;
+
+    // Aksi 1: Sinkronisasi Kegiatan Bahtsul Masail (Daftar Pemberangkatan & Perkembangan)
+    if (action === 'syncBahsuEvent' || event) {
+      const eventData = event || {};
+      const newAcara = String(eventData.newAcara || eventData.acara || '').trim();
+      const newTanggal = String(eventData.newTanggal || eventData.tanggal || '').trim();
+      const delegasi = String(eventData.delegasi || '').trim();
+      const keterangan = String(eventData.keterangan || 'SUDAH').trim();
+      const oldAcara = String(eventData.oldAcara || '').trim();
+      const oldTanggal = String(eventData.oldTanggal || '').trim();
+      const mode = eventData.mode === 'create' ? 'create' : 'edit';
+      const rowNumber = Number(eventData.rowNumber) || null;
+      const no = eventData.no !== undefined && eventData.no !== null ? String(eventData.no).trim() : '';
+
+      if (!newAcara) {
+        return NextResponse.json(
+          { success: false, error: 'Nama agenda Bahtsul Masail (acara) wajib diisi.' },
+          { status: 400 }
+        );
+      }
+
+      appsScriptPayload = {
+        action: 'syncBahsuEvent',
+        token: secretToken,
+        event: {
+          mode,
+          rowNumber,
+          no,
+          newAcara: newAcara.slice(0, 500),
+          newTanggal: newTanggal.slice(0, 100),
+          delegasi: delegasi.slice(0, 3000),
+          keterangan: keterangan.slice(0, 100),
+          oldAcara: oldAcara.slice(0, 500),
+          oldTanggal: oldTanggal.slice(0, 100),
+        },
+      };
+    } else {
+      // Aksi 2: Pembaruan Biodata Anggota
+      if (!id || typeof id !== 'string' || id.trim().length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'Parameter ID anggota unik wajib disertakan.' },
+          { status: 400 }
+        );
+      }
+
+      const trimmedId = id.trim().toUpperCase();
+
+      if (!/^[A-Z0-9_\-]+$/.test(trimmedId)) {
+        return NextResponse.json(
+          { success: false, error: 'Format ID anggota tidak valid.' },
+          { status: 400 }
+        );
+      }
+
+      if (!changes || typeof changes !== 'object' || Array.isArray(changes) || Object.keys(changes).length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'Objek changes berisi perubahan biodata wajib disertakan.' },
+          { status: 400 }
+        );
+      }
+
+      const sanitizedChanges = {};
+      for (const key of Object.keys(changes)) {
+        if (ALLOWED_BIODATA_FIELDS.includes(key)) {
+          const val = changes[key];
+          if (typeof val === 'string') {
+            sanitizedChanges[key] = val.trim().slice(0, 500);
+          } else if (val !== null && val !== undefined) {
+            sanitizedChanges[key] = String(val).trim().slice(0, 500);
+          }
+        }
+      }
+
+      if (Object.keys(sanitizedChanges).length === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Tidak ada kolom yang diizinkan untuk diedit dalam permintaan ini.',
+          },
+          { status: 400 }
+        );
+      }
+
+      appsScriptPayload = {
+        id: trimmedId,
+        changes: sanitizedChanges,
+        token: secretToken,
+      };
+    }
 
     let appsScriptRes;
     try {
@@ -347,8 +383,8 @@ export async function POST(request) {
     // Berhasil disimpan ke Google Sheets
     return NextResponse.json({
       success: true,
-      message: responseData.message || 'Biodata santri berhasil diperbarui di Google Sheets.',
-      data: responseData.data || { id: trimmedId, updated: sanitizedChanges },
+      message: responseData.message || 'Perubahan berhasil disimpan ke Google Sheets.',
+      data: responseData.data || null,
     });
 
   } catch (error) {
