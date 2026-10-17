@@ -322,11 +322,13 @@ export async function POST(request) {
     try {
       responseData = JSON.parse(resText);
     } catch {
+      const titleMatch = resText.match(/<title>(.*?)<\/title>/i);
+      const cleanSnippet = resText.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 250);
       console.error('[API /api/sheets POST] Non-JSON response from Google Apps Script:', resText);
       return NextResponse.json(
         {
           success: false,
-          error: 'Respons dari Google Apps Script tidak valid.',
+          error: `Respons dari Google Apps Script bukan JSON (${titleMatch ? titleMatch[1] : 'Non-JSON'}): ${cleanSnippet}`,
         },
         { status: 502 }
       );
