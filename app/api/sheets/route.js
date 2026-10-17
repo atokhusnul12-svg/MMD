@@ -71,6 +71,8 @@ export async function GET(request) {
         checks.httpStatus = testRes.status;
         checks.contentType = contentType;
         checks.scriptUrlEnding = scriptUrl.slice(-15);
+        checks.redirected = testRes.redirected;
+        checks.diagnoseTime = new Date().toISOString();
 
         // Kasus 1: Mengembalikan HTML login karena akses belum disetel 'Anyone'
         if (text.includes('<!DOCTYPE') || text.includes('<html') || text.includes('accounts.google.com') || contentType.includes('text/html')) {
