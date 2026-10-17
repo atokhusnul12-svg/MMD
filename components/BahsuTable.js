@@ -194,45 +194,6 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
       {/* Kontainer Utama Tabel / List */}
       <div className="bg-white rounded-xl shadow-xs border border-[#DCE5E0] overflow-hidden card-print">
         
-        {/* Header & Tombol Edit */}
-        <div className="p-5 sm:p-6 border-b border-[#DCE5E0] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#F7F5EF]/60 no-print">
-          <div>
-            <h2 className="text-xl font-bold text-[#26332E] font-serif flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-[#1D7A6F]" />
-              Daftar Pemberangkatan &amp; Delegasi Bahtsul Masail
-            </h2>
-            <p className="text-xs text-[#5C6E66] mt-0.5">
-              Jadwal pelaksanaan forum Bahtsul Masail, lokasi, serta utusan santri LBM Darussalamah
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Tombol Cetak Laporan */}
-            <button
-              onClick={handlePrint}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white border border-[#DCE5E0] text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F] shadow-xs transition-all cursor-pointer"
-              title="Cetak Laporan Bahtsul Masail atau Simpan sebagai PDF"
-            >
-              <Printer className="w-4 h-4 text-[#1D7A6F]" />
-              <span>Cetak Laporan</span>
-            </button>
-
-            {/* Tombol Tambah Agenda Bahsu Khusus Admin */}
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={handleOpenAddEvent}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-[#1D7A6F] text-white hover:bg-[#165E55] shadow-xs transition-colors cursor-pointer"
-                title="Tambah Agenda Bahtsul Masail Baru dan Sinkronkan ke Sheets"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Tambah Agenda</span>
-              </button>
-            )}
-
-            <AdminButton editUrl={editUrl} title="Edit Bahsu di Sheets" />
-          </div>
-        </div>
 
         {/* Baris Pencarian & Filter Status */}
         <div className="p-4 sm:p-5 bg-white border-b border-[#DCE5E0] space-y-3 no-print">
