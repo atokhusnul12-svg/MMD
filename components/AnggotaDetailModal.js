@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Award,
+  Edit3,
 } from 'lucide-react';
 import { STATUS_COLORS } from './PieChart';
 
@@ -76,7 +77,7 @@ const itemVariants = {
   },
 };
 
-export default function AnggotaDetailModal({ anggota, onClose }) {
+export default function AnggotaDetailModal({ anggota, onClose, onEdit }) {
   // Tutup modal jika tombol Escape ditekan & kunci scroll halaman
   useEffect(() => {
     if (!anggota) return;
@@ -359,13 +360,26 @@ export default function AnggotaDetailModal({ anggota, onClose }) {
             <span className="text-xs text-[#5C6E66] truncate">
               Data terhubung langsung ke Google Sheets WAKA III
             </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-1.5 rounded-lg bg-[#1D7A6F] hover:bg-[#155D54] text-white text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
-            >
-              Tutup
-            </button>
+            <div className="flex items-center gap-2">
+              {onEdit && (
+                <button
+                  type="button"
+                  onClick={() => onEdit(anggota)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#C8E3DC] text-[#1D7A6F] hover:bg-[#E8F5F3] text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+                  title="Edit data anggota ini di Google Sheets"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Edit Biodata</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-1.5 rounded-lg bg-[#1D7A6F] hover:bg-[#155D54] text-white text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
 
         </motion.div>

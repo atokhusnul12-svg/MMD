@@ -14,13 +14,23 @@ import {
   BookOpen,
   Hourglass,
   Printer,
+  Edit3,
+  UserCheck,
+  ChevronDown,
 } from 'lucide-react';
 import AdminButton from './AdminButton';
+import EditBiodataModal from './EditBiodataModal';
 import { PrintHeader, PrintSignatures } from './PrintHeaderFooter';
+import { useAuth } from '@/lib/auth';
+import { findAnggotaByDelegasiName } from '@/lib/fetchCSV';
 
-export default function BahsuTable({ events = [], title, editUrl }) {
+export default function BahsuTable({ events = [], title, editUrl, anggotaList = [], onRefresh }) {
+  const { isAdmin } = useAuth();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL'); // 'ALL' | 'BELUM' | 'SUDAH' | 'IZIN'
+  const [editingAnggota, setEditingAnggota] = useState(null);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [pickerSearch, setPickerSearch] = useState('');
 
   const handlePrint = () => {
     if (typeof window !== 'undefined') {
@@ -36,7 +46,7 @@ export default function BahsuTable({ events = [], title, editUrl }) {
         search === '' ||
         item.acara.toLowerCase().includes(q) ||
         item.tanggal.toLowerCase().includes(q) ||
-        item.delegasi.some(d => d.toLowerCase().includes(q)) ||
+        item.delegasi.some((d) => d.toLowerCase().includes(q)) ||
         item.keterangan.toLowerCase().includes(q);
 
       const matchStatus =
@@ -50,15 +60,15 @@ export default function BahsuTable({ events = [], title, editUrl }) {
   }, [events, search, filterStatus]);
 
   const totalBelumBerangkat = useMemo(() => {
-    return events.filter(e => e.statusKeberangkatan === 'BELUM_BERANGKAT').length;
+    return events.filter((e) => e.statusKeberangkatan === 'BELUM_BERANGKAT').length;
   }, [events]);
 
   const totalSudahBerangkat = useMemo(() => {
-    return events.filter(e => e.statusKeberangkatan === 'SUDAH_BERANGKAT').length;
+    return events.filter((e) => e.statusKeberangkatan === 'SUDAH_BERANGKAT').length;
   }, [events]);
 
   const totalIzin = useMemo(() => {
-    return events.filter(e => e.statusKeberangkatan === 'IZIN').length;
+    return events.filter((e) => e.statusKeberangkatan === 'IZIN').length;
   }, [events]);
 
   const filterDescription = useMemo(() => {
@@ -69,6 +79,24 @@ export default function BahsuTable({ events = [], title, editUrl }) {
     if (filterStatus === 'IZIN') parts.push('Status: Izin / Berhalangan');
     return parts.length > 0 ? parts.join(' | ') : 'Semua Agenda Terjadwal';
   }, [search, filterStatus]);
+
+  // Santri terfilter untuk pemilih cepat admin
+  const filteredAnggotaPicker = useMemo(() => {
+    if (!pickerSearch.trim()) return anggotaList;
+    const q = pickerSearch.toLowerCase();
+    return anggotaList.filter(
+      (a) =>
+        a.nama.toLowerCase().includes(q) ||
+        a.id.toLowerCase().includes(q) ||
+        (a.kelas && a.kelas.toLowerCase().includes(q))
+    );
+  }, [anggotaList, pickerSearch]);
+
+  const handleEditSuccess = () => {
+    if (typeof onRefresh === 'function') {
+      onRefresh();
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -182,7 +210,7 @@ export default function BahsuTable({ events = [], title, editUrl }) {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {/* Tombol Cetak Laporan */}
             <button
               onClick={handlePrint}
@@ -192,6 +220,72 @@ export default function BahsuTable({ events = [], title, editUrl }) {
               <Printer className="w-4 h-4 text-[#1D7A6F]" />
               <span>Cetak Laporan</span>
             </button>
+
+            {/* Tombol Cepat Admin: Edit Biodata Santri */}
+            {isAdmin && anggotaList.length > 0 && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsPickerOpen(!isPickerOpen)}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-[#E8F5F3] text-[#1D7A6F] hover:bg-[#1D7A6F] hover:text-white border border-[#C8E3DC] transition-colors shadow-2xs cursor-pointer"
+                  title="Pilih santri untuk edit biodata dan sinkronkan ke Google Sheets"
+                >
+                  <UserCheck className="w-4 h-4" />
+                  <span>Edit Biodata Santri</span>
+                  <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+                </button>
+
+                {/* Dropdown Menu Pemilih Santri */}
+                {isPickerOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-xl shadow-xl border border-[#DCE5E0] p-3 z-30 space-y-2">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#DCE5E0]">
+                      <span className="text-xs font-bold text-[#1D7A6F] uppercase tracking-wider">
+                        Pilih Santri ({anggotaList.length})
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsPickerOpen(false)}
+                        className="text-xs text-[#5C6E66] hover:text-[#26332E]"
+                      >
+                        Tutup
+                      </button>
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="Cari nama santri..."
+                      value={pickerSearch}
+                      onChange={(e) => setPickerSearch(e.target.value)}
+                      className="w-full px-2.5 py-1.5 text-xs rounded border border-[#DCE5E0] focus:outline-hidden focus:border-[#1D7A6F]"
+                      autoFocus
+                    />
+
+                    <div className="max-h-56 overflow-y-auto space-y-1 divide-y divide-[#DCE5E0]/50">
+                      {filteredAnggotaPicker.map((a) => (
+                        <div
+                          key={a.id}
+                          onClick={() => {
+                            setEditingAnggota(a);
+                            setIsPickerOpen(false);
+                            setPickerSearch('');
+                          }}
+                          className="pt-1.5 pb-1 px-1.5 hover:bg-[#F7F5EF] rounded cursor-pointer transition-colors flex items-center justify-between text-xs"
+                        >
+                          <div className="min-w-0 pr-2">
+                            <p className="font-semibold text-[#26332E] truncate">{a.nama}</p>
+                            <p className="text-[10px] text-[#5C6E66]">{a.kelas} • {a.id}</p>
+                          </div>
+                          <Edit3 className="w-3.5 h-3.5 text-[#1D7A6F] shrink-0" />
+                        </div>
+                      ))}
+                      {filteredAnggotaPicker.length === 0 && (
+                        <p className="text-center text-xs text-[#5C6E66] py-3">Tidak ditemukan.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <AdminButton editUrl={editUrl} title="Edit Bahsu di Sheets" />
           </div>
@@ -288,22 +382,57 @@ export default function BahsuTable({ events = [], title, editUrl }) {
                       </td>
                       <td className="py-3.5 px-5">
                         {item.delegasi && item.delegasi.length > 0 ? (
-                          <div className="space-y-1">
+                          <div className="space-y-1.5">
                             {item.delegasi.map((del, dIdx) => {
-                              const isKomisi = del.toUpperCase().startsWith('KOMISI') || del.toUpperCase().startsWith('KOM ');
+                              const isKomisi =
+                                del.toUpperCase().startsWith('KOMISI') ||
+                                del.toUpperCase().startsWith('KOM ');
+                              const matchedAnggota = !isKomisi
+                                ? findAnggotaByDelegasiName(del, anggotaList)
+                                : null;
+
                               return (
                                 <div
                                   key={dIdx}
                                   className={`text-xs ${
                                     isKomisi
                                       ? 'font-bold text-[#1D7A6F] mt-1 pt-1 border-t border-[#DCE5E0]'
-                                      : 'text-[#26332E] flex items-center gap-1.5'
+                                      : 'text-[#26332E] flex items-center justify-between gap-2 py-0.5'
                                   }`}
                                 >
-                                  {!isKomisi && (
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#1D7A6F] shrink-0" />
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    {!isKomisi && (
+                                      <span
+                                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                          matchedAnggota ? 'bg-[#1D7A6F]' : 'bg-[#C6A66B]'
+                                        }`}
+                                      />
+                                    )}
+                                    <span className={matchedAnggota ? 'font-medium' : ''}>
+                                      {del}
+                                    </span>
+                                    {matchedAnggota && (
+                                      <span
+                                        className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#E8F5F3] text-[#1D7A6F] border border-[#C8E3DC] no-print shrink-0"
+                                        title={`ID Anggota: ${matchedAnggota.id} • ${matchedAnggota.kelas}`}
+                                      >
+                                        {matchedAnggota.id}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {/* Tombol Edit Biodata Khusus Admin */}
+                                  {matchedAnggota && isAdmin && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingAnggota(matchedAnggota)}
+                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold text-[#1D7A6F] bg-white hover:bg-[#1D7A6F] hover:text-white border border-[#C8E3DC] transition-colors shrink-0 cursor-pointer no-print shadow-2xs"
+                                      title={`Edit biodata ${matchedAnggota.nama} di Google Sheets`}
+                                    >
+                                      <Edit3 className="w-3 h-3" />
+                                      <span>Edit Biodata</span>
+                                    </button>
                                   )}
-                                  <span>{del}</span>
                                 </div>
                               );
                             })}
@@ -382,13 +511,37 @@ export default function BahsuTable({ events = [], title, editUrl }) {
                   </div>
 
                   {item.delegasi && item.delegasi.length > 0 && (
-                    <div className="p-3 rounded-lg bg-[#F7F5EF] border border-[#DCE5E0] text-xs space-y-1">
+                    <div className="p-3 rounded-lg bg-[#F7F5EF] border border-[#DCE5E0] text-xs space-y-1.5">
                       <span className="font-semibold text-[#1D7A6F] block mb-1">Delegasi:</span>
-                      {item.delegasi.map((del, dIdx) => (
-                        <p key={dIdx} className="text-[#26332E]">
-                          {del}
-                        </p>
-                      ))}
+                      {item.delegasi.map((del, dIdx) => {
+                        const isKomisi =
+                          del.toUpperCase().startsWith('KOMISI') ||
+                          del.toUpperCase().startsWith('KOM ');
+                        const matchedAnggota = !isKomisi
+                          ? findAnggotaByDelegasiName(del, anggotaList)
+                          : null;
+
+                        return (
+                          <div
+                            key={dIdx}
+                            className={`flex items-center justify-between gap-2 py-0.5 ${
+                              isKomisi ? 'font-bold text-[#1D7A6F] pt-1' : 'text-[#26332E]'
+                            }`}
+                          >
+                            <span className="truncate">{del}</span>
+                            {matchedAnggota && isAdmin && (
+                              <button
+                                type="button"
+                                onClick={() => setEditingAnggota(matchedAnggota)}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold text-[#1D7A6F] bg-white border border-[#C8E3DC] shrink-0 cursor-pointer shadow-2xs"
+                              >
+                                <Edit3 className="w-3 h-3" />
+                                <span>Edit</span>
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -406,7 +559,14 @@ export default function BahsuTable({ events = [], title, editUrl }) {
       {/* Tanda Tangan Resmi Pengesahan Laporan */}
       <PrintSignatures rightRole="WAKA III / Koordinator Bahtsul Masail" />
 
+      {/* Modal Edit Biodata Anggota */}
+      <EditBiodataModal
+        anggota={editingAnggota}
+        isOpen={!!editingAnggota}
+        onClose={() => setEditingAnggota(null)}
+        onSuccess={handleEditSuccess}
+      />
+
     </div>
   );
 }
-

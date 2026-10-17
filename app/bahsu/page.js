@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { DATA_LINKS } from '@/lib/dataLinks';
-import { getBahsuData } from '@/lib/fetchCSV';
+import { getBahsuData, getAnggotaData } from '@/lib/fetchCSV';
 import BahsuTable from '@/components/BahsuTable';
 import AdminButton from '@/components/AdminButton';
 import { Calendar, RefreshCw, AlertCircle, ArrowLeft, Printer } from 'lucide-react';
@@ -10,22 +10,35 @@ import Link from 'next/link';
 
 export default function BahsuPage() {
   const [data, setData] = useState(null);
+  const [anggotaList, setAnggotaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchBahsu = async (showLoading = true) => {
+  const fetchBahsu = useCallback(async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true);
       setError(null);
-      const res = await getBahsuData(DATA_LINKS.bahsu.csvUrl);
-      setData(res);
+
+      // Ambil jadwal pemberangkatan bahsu sekaligus data profil anggota LBM
+      const [bahsuRes, anggotaRes] = await Promise.all([
+        getBahsuData(DATA_LINKS.bahsu.csvUrl),
+        getAnggotaData(DATA_LINKS.anggota.csvUrl).catch((err) => {
+          console.warn('Gagal memuat profil anggota pendamping:', err);
+          return { anggota: [] };
+        }),
+      ]);
+
+      setData(bahsuRes);
+      if (anggotaRes?.anggota) {
+        setAnggotaList(anggotaRes.anggota);
+      }
     } catch (err) {
       console.error(err);
       setError(err?.message || 'Gagal memuat jadwal & delegasi Bahtsul Masail dari Google Sheets.');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchBahsu(true);
@@ -38,7 +51,7 @@ export default function BahsuPage() {
       clearInterval(timer);
       window.removeEventListener('focus', onFocus);
     };
-  }, []);
+  }, [fetchBahsu]);
 
   return (
     <div className="space-y-6">
@@ -72,7 +85,7 @@ export default function BahsuPage() {
             <span>Cetak Laporan</span>
           </button>
           <button
-            onClick={fetchBahsu}
+            onClick={() => fetchBahsu(true)}
             disabled={loading}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#DCE5E0] bg-white text-[#1D7A6F] hover:bg-[#F7F5EF] text-xs sm:text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
           >
@@ -89,7 +102,7 @@ export default function BahsuPage() {
           <AlertCircle className="w-5 h-5 shrink-0 text-[#8A2F1B] mt-0.5" />
           <div>
             <p className="font-semibold">{error}</p>
-            <button onClick={fetchBahsu} className="underline text-xs mt-1 cursor-pointer">Coba Muat Ulang</button>
+            <button onClick={() => fetchBahsu(true)} className="underline text-xs mt-1 cursor-pointer">Coba Muat Ulang</button>
           </div>
         </div>
       )}
@@ -105,10 +118,11 @@ export default function BahsuPage() {
           events={data?.events || []}
           title={data?.title}
           editUrl={DATA_LINKS.bahsu.editUrl}
+          anggotaList={anggotaList}
+          onRefresh={() => fetchBahsu(false)}
         />
       )}
 
     </div>
   );
 }
-

@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, RotateCcw, User, GraduationCap, Activity, FileSpreadsheet, Info, ChevronRight, Printer } from 'lucide-react';
+import { Search, Filter, RotateCcw, User, GraduationCap, Activity, FileSpreadsheet, Info, ChevronRight, Printer, Edit3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { STATUS_COLORS } from './PieChart';
 import AdminButton from './AdminButton';
 import AnggotaDetailModal from './AnggotaDetailModal';
+import EditBiodataModal from './EditBiodataModal';
 import { PrintHeader, PrintSignatures } from './PrintHeaderFooter';
+import { useAuth } from '@/lib/auth';
 
 // Urutan hierarki standar tingkatan kelas (Aliyah tertinggi ke Tsanawiyah terendah)
 const CLASS_ORDER = [
@@ -21,11 +23,13 @@ const CLASS_ORDER = [
   '1 Tsanawiyah',
 ];
 
-export default function AnggotaTable({ anggota = [], editUrl }) {
+export default function AnggotaTable({ anggota = [], editUrl, onRefresh }) {
+  const { isAdmin } = useAuth();
   const [search, setSearch] = useState('');
   const [selectedKelas, setSelectedKelas] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedAnggota, setSelectedAnggota] = useState(null);
+  const [editingAnggota, setEditingAnggota] = useState(null);
 
   // Ekstrak daftar unik Kelas & Status untuk filter dropdown
   const { kelasList, statusList, hasTanpaKelas } = useMemo(() => {
@@ -297,19 +301,35 @@ export default function AnggotaTable({ anggota = [], editUrl }) {
                       </span>
                     </td>
 
-                    {/* Kolom Aksi / Tombol Detail */}
+                    {/* Kolom Aksi / Tombol Detail & Edit */}
                     <td className="py-3.5 px-4 sm:px-6 text-center no-print">
-                      <motion.button
-                        type="button"
-                        onClick={() => setSelectedAnggota(item)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-2.5 py-1 text-xs font-semibold text-[#1D7A6F] bg-[#E8F5F3] hover:bg-[#1D7A6F] hover:text-white rounded border border-[#C8E3DC] transition-colors cursor-pointer inline-flex items-center gap-1"
-                        title="Lihat detail lengkap"
-                      >
-                        <span>Detail</span>
-                        <ChevronRight className="w-3 h-3" />
-                      </motion.button>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <motion.button
+                          type="button"
+                          onClick={() => setSelectedAnggota(item)}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="px-2.5 py-1 text-xs font-semibold text-[#1D7A6F] bg-[#E8F5F3] hover:bg-[#1D7A6F] hover:text-white rounded border border-[#C8E3DC] transition-colors cursor-pointer inline-flex items-center gap-1"
+                          title="Lihat detail lengkap"
+                        >
+                          <span>Detail</span>
+                          <ChevronRight className="w-3 h-3" />
+                        </motion.button>
+
+                        {isAdmin && (
+                          <motion.button
+                            type="button"
+                            onClick={() => setEditingAnggota(item)}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="px-2.5 py-1 text-xs font-semibold text-[#1D7A6F] bg-white hover:bg-[#1D7A6F] hover:text-white rounded border border-[#C8E3DC] transition-colors cursor-pointer inline-flex items-center gap-1 shadow-2xs"
+                            title="Edit biodata di Google Sheets"
+                          >
+                            <Edit3 className="w-3 h-3" />
+                            <span>Edit</span>
+                          </motion.button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -347,9 +367,24 @@ export default function AnggotaTable({ anggota = [], editUrl }) {
       <AnggotaDetailModal
         anggota={selectedAnggota}
         onClose={() => setSelectedAnggota(null)}
+        onEdit={(item) => setEditingAnggota(item)}
+      />
+
+      {/* Modal Edit Biodata Anggota */}
+      <EditBiodataModal
+        anggota={editingAnggota}
+        isOpen={!!editingAnggota}
+        onClose={() => setEditingAnggota(null)}
+        onSuccess={(updated) => {
+          if (typeof onRefresh === 'function') onRefresh();
+          if (selectedAnggota && updated && selectedAnggota.id === updated.id) {
+            setSelectedAnggota((prev) => ({ ...prev, ...updated }));
+          }
+        }}
       />
 
     </div>
   );
 }
+
 

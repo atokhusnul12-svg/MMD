@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { DATA_LINKS } from '@/lib/dataLinks';
 import { getAnggotaData } from '@/lib/fetchCSV';
 import AnggotaTable from '@/components/AnggotaTable';
@@ -13,7 +13,7 @@ export default function AnggotaPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchAnggota = async (showLoading = true) => {
+  const fetchAnggota = useCallback(async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true);
       setError(null);
@@ -25,7 +25,7 @@ export default function AnggotaPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchAnggota(true);
@@ -38,7 +38,7 @@ export default function AnggotaPage() {
       clearInterval(timer);
       window.removeEventListener('focus', onFocus);
     };
-  }, []);
+  }, [fetchAnggota]);
 
   return (
     <div className="space-y-6">
@@ -72,7 +72,7 @@ export default function AnggotaPage() {
             <span>Cetak Laporan</span>
           </button>
           <button
-            onClick={fetchAnggota}
+            onClick={() => fetchAnggota(true)}
             disabled={loading}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#DCE5E0] bg-white text-[#1D7A6F] hover:bg-[#F7F5EF] text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
           >
@@ -89,7 +89,7 @@ export default function AnggotaPage() {
           <AlertCircle className="w-5 h-5 shrink-0 text-[#8A2F1B] mt-0.5" />
           <div>
             <p className="font-semibold">{error}</p>
-            <button onClick={fetchAnggota} className="underline text-xs mt-1 cursor-pointer">Coba Muat Ulang</button>
+            <button onClick={() => fetchAnggota(true)} className="underline text-xs mt-1 cursor-pointer">Coba Muat Ulang</button>
           </div>
         </div>
       )}
@@ -104,10 +104,10 @@ export default function AnggotaPage() {
         <AnggotaTable
           anggota={data?.anggota || []}
           editUrl={DATA_LINKS.anggota.editUrl}
+          onRefresh={() => fetchAnggota(false)}
         />
       )}
 
     </div>
   );
 }
-
