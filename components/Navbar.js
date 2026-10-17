@@ -43,31 +43,31 @@ export default function Navbar() {
       {/* TopBar Jam Istiwa' Real-Time Tampil di Semua Halaman */}
       <JamIstiwaTopBar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-18">
           
           {/* Logo & Judul Organisasi */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-11 h-11 rounded-lg bg-[#FAF6EF] p-1 flex items-center justify-center border border-[#DCE5E0] shadow-2xs group-hover:border-[#1D7A6F] transition-colors">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0 min-w-0">
+            <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-lg bg-[#FAF6EF] p-1 flex items-center justify-center border border-[#DCE5E0] shadow-2xs group-hover:border-[#1D7A6F] transition-colors shrink-0">
               <img
                 src="/logo.png"
                 alt="Logo MIDA Sumbersari Kediri"
                 className="w-full h-full object-contain filter drop-shadow-2xs"
               />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-lg text-[#1D7A6F] tracking-tight transition-colors">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="font-bold text-base sm:text-lg text-[#1D7A6F] tracking-tight transition-colors whitespace-nowrap">
                   WAKA III MMD
                 </span>
                 {isAdmin && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-xs bg-[#FAF3E6] text-[#8C6D23] border border-[#C6A66B]/30">
-                    <ShieldCheck className="w-3 h-3 text-[#C6A66B]" />
+                  <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold px-1.5 sm:px-2 py-0.5 rounded-xs bg-[#FAF3E6] text-[#8C6D23] border border-[#C6A66B]/30 shrink-0">
+                    <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#C6A66B]" />
                     Admin
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[#5C6B64] hidden sm:block">
+              <p className="text-xs text-[#5C6B64] hidden sm:block truncate">
                 Madrasah Islamiyah Darussalamah • Pondok Pesantren Darussalam Sumbersari
               </p>
             </div>
@@ -122,19 +122,19 @@ export default function Navbar() {
           </nav>
 
           {/* Tombol Hamburger & Notifikasi Menu Mobile */}
-          <div className="flex lg:hidden items-center gap-1.5">
+          <div className="flex lg:hidden items-center gap-1 sm:gap-1.5 shrink-0">
             <NotificationButton variant="header" />
             {isAdmin && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-xs bg-[#FAF3E6] text-[#8C6D23] border border-[#C6A66B]/30">
+              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-xs bg-[#FAF3E6] text-[#8C6D23] border border-[#C6A66B]/30">
                 Admin
               </span>
             )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle Menu"
-              className="p-2 rounded-md text-[#26332E] hover:bg-[#F7F5EF] focus:outline-hidden cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-md text-[#26332E] hover:bg-[#F7F5EF] focus:outline-hidden cursor-pointer"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
           </div>
         </div>
