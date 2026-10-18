@@ -208,6 +208,31 @@ export async function POST(request) {
 
     const { action, id, changes, event } = body || {};
 
+    const scriptUrl = resolveScriptUrl();
+    const secretToken = process.env.SHEETS_API_SECRET_TOKEN;
+
+    if (!scriptUrl || typeof scriptUrl !== 'string' || scriptUrl.trim().length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Variabel lingkungan GOOGLE_SHEETS_SCRIPT_URL belum diatur di server Vercel / .env.local. Silakan lakukan deployment Google Apps Script terlebih dahulu.',
+        },
+        { status: 503 }
+      );
+    }
+
+    if (!secretToken || typeof secretToken !== 'string' || secretToken.trim().length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Variabel lingkungan SHEETS_API_SECRET_TOKEN belum diatur pada hosting website (Vercel / .env.local). Silakan tambahkan token rahasia server-to-server.',
+        },
+        { status: 500 }
+      );
+    }
+
+    let appsScriptPayload;
+
     // Aksi 1: Sinkronisasi Kegiatan Bahtsul Masail (Daftar Pemberangkatan & Perkembangan)
     if (action === 'syncBahsuEvent' || event) {
       const eventData = event || {};
@@ -235,29 +260,6 @@ export async function POST(request) {
         return NextResponse.json(
           { success: false, error: 'Tanggal pelaksanaan kegiatan Bahtsul Masail wajib diisi.' },
           { status: 400 }
-        );
-      }
-
-      const scriptUrl = resolveScriptUrl();
-      const secretToken = process.env.SHEETS_API_SECRET_TOKEN;
-
-      if (!scriptUrl || typeof scriptUrl !== 'string' || scriptUrl.trim().length === 0) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Variabel lingkungan GOOGLE_SHEETS_SCRIPT_URL belum diatur di server Vercel / .env.local. Silakan lakukan deployment Google Apps Script terlebih dahulu.',
-          },
-          { status: 503 }
-        );
-      }
-
-      if (!secretToken || typeof secretToken !== 'string' || secretToken.trim().length === 0) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Variabel lingkungan SHEETS_API_SECRET_TOKEN belum diatur pada hosting website (Vercel / .env.local). Silakan tambahkan token rahasia server-to-server.',
-          },
-          { status: 500 }
         );
       }
 
