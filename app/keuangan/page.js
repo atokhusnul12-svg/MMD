@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { DATA_LINKS } from '@/lib/dataLinks';
 import { getKeuanganData } from '@/lib/fetchCSV';
 import KeuanganTable from '@/components/KeuanganTable';
@@ -8,10 +8,14 @@ import AdminButton from '@/components/AdminButton';
 import { Wallet, RefreshCw, AlertCircle, ArrowLeft, Printer } from 'lucide-react';
 import Link from 'next/link';
 
+const SYNC_INTERVAL_MS = 180_000;
+const REFOCUS_COOLDOWN_MS = 60_000;
+
 export default function KeuanganPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const lastFetchRef = useRef(0);
 
   const fetchKeuangan = async (showLoading = true) => {
     try {
@@ -19,6 +23,7 @@ export default function KeuanganPage() {
       setError(null);
       const res = await getKeuanganData(DATA_LINKS.keuangan.csvUrl);
       setData(res);
+      lastFetchRef.current = Date.now();
     } catch (err) {
       console.error(err);
       setError(err?.message || 'Gagal memuat rekapitulasi keuangan dari Google Sheets.');
@@ -30,13 +35,22 @@ export default function KeuanganPage() {
   useEffect(() => {
     fetchKeuangan(true);
 
-    const timer = setInterval(() => fetchKeuangan(false), 25000);
-    const onFocus = () => fetchKeuangan(false);
-    window.addEventListener('focus', onFocus);
+    const timer = setInterval(() => fetchKeuangan(false), SYNC_INTERVAL_MS);
+
+    const throttledRefetch = () => {
+      if (Date.now() - lastFetchRef.current >= REFOCUS_COOLDOWN_MS) fetchKeuangan(false);
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') throttledRefetch();
+    };
+
+    window.addEventListener('focus', throttledRefetch);
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       clearInterval(timer);
-      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('focus', throttledRefetch);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, []);
 

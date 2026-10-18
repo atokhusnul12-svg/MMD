@@ -208,6 +208,48 @@ export async function POST(request) {
 
     const { action, id, changes, event } = body || {};
 
+    // 1. Guard Aksi: Hanya 'syncBahsuEvent' yang diizinkan. Pengeditan biodata ditolak permanen.
+    if (action !== 'syncBahsuEvent' && !event) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Fitur pengeditan biodata santri dinonaktifkan. Data biodata santri pada Google Sheets bersifat tetap (read-only) dan tidak dapat diubah melalui website.',
+        },
+        { status: 403 }
+      );
+    }
+
+    // 2. Validasi Input Payload Kegiatan Bahtsul Masail
+    const eventData = event || {};
+    const newAcara = String(eventData.newAcara || eventData.acara || '').trim();
+    const newTanggal = String(eventData.newTanggal || eventData.tanggal || '').trim();
+    const delegasi = String(eventData.delegasi || '').trim();
+    const keterangan = String(eventData.keterangan || 'SUDAH').trim();
+    const oldAcara = String(eventData.oldAcara || '').trim();
+    const oldTanggal = String(eventData.oldTanggal || '').trim();
+    const mode = eventData.mode === 'create' ? 'create' : 'edit';
+    const rowNumber = Number(eventData.rowNumber) || null;
+    const no = eventData.no !== undefined && eventData.no !== null ? String(eventData.no).trim() : '';
+    const matchedMemberIds = Array.isArray(eventData.matchedMemberIds)
+      ? eventData.matchedMemberIds.map((id) => String(id).trim().toUpperCase()).filter(Boolean)
+      : [];
+
+    if (!newAcara) {
+      return NextResponse.json(
+        { success: false, error: 'Nama agenda Bahtsul Masail (acara) wajib diisi.' },
+        { status: 400 }
+      );
+    }
+
+    if (!newTanggal) {
+      return NextResponse.json(
+        { success: false, error: 'Tanggal pelaksanaan kegiatan Bahtsul Masail wajib diisi.' },
+        { status: 400 }
+      );
+    }
+
+    // 3. Verifikasi Konfigurasi Backend Google Apps Script
     const scriptUrl = resolveScriptUrl();
     const secretToken = process.env.SHEETS_API_SECRET_TOKEN;
 
@@ -231,65 +273,22 @@ export async function POST(request) {
       );
     }
 
-    let appsScriptPayload;
-
-    // Aksi 1: Sinkronisasi Kegiatan Bahtsul Masail (Daftar Pemberangkatan & Perkembangan)
-    if (action === 'syncBahsuEvent' || event) {
-      const eventData = event || {};
-      const newAcara = String(eventData.newAcara || eventData.acara || '').trim();
-      const newTanggal = String(eventData.newTanggal || eventData.tanggal || '').trim();
-      const delegasi = String(eventData.delegasi || '').trim();
-      const keterangan = String(eventData.keterangan || 'SUDAH').trim();
-      const oldAcara = String(eventData.oldAcara || '').trim();
-      const oldTanggal = String(eventData.oldTanggal || '').trim();
-      const mode = eventData.mode === 'create' ? 'create' : 'edit';
-      const rowNumber = Number(eventData.rowNumber) || null;
-      const no = eventData.no !== undefined && eventData.no !== null ? String(eventData.no).trim() : '';
-      const matchedMemberIds = Array.isArray(eventData.matchedMemberIds)
-        ? eventData.matchedMemberIds.map((id) => String(id).trim().toUpperCase()).filter(Boolean)
-        : [];
-
-      if (!newAcara) {
-        return NextResponse.json(
-          { success: false, error: 'Nama agenda Bahtsul Masail (acara) wajib diisi.' },
-          { status: 400 }
-        );
-      }
-
-      if (!newTanggal) {
-        return NextResponse.json(
-          { success: false, error: 'Tanggal pelaksanaan kegiatan Bahtsul Masail wajib diisi.' },
-          { status: 400 }
-        );
-      }
-
-      appsScriptPayload = {
-        action: 'syncBahsuEvent',
-        token: secretToken,
-        event: {
-          mode,
-          rowNumber,
-          no,
-          newAcara: newAcara.slice(0, 500),
-          newTanggal: newTanggal.slice(0, 100),
-          delegasi: delegasi.slice(0, 3000),
-          keterangan: keterangan.slice(0, 100),
-          oldAcara: oldAcara.slice(0, 500),
-          oldTanggal: oldTanggal.slice(0, 100),
-          matchedMemberIds: matchedMemberIds.slice(0, 100),
-        },
-      };
-    } else {
-      // Fitur pengeditan biodata santri dinonaktifkan secara permanen
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            'Fitur pengeditan biodata santri dinonaktifkan. Data biodata santri pada Google Sheets bersifat tetap (read-only) dan tidak dapat diubah melalui website.',
-        },
-        { status: 403 }
-      );
-    }
+    const appsScriptPayload = {
+      action: 'syncBahsuEvent',
+      token: secretToken,
+      event: {
+        mode,
+        rowNumber,
+        no,
+        newAcara: newAcara.slice(0, 500),
+        newTanggal: newTanggal.slice(0, 100),
+        delegasi: delegasi.slice(0, 3000),
+        keterangan: keterangan.slice(0, 100),
+        oldAcara: oldAcara.slice(0, 500),
+        oldTanggal: oldTanggal.slice(0, 100),
+        matchedMemberIds: matchedMemberIds.slice(0, 100),
+      },
+    };
 
     let appsScriptRes;
     try {
@@ -354,6 +353,7 @@ export async function POST(request) {
       success: true,
       message: responseData.message || 'Perubahan berhasil disimpan ke Google Sheets.',
       data: responseData.data || null,
+      isPartial: Boolean(responseData.data?.isPartial),
     });
 
   } catch (error) {

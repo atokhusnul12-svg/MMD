@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { DATA_LINKS } from '@/lib/dataLinks';
 import { getBahsuData, getAnggotaData } from '@/lib/fetchCSV';
 import BahsuTable from '@/components/BahsuTable';
@@ -8,12 +8,16 @@ import AdminButton from '@/components/AdminButton';
 import { Calendar, RefreshCw, AlertCircle, ArrowLeft, Printer, Plus } from 'lucide-react';
 import Link from 'next/link';
 
+const SYNC_INTERVAL_MS = 180_000;
+const REFOCUS_COOLDOWN_MS = 60_000;
+
 export default function BahsuPage() {
   const [data, setData] = useState(null);
   const [anggotaList, setAnggotaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const lastFetchRef = useRef(0);
 
   const fetchBahsu = useCallback(async (showLoading = true) => {
     try {
@@ -33,6 +37,7 @@ export default function BahsuPage() {
       if (anggotaRes?.anggota) {
         setAnggotaList(anggotaRes.anggota);
       }
+      lastFetchRef.current = Date.now();
     } catch (err) {
       console.error(err);
       setError(err?.message || 'Gagal memuat jadwal & delegasi Bahtsul Masail dari Google Sheets.');
@@ -41,16 +46,75 @@ export default function BahsuPage() {
     }
   }, []);
 
+  const handleRefresh = useCallback((savedEvent = null) => {
+    if (savedEvent && savedEvent.acara) {
+      setData((prevData) => {
+        if (!prevData) return prevData;
+        const currentEvents = [...(prevData.events || [])];
+        const existingIdx = currentEvents.findIndex(
+          (e) => (savedEvent.no && String(e.no) === String(savedEvent.no)) ||
+                 (e.acara.toLowerCase() === savedEvent.acara.toLowerCase() && (!savedEvent.tanggal || e.tanggal === savedEvent.tanggal))
+        );
+
+        const formattedEvent = {
+          id: existingIdx !== -1 ? currentEvents[existingIdx].id : currentEvents.length + 1,
+          no: savedEvent.no || String(currentEvents.length + 1),
+          acara: savedEvent.acara,
+          tanggal: savedEvent.tanggal,
+          delegasi: Array.isArray(savedEvent.delegasi) ? savedEvent.delegasi : [],
+          keterangan: savedEvent.keterangan || 'SUDAH',
+          isBelumBerangkat: savedEvent.statusKeberangkatan === 'BELUM_BERANGKAT',
+          statusKeberangkatan: savedEvent.statusKeberangkatan || 'SUDAH_BERANGKAT',
+        };
+
+        if (existingIdx !== -1) {
+          currentEvents[existingIdx] = formattedEvent;
+        } else {
+          currentEvents.push(formattedEvent);
+        }
+
+        const totalAgenda = currentEvents.length;
+        const totalBelumBerangkat = currentEvents.filter((e) => e.statusKeberangkatan === 'BELUM_BERANGKAT').length;
+        const totalSudahBerangkat = currentEvents.filter((e) => e.statusKeberangkatan === 'SUDAH_BERANGKAT').length;
+        const totalIzin = currentEvents.filter((e) => e.statusKeberangkatan === 'IZIN').length;
+
+        return {
+          ...prevData,
+          events: currentEvents,
+          totalAgenda,
+          totalBelumBerangkat,
+          totalSudahBerangkat,
+          totalIzin,
+        };
+      });
+    }
+
+    // Refresh data kanonikal dari Google Sheets di latar belakang
+    fetchBahsu(false);
+  }, [fetchBahsu]);
+
   useEffect(() => {
     fetchBahsu(true);
 
-    const timer = setInterval(() => fetchBahsu(false), 25000);
-    const onFocus = () => fetchBahsu(false);
-    window.addEventListener('focus', onFocus);
+    const timer = setInterval(() => fetchBahsu(false), SYNC_INTERVAL_MS);
+
+    const throttledRefetch = () => {
+      if (Date.now() - lastFetchRef.current >= REFOCUS_COOLDOWN_MS) {
+        fetchBahsu(false);
+      }
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') throttledRefetch();
+    };
+
+    window.addEventListener('focus', throttledRefetch);
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       clearInterval(timer);
-      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('focus', throttledRefetch);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [fetchBahsu]);
 
@@ -131,7 +195,7 @@ export default function BahsuPage() {
           anggotaList={anggotaList}
           isAddModalOpen={isAddModalOpen}
           onCloseAddModal={() => setIsAddModalOpen(false)}
-          onRefresh={() => fetchBahsu(false)}
+          onRefresh={handleRefresh}
         />
       )}
 

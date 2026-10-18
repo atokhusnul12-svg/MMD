@@ -8,6 +8,7 @@ import {
   Users,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
   Loader2,
   Plus,
   Trash2,
@@ -65,6 +66,7 @@ export default function EditBahsuModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [isPartialSuccess, setIsPartialSuccess] = useState(false);
   const [pickerSearch, setPickerSearch] = useState('');
   const [showPicker, setShowPicker] = useState(false);
 
@@ -75,6 +77,7 @@ export default function EditBahsuModal({
     if (isOpen) {
       setErrorMsg('');
       setSuccessMsg('');
+      setIsPartialSuccess(false);
       setPickerSearch('');
       setShowPicker(false);
 
@@ -294,20 +297,28 @@ export default function EditBahsuModal({
         throw new Error(data.error || 'Gagal menyimpan agenda ke Google Sheets.');
       }
 
-      const syncCount = data.data?.syncedCount ?? parsedDelegates.matched.length;
-      const successText = isCreate
-        ? `Agenda berhasil ditambahkan ke DAFTAR PEMBERANGKATAN BAHSU dan disinkronkan ke ${syncCount} riwayat santri di tab PERKEMBANGAN!`
-        : (data.message || 'Perubahan agenda Bahtsul Masail berhasil disimpan ke Google Sheets.');
+      const isPartial = Boolean(data.isPartial || data.data?.isPartial);
+      setIsPartialSuccess(isPartial);
+      const syncCount = data.data?.syncedCount ?? 0;
+
+      let successText = '';
+      if (isPartial) {
+        successText = data.message || '⚠️ Agenda berhasil disimpan ke DAFTAR PEMBERANGKATAN BAHSU, namun tidak ada santri LBM yang cocok untuk disinkronkan ke sheet PERKEMBANGAN.';
+      } else if (isCreate) {
+        successText = `Agenda berhasil ditambahkan ke DAFTAR PEMBERANGKATAN BAHSU dan disinkronkan ke ${syncCount} riwayat santri di tab PERKEMBANGAN!`;
+      } else {
+        successText = data.message || `Perubahan agenda Bahtsul Masail berhasil disimpan ke Google Sheets (tersinkron ke ${syncCount} santri).`;
+      }
 
       setSuccessMsg(successText);
 
-      // Berikan jeda sejenak agar pengguna membaca notifikasi sukses
+      // Berikan jeda sejenak agar pengguna membaca notifikasi (lebih lama untuk peringatan parsial)
       setTimeout(() => {
         if (typeof onSuccess === 'function') {
           onSuccess(data.data?.event || null);
         }
         onClose();
-      }, 1500);
+      }, isPartial ? 3000 : 1500);
 
     } catch (err) {
       console.error('Error saat menyimpan kegiatan bahtsu:', err);
@@ -367,10 +378,20 @@ export default function EditBahsuModal({
             </div>
           )}
 
-          {/* Banner Notifikasi Sukses */}
+          {/* Banner Notifikasi Sukses / Sukses Parsial */}
           {successMsg && (
-            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-[#E8F5F3] border border-[#C8E3DC] text-[#1D7A6F] text-xs animate-in fade-in duration-150">
-              <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-[#1D7A6F]" />
+            <div
+              className={`flex items-start gap-3 p-3.5 rounded-xl text-xs animate-in fade-in duration-150 ${
+                isPartialSuccess
+                  ? 'bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E]'
+                  : 'bg-[#E8F5F3] border border-[#C8E3DC] text-[#1D7A6F]'
+              }`}
+            >
+              {isPartialSuccess ? (
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-[#D97706]" />
+              ) : (
+                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-[#1D7A6F]" />
+              )}
               <div className="leading-relaxed font-bold">{successMsg}</div>
             </div>
           )}

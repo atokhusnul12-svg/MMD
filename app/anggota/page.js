@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { DATA_LINKS } from '@/lib/dataLinks';
 import { getAnggotaData } from '@/lib/fetchCSV';
 import AnggotaTable from '@/components/AnggotaTable';
@@ -8,10 +8,14 @@ import AdminButton from '@/components/AdminButton';
 import { Users, RefreshCw, AlertCircle, ArrowLeft, Printer } from 'lucide-react';
 import Link from 'next/link';
 
+const SYNC_INTERVAL_MS = 180_000;
+const REFOCUS_COOLDOWN_MS = 60_000;
+
 export default function AnggotaPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const lastFetchRef = useRef(0);
 
   const fetchAnggota = useCallback(async (showLoading = true) => {
     try {
@@ -19,6 +23,7 @@ export default function AnggotaPage() {
       setError(null);
       const res = await getAnggotaData(DATA_LINKS.anggota.csvUrl);
       setData(res);
+      lastFetchRef.current = Date.now();
     } catch (err) {
       console.error(err);
       setError(err?.message || 'Gagal memuat data anggota dari Google Sheets.');
@@ -30,13 +35,22 @@ export default function AnggotaPage() {
   useEffect(() => {
     fetchAnggota(true);
 
-    const timer = setInterval(() => fetchAnggota(false), 25000);
-    const onFocus = () => fetchAnggota(false);
-    window.addEventListener('focus', onFocus);
+    const timer = setInterval(() => fetchAnggota(false), SYNC_INTERVAL_MS);
+
+    const throttledRefetch = () => {
+      if (Date.now() - lastFetchRef.current >= REFOCUS_COOLDOWN_MS) fetchAnggota(false);
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') throttledRefetch();
+    };
+
+    window.addEventListener('focus', throttledRefetch);
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       clearInterval(timer);
-      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('focus', throttledRefetch);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [fetchAnggota]);
 

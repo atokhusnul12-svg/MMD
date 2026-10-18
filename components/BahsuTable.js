@@ -70,6 +70,13 @@ export default function BahsuTable({
     }
   };
 
+  const handleEditSuccess = (savedEvent = null) => {
+    handleCloseModal();
+    if (typeof onRefresh === 'function') {
+      onRefresh(savedEvent);
+    }
+  };
+
   const handlePrint = () => {
     if (typeof window !== 'undefined') {
       window.print();
@@ -117,12 +124,6 @@ export default function BahsuTable({
     if (filterStatus === 'IZIN') parts.push('Status: Izin / Berhalangan');
     return parts.length > 0 ? parts.join(' | ') : 'Semua Agenda Terjadwal';
   }, [search, filterStatus]);
-
-  const handleEditSuccess = () => {
-    if (typeof onRefresh === 'function') {
-      onRefresh();
-    }
-  };
 
   return (
     <div className="space-y-6">

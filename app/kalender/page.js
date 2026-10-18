@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { DATA_LINKS } from '@/lib/dataLinks';
 import { getKalenderData } from '@/lib/fetchCSV';
 import KalenderView from '@/components/KalenderView';
@@ -8,10 +8,14 @@ import AdminButton from '@/components/AdminButton';
 import { Calendar, RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+const SYNC_INTERVAL_MS = 180_000;
+const REFOCUS_COOLDOWN_MS = 60_000;
+
 export default function KalenderPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const lastFetchRef = useRef(0);
 
   const fetchKalender = async (showLoading = true) => {
     try {
@@ -19,6 +23,7 @@ export default function KalenderPage() {
       setError(null);
       const res = await getKalenderData(DATA_LINKS.kalender.csvUrl);
       setData(res);
+      lastFetchRef.current = Date.now();
     } catch (err) {
       console.error(err);
       setError(err?.message || 'Gagal memuat Kalender Kerja dari Google Sheets.');
@@ -30,13 +35,22 @@ export default function KalenderPage() {
   useEffect(() => {
     fetchKalender(true);
 
-    const timer = setInterval(() => fetchKalender(false), 25000);
-    const onFocus = () => fetchKalender(false);
-    window.addEventListener('focus', onFocus);
+    const timer = setInterval(() => fetchKalender(false), SYNC_INTERVAL_MS);
+
+    const throttledRefetch = () => {
+      if (Date.now() - lastFetchRef.current >= REFOCUS_COOLDOWN_MS) fetchKalender(false);
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') throttledRefetch();
+    };
+
+    window.addEventListener('focus', throttledRefetch);
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       clearInterval(timer);
-      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('focus', throttledRefetch);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, []);
 
