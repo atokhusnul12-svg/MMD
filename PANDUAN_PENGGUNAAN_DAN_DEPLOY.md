@@ -34,7 +34,7 @@ Ikuti panduan terstruktur berikut untuk mengonfigurasi autentikasi rahasia serve
 
 ### 1. Buka Proyek Google Apps Script
 1. Buka spreadsheet Google Sheets WAKA III:
-   👉 **[Spreadsheet WAKA III (statistik new 2.xlsx)](https://docs.google.com/spreadsheets/d/1QHHc20jWFW3jTZUUIlsCvVCO7Qi6wLcS/edit)**
+   👉 **[Spreadsheet WAKA III (Google Sheets)](https://docs.google.com/spreadsheets/d/1QHHc20jWFW3jTZUUIlsCvVCO7Qi6wLcS/edit)**
 2. Pada menu atas, klik **Ekstensi (Extensions)** > **Apps Script**. Tab baru editor Apps Script akan terbuka.
 
 ### 2. Buat Token Acak yang Kuat di Komputer Anda (Lokal)
