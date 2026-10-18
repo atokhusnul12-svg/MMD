@@ -185,23 +185,50 @@ function handleSyncBahsuEvent(ss, payload) {
 
   if (mode === "create") {
     // Mode Tambah Kegiatan Baru
-    var nextRow = bahsuSheet.getLastRow() + 1;
-    actualSourceRow = nextRow;
-
     if (!no) {
-      // Hitung urutan agenda otomatis jika kosong
-      var count = 0;
+      // Hitung urutan nomor agenda otomatis berdasarkan angka terbesar yang sudah ada
+      var maxNo = 0;
       for (var bi = bHeaderRowIndex + 1; bi < bahsuValues.length; bi++) {
-        if (bahsuValues[bi][bColMap.acara] || bahsuValues[bi][bColMap.no]) count++;
+        var rawVal = String(bahsuValues[bi][bColMap.no] || "").trim();
+        var parsedNo = parseInt(rawVal, 10);
+        if (!isNaN(parsedNo) && parsedNo > maxNo) {
+          maxNo = parsedNo;
+        }
       }
-      no = String(count + 1);
+      no = String(maxNo > 0 ? maxNo + 1 : bahsuValues.length);
     }
 
-    bahsuSheet.getRange(actualSourceRow, bColMap.no + 1).setValue(no);
-    bahsuSheet.getRange(actualSourceRow, bColMap.acara + 1).setValue(newAcara);
-    bahsuSheet.getRange(actualSourceRow, bColMap.tanggal + 1).setValue(newTanggal);
-    bahsuSheet.getRange(actualSourceRow, bColMap.delegasi + 1).setValue(delegasi);
-    bahsuSheet.getRange(actualSourceRow, bColMap.keterangan + 1).setValue(keterangan);
+    // Cegah duplikasi penulisan jika formulir terkirim ulang secara cepat
+    var alreadyExistsRow = -1;
+    for (var biCheck = bahsuValues.length - 1; biCheck >= Math.max(0, bahsuValues.length - 15); biCheck--) {
+      var rowA = String(bahsuValues[biCheck][bColMap.acara] || "").trim().toLowerCase();
+      var rowT = String(bahsuValues[biCheck][bColMap.tanggal] || "").trim().toLowerCase();
+      if (rowA === newAcara.toLowerCase() && (!newTanggal || rowT === newTanggal.toLowerCase())) {
+        alreadyExistsRow = biCheck + 1;
+        break;
+      }
+    }
+
+    if (alreadyExistsRow !== -1) {
+      actualSourceRow = alreadyExistsRow;
+      if (no) bahsuSheet.getRange(actualSourceRow, bColMap.no + 1).setValue(no);
+      bahsuSheet.getRange(actualSourceRow, bColMap.acara + 1).setValue(newAcara);
+      bahsuSheet.getRange(actualSourceRow, bColMap.tanggal + 1).setValue(newTanggal);
+      bahsuSheet.getRange(actualSourceRow, bColMap.delegasi + 1).setValue(delegasi);
+      bahsuSheet.getRange(actualSourceRow, bColMap.keterangan + 1).setValue(keterangan);
+    } else {
+      var nextRow = bahsuSheet.getLastRow() + 1;
+      actualSourceRow = nextRow;
+      bahsuSheet.getRange(actualSourceRow, bColMap.no + 1).setValue(no);
+      bahsuSheet.getRange(actualSourceRow, bColMap.acara + 1).setValue(newAcara);
+      bahsuSheet.getRange(actualSourceRow, bColMap.tanggal + 1).setValue(newTanggal);
+      bahsuSheet.getRange(actualSourceRow, bColMap.delegasi + 1).setValue(delegasi);
+      bahsuSheet.getRange(actualSourceRow, bColMap.keterangan + 1).setValue(keterangan);
+    }
+
+    try {
+      bahsuSheet.getRange(actualSourceRow, 1, 1, 5).setWrap(true);
+    } catch (eWrap) {}
 
   } else {
     // Mode Edit Kegiatan yang Ada
@@ -228,6 +255,10 @@ function handleSyncBahsuEvent(ss, payload) {
     bahsuSheet.getRange(actualSourceRow, bColMap.tanggal + 1).setValue(newTanggal);
     bahsuSheet.getRange(actualSourceRow, bColMap.delegasi + 1).setValue(delegasi);
     bahsuSheet.getRange(actualSourceRow, bColMap.keterangan + 1).setValue(keterangan);
+
+    try {
+      bahsuSheet.getRange(actualSourceRow, 1, 1, 5).setWrap(true);
+    } catch (eWrap2) {}
   }
 
   // 3. SINKRONISASI KE TAB PERKEMBANGAN (KOLOM BAHTSU YANG DIDATANGI)
@@ -242,7 +273,7 @@ function handleSyncBahsuEvent(ss, payload) {
 
   var aValues = anggotaSheet.getDataRange().getValues();
   var aHeaderRowIndex = -1;
-  var aColMap = { nama: 1, bahtsu: 9 };
+  var aColMap = { no: 0, nama: 1, id: 3, bahtsu: 9 };
 
   for (var ar = 0; ar < Math.min(10, aValues.length); ar++) {
     var aRow = aValues[ar];
@@ -260,7 +291,9 @@ function handleSyncBahsuEvent(ss, payload) {
     var aHeaders = aValues[aHeaderRowIndex];
     for (var ahc = 0; ahc < aHeaders.length; ahc++) {
       var ah = String(aHeaders[ahc] || "").trim().toUpperCase();
-      if (ah === "NAMA" || ah.indexOf("NAMA") !== -1) aColMap.nama = ahc;
+      if (ah === "NO." || ah === "NO" || ah.indexOf("NO.") !== -1) aColMap.no = ahc;
+      else if (ah === "NAMA" || ah.indexOf("NAMA") !== -1) aColMap.nama = ahc;
+      else if (ah === "ID" || ah === "ID_ANGGOTA" || ah === "ID ANGGOTA") aColMap.id = ahc;
       else if (ah.indexOf("BAHTSU") !== -1 || ah.indexOf("DIDATANGI") !== -1) aColMap.bahtsu = ahc;
     }
   } else {
@@ -270,17 +303,19 @@ function handleSyncBahsuEvent(ss, payload) {
   // Ekstrak baris-baris nama delegasi dari teks input
   var delegasiLines = delegasi.split(/\r?\n/).map(function(s) { return s.trim(); }).filter(Boolean);
   var attendingNamesClean = [];
+  var matchedMemberIds = Array.isArray(event.matchedMemberIds) ? event.matchedMemberIds : [];
 
   for (var dl = 0; dl < delegasiLines.length; dl++) {
     var dLine = delegasiLines[dl];
     var cName = cleanNameForCompare(dLine);
     // Lewati baris komisi, izin, tanda strip, atau "semua anggota"
-    if (!cName || cName.indexOf("komisi") === 0 || cName.indexOf("kom ") === 0 || cName === "-" || cName.indexOf("semua anggota") !== -1) {
+    if (!cName || cName.indexOf("komisi") === 0 || cName.indexOf("kom ") === 0 || cName === "-" || cName.indexOf("semua anggota") !== -1 || cName === "izin" || cName === "batal" || cName === "tidak ada" || cName === "nihil") {
       continue;
     }
     attendingNamesClean.push(cName);
   }
 
+  var isIzinEvent = keterangan.toUpperCase().indexOf("IZIN") !== -1;
   var newEventLine = (newTanggal && newTanggal.trim()) 
     ? (newAcara.trim() + " " + newTanggal.trim()) 
     : newAcara.trim();
@@ -300,13 +335,34 @@ function handleSyncBahsuEvent(ss, payload) {
     var mNamaClean = cleanNameForCompare(mNama);
     if (!mNamaClean) continue;
 
+    // Periksa ID anggota jika ada
+    var mRawNo = aColMap.no !== undefined ? String(mRow[aColMap.no] || "").trim() : "";
+    var mId = aColMap.id !== undefined ? String(mRow[aColMap.id] || "").trim().toUpperCase() : "";
+    if (!mId && mRawNo && !isNaN(parseInt(mRawNo, 10))) {
+      mId = "LBM-" + padZero(parseInt(mRawNo, 10), 3);
+    }
+
     // Cek apakah santri ini tercatat sebagai delegasi yang hadir
     var isAttending = false;
-    for (var att = 0; att < attendingNamesClean.length; att++) {
-      var aTarget = attendingNamesClean[att];
-      if (mNamaClean === aTarget || (mNamaClean.length > 5 && (mNamaClean.indexOf(aTarget) !== -1 || aTarget.indexOf(mNamaClean) !== -1))) {
-        isAttending = true;
-        break;
+
+    // 1. Cek kecocokan via ID anggota stabil
+    if (mId && matchedMemberIds.length > 0 && matchedMemberIds.indexOf(mId) !== -1) {
+      isAttending = true;
+    }
+
+    // 2. Cek kecocokan via nama yang sudah dibersihkan
+    if (!isAttending) {
+      for (var att = 0; att < attendingNamesClean.length; att++) {
+        var aTarget = attendingNamesClean[att];
+        if (mNamaClean === aTarget) {
+          isAttending = true;
+          break;
+        }
+        // Substring matching hanya untuk nama panjang (minimal 6 karakter) guna menghindari salah cocok
+        if (aTarget.length >= 6 && mNamaClean.length >= 6 && (mNamaClean.indexOf(aTarget) !== -1 || aTarget.indexOf(mNamaClean) !== -1)) {
+          isAttending = true;
+          break;
+        }
       }
     }
 
@@ -314,7 +370,7 @@ function handleSyncBahsuEvent(ss, payload) {
     var mLines = currentBahtsuCell.split(/\r?\n/).map(function(s) { return s.trim(); }).filter(Boolean);
     var lineModified = false;
 
-    if (isAttending) {
+    if (isAttending && !isIzinEvent) {
       // Santri HADIR: pastikan newEventLine ada di kolom BAHTSU YANG DIDATANGI
       var foundIdx = -1;
       for (var li = 0; li < mLines.length; li++) {
@@ -344,12 +400,13 @@ function handleSyncBahsuEvent(ss, payload) {
       }
 
     } else {
-      // Santri TIDAK HADIR: Jika sebelumnya pernah hadir pada kegiatan ini (diedit / dikeluarkan dari delegasi), hapus
-      if (mode === "edit" && cleanOldAcara) {
+      // Santri TIDAK HADIR atau Status IZIN: Jika sebelumnya pernah hadir pada kegiatan ini, hapus dari riwayat
+      if ((mode === "edit" || isIzinEvent) && (cleanOldAcara || cleanNewAcara)) {
+        var targetSearch = cleanOldAcara || cleanNewAcara;
         var filteredLines = [];
         for (var lk = 0; lk < mLines.length; lk++) {
           var curLower = mLines[lk].toLowerCase();
-          if (curLower.indexOf(cleanOldAcara) !== -1) {
+          if (curLower.indexOf(targetSearch) !== -1) {
             lineModified = true;
           } else {
             filteredLines.push(mLines[lk]);
@@ -378,7 +435,15 @@ function handleSyncBahsuEvent(ss, payload) {
     syncedCount: syncedMembers.length,
     syncedMembers: syncedMembers,
     removedCount: removedMembers.length,
-    removedMembers: removedMembers
+    removedMembers: removedMembers,
+    event: {
+      no: no,
+      acara: newAcara,
+      tanggal: newTanggal,
+      delegasi: delegasiLines,
+      keterangan: keterangan,
+      statusKeberangkatan: isIzinEvent ? "IZIN" : (keterangan.toUpperCase().indexOf("BELUM") !== -1 ? "BELUM_BERANGKAT" : "SUDAH_BERANGKAT")
+    }
   });
 }
 

@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import { DATA_LINKS } from '@/lib/dataLinks';
 
 const ACTIVE_APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbz71opCqhjCVNsjH5VbRo4qrpUKd701Ap-6sIEkmkwCME_f7FGMTCWQoRKmBgZLynxL0w/exec';
+  'https://script.google.com/macros/s/AKfycbyY5G0BrvGS87rndi5nK-nBEBRO95QxeXF2_1nYKsx0ZuJ68TzN7EJJzegaXWYZYDV2OQ/exec';
 
 function resolveScriptUrl() {
   const envUrl = process.env.GOOGLE_SHEETS_SCRIPT_URL || process.env.GOOGLE_APPS_SCRIPT_URL;
-  if (!envUrl || envUrl.includes('5SY1LiUuTg')) {
+  if (!envUrl || envUrl.includes('5SY1LiUuTg') || envUrl.includes('AKfycbz71opCqhj')) {
     return ACTIVE_APPS_SCRIPT_URL;
   }
   return envUrl.trim();
@@ -208,31 +208,6 @@ export async function POST(request) {
 
     const { action, id, changes, event } = body || {};
 
-    const scriptUrl = resolveScriptUrl();
-    const secretToken = process.env.SHEETS_API_SECRET_TOKEN;
-
-    if (!scriptUrl || typeof scriptUrl !== 'string' || scriptUrl.trim().length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Variabel lingkungan GOOGLE_SHEETS_SCRIPT_URL belum diatur di server Vercel / .env.local. Silakan lakukan deployment Google Apps Script terlebih dahulu.',
-        },
-        { status: 503 }
-      );
-    }
-
-    if (!secretToken || typeof secretToken !== 'string' || secretToken.trim().length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Variabel lingkungan SHEETS_API_SECRET_TOKEN belum diatur pada hosting website (Vercel / .env.local). Silakan tambahkan token rahasia server-to-server.',
-        },
-        { status: 500 }
-      );
-    }
-
-    let appsScriptPayload;
-
     // Aksi 1: Sinkronisasi Kegiatan Bahtsul Masail (Daftar Pemberangkatan & Perkembangan)
     if (action === 'syncBahsuEvent' || event) {
       const eventData = event || {};
@@ -245,11 +220,44 @@ export async function POST(request) {
       const mode = eventData.mode === 'create' ? 'create' : 'edit';
       const rowNumber = Number(eventData.rowNumber) || null;
       const no = eventData.no !== undefined && eventData.no !== null ? String(eventData.no).trim() : '';
+      const matchedMemberIds = Array.isArray(eventData.matchedMemberIds)
+        ? eventData.matchedMemberIds.map((id) => String(id).trim().toUpperCase()).filter(Boolean)
+        : [];
 
       if (!newAcara) {
         return NextResponse.json(
           { success: false, error: 'Nama agenda Bahtsul Masail (acara) wajib diisi.' },
           { status: 400 }
+        );
+      }
+
+      if (!newTanggal) {
+        return NextResponse.json(
+          { success: false, error: 'Tanggal pelaksanaan kegiatan Bahtsul Masail wajib diisi.' },
+          { status: 400 }
+        );
+      }
+
+      const scriptUrl = resolveScriptUrl();
+      const secretToken = process.env.SHEETS_API_SECRET_TOKEN;
+
+      if (!scriptUrl || typeof scriptUrl !== 'string' || scriptUrl.trim().length === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Variabel lingkungan GOOGLE_SHEETS_SCRIPT_URL belum diatur di server Vercel / .env.local. Silakan lakukan deployment Google Apps Script terlebih dahulu.',
+          },
+          { status: 503 }
+        );
+      }
+
+      if (!secretToken || typeof secretToken !== 'string' || secretToken.trim().length === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Variabel lingkungan SHEETS_API_SECRET_TOKEN belum diatur pada hosting website (Vercel / .env.local). Silakan tambahkan token rahasia server-to-server.',
+          },
+          { status: 500 }
         );
       }
 
@@ -266,6 +274,7 @@ export async function POST(request) {
           keterangan: keterangan.slice(0, 100),
           oldAcara: oldAcara.slice(0, 500),
           oldTanggal: oldTanggal.slice(0, 100),
+          matchedMemberIds: matchedMemberIds.slice(0, 100),
         },
       };
     } else {

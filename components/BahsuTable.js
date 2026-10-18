@@ -23,12 +23,34 @@ import { PrintHeader, PrintSignatures } from './PrintHeaderFooter';
 import { useAuth } from '@/lib/auth';
 import { findAnggotaByDelegasiName } from '@/lib/fetchCSV';
 
-export default function BahsuTable({ events = [], title, editUrl, anggotaList = [], onRefresh }) {
+export default function BahsuTable({
+  events = [],
+  title,
+  editUrl,
+  anggotaList = [],
+  onRefresh,
+  isAddModalOpen = false,
+  onCloseAddModal,
+}) {
   const { isAdmin } = useAuth();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL'); // 'ALL' | 'BELUM' | 'SUDAH' | 'IZIN'
   const [editingBahsuEvent, setEditingBahsuEvent] = useState(null);
   const [isBahsuModalOpen, setIsBahsuModalOpen] = useState(false);
+
+  // Hitung nomor urut agenda berikutnya secara otomatis
+  const nextSuggestedNo = useMemo(() => {
+    let maxNo = 0;
+    for (const e of events) {
+      const n = parseInt(e.no, 10);
+      if (!isNaN(n) && n > maxNo) {
+        maxNo = n;
+      }
+    }
+    return maxNo > 0 ? maxNo + 1 : events.length + 1;
+  }, [events]);
+
+  const effectiveModalOpen = isBahsuModalOpen || isAddModalOpen;
 
   const handleOpenAddEvent = () => {
     setEditingBahsuEvent(null);
@@ -38,6 +60,14 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
   const handleOpenEditEvent = (eventItem) => {
     setEditingBahsuEvent(eventItem);
     setIsBahsuModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsBahsuModalOpen(false);
+    setEditingBahsuEvent(null);
+    if (typeof onCloseAddModal === 'function') {
+      onCloseAddModal();
+    }
   };
 
   const handlePrint = () => {
@@ -277,7 +307,31 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
       {/* Kontainer Utama Tabel / List */}
       <div id="table-bahsu-agenda" className="bg-white rounded-xl shadow-xs border border-[#DCE5E0] overflow-hidden card-print scroll-mt-28">
         {/* Baris Pencarian & Filter Status */}
-        <div className="p-4 sm:p-5 bg-white border-b border-[#DCE5E0] space-y-3 no-print">
+        <div className="p-4 sm:p-5 bg-white border-b border-[#DCE5E0] space-y-3.5 no-print">
+          
+          {/* Header Aksi Tabel: Judul & Tombol Tambah Agenda */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#DCE5E0]/60">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-[#26332E] font-serif flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#1D7A6F]" />
+                <span>Jadwal Kegiatan &amp; Utusan Delegasi</span>
+              </h2>
+              <p className="text-xs text-[#5C6E66] mt-0.5">
+                Kelola jadwal forum Bahtsul Masail dan utusan santri LBM Darussalamah langsung tersinkron ke Google Sheets
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleOpenAddEvent}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#1D7A6F] text-white hover:bg-[#165E55] text-xs sm:text-sm font-bold transition-all shadow-xs hover:shadow-md cursor-pointer shrink-0"
+              title="Tambah Agenda Bahtsul Masail Baru dan Sinkronkan Otomatis ke Google Sheets"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Tambah Agenda</span>
+            </button>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
             
             {/* Input Search */}
@@ -554,9 +608,10 @@ export default function BahsuTable({ events = [], title, editUrl, anggotaList = 
 
       {/* Modal Edit / Tambah Kegiatan Bahtsul Masail & Sinkronisasi */}
       <EditBahsuModal
-        isOpen={isBahsuModalOpen}
-        onClose={() => setIsBahsuModalOpen(false)}
+        isOpen={effectiveModalOpen}
+        onClose={handleCloseModal}
         event={editingBahsuEvent}
+        suggestedNo={nextSuggestedNo}
         anggotaList={anggotaList}
         onSuccess={handleEditSuccess}
       />

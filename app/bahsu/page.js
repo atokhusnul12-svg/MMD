@@ -5,7 +5,7 @@ import { DATA_LINKS } from '@/lib/dataLinks';
 import { getBahsuData, getAnggotaData } from '@/lib/fetchCSV';
 import BahsuTable from '@/components/BahsuTable';
 import AdminButton from '@/components/AdminButton';
-import { Calendar, RefreshCw, AlertCircle, ArrowLeft, Printer } from 'lucide-react';
+import { Calendar, RefreshCw, AlertCircle, ArrowLeft, Printer, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 export default function BahsuPage() {
@@ -13,6 +13,7 @@ export default function BahsuPage() {
   const [anggotaList, setAnggotaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const fetchBahsu = useCallback(async (showLoading = true) => {
     try {
@@ -76,6 +77,15 @@ export default function BahsuPage() {
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <button
+            type="button"
+            onClick={() => setIsAddModalOpen(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#1D7A6F] text-white hover:bg-[#165E55] text-xs sm:text-sm font-bold transition-all shadow-xs hover:shadow-md cursor-pointer"
+            title="Tambah Agenda Bahtsul Masail Baru dan Sinkronkan ke Google Sheets"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Tambah Agenda</span>
+          </button>
+          <button
             onClick={() => window.print()}
             disabled={loading || !!error}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#DCE5E0] bg-white text-[#26332E] hover:bg-[#F7F5EF] hover:text-[#1D7A6F] text-xs sm:text-sm font-semibold transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
@@ -119,6 +129,8 @@ export default function BahsuPage() {
           title={data?.title}
           editUrl={DATA_LINKS.bahsu.editUrl}
           anggotaList={anggotaList}
+          isAddModalOpen={isAddModalOpen}
+          onCloseAddModal={() => setIsAddModalOpen(false)}
           onRefresh={() => fetchBahsu(false)}
         />
       )}
