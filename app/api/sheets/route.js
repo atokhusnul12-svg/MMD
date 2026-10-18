@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import { DATA_LINKS } from '@/lib/dataLinks';
 
 const ACTIVE_APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbyY5G0BrvGS87rndi5nK-nBEBRO95QxeXF2_1nYKsx0ZuJ68TzN7EJJzegaXWYZYDV2OQ/exec';
+  'https://script.google.com/macros/s/AKfycbzuNoe2QQ3DVDQsIDZepDivH3-e9FBvmPYbnkvzN8Vf8phJdrDCU-PrGQqY8sWgTBQEGg/exec';
 
 function resolveScriptUrl() {
   const envUrl = process.env.GOOGLE_SHEETS_SCRIPT_URL || process.env.GOOGLE_APPS_SCRIPT_URL;
-  if (!envUrl || envUrl.includes('5SY1LiUuTg') || envUrl.includes('AKfycbz71opCqhj')) {
+  if (!envUrl || envUrl.includes('5SY1LiUuTg') || envUrl.includes('AKfycbz71opCqhj') || envUrl.includes('AKfycbyY5G0BrvGS87rndi5nK-nBEBRO95QxeXF2_1nYKsx0ZuJ68TzN7EJJzegaXWYZYDV2OQ')) {
     return ACTIVE_APPS_SCRIPT_URL;
   }
   return envUrl.trim();
