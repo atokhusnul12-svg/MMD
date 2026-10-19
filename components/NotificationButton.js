@@ -84,7 +84,7 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
           }}
           disabled={isLoading}
           aria-label="Pengaturan Notifikasi"
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-md text-xs xl:text-sm font-medium whitespace-nowrap shrink-0 transition-all duration-150 cursor-pointer ${
             isSubscribed
               ? 'bg-[#E8F5F3] text-[#1D7A6F] border border-[#1D7A6F]/20 hover:bg-[#1D7A6F] hover:text-white'
               : permission === 'denied'
@@ -100,22 +100,22 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
           }
         >
           {isLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin text-[#1D7A6F]" />
+            <Loader2 className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0 animate-spin text-[#1D7A6F]" />
           ) : isSubscribed ? (
-            <div className="relative flex items-center">
-              <BellRing className="w-4 h-4 text-[#1D7A6F]" />
+            <div className="relative flex items-center shrink-0">
+              <BellRing className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0 text-[#1D7A6F]" />
               <span className="absolute -top-1 -right-1 flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C6A66B] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C6A66B]"></span>
               </span>
             </div>
           ) : permission === 'denied' ? (
-            <BellOff className="w-4 h-4 text-[#8A2F1B]" />
+            <BellOff className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0 text-[#8A2F1B]" />
           ) : (
-            <Bell className="w-4 h-4" />
+            <Bell className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
           )}
 
-          <span className="hidden md:inline text-xs font-semibold">
+          <span className="hidden md:inline text-xs font-semibold whitespace-nowrap">
             {isLoading
               ? 'Memproses...'
               : isSubscribed
@@ -126,7 +126,7 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
           </span>
 
           {isSubscribed && (
-            <ChevronDown className="w-3 h-3 text-[#1D7A6F] hidden md:inline ml-0.5" />
+            <ChevronDown className="w-3 h-3 text-[#1D7A6F] hidden md:inline ml-0.5 shrink-0" />
           )}
         </button>
 
