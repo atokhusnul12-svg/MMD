@@ -13,26 +13,26 @@ export default function Footer() {
           
           <div>
             <p className="font-bold text-sm text-[#1D7A6F]">
-              WAKA III — MMD Madrasah Islamiyah Darussalamah
+              MMD — Majlis Musyawaroh Darussalam
             </p>
             <p className="text-xs text-[#5C6B64] mt-0.5">
-              Pondok Pesantren Darussalam Sumbersari | Tahun Ajaran 1447-1448 H / 2026-2027 M
+              Madrasah Islamiyah Darussalamah • Pondok Pesantren Darussalam Sumbersari Kediri
             </p>
           </div>
 
           <div className="flex items-center gap-3 text-xs text-[#5C6B64]">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xs bg-[#E8F5F3] text-[#1D7A6F] font-semibold border border-[#C8E3DC]">
               <span className="w-1.5 h-1.5 rounded-full bg-[#1D7A6F] animate-pulse"></span>
-              Live Sync Google Sheets
+              HOME • WAKA I • WAKA II • WAKA III
             </span>
           </div>
 
         </div>
 
         <div className="mt-6 pt-4 border-t border-[#DCE5E0] flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[#5C6B64]">
-          <p>© {currentYear} WAKA III Darussalamah. Seluruh hak cipta dilindungi.</p>
+          <p>© {currentYear} MMD Darussalamah. Seluruh hak cipta dilindungi.</p>
           <p className="flex items-center gap-1">
-            Data terhubung langsung dengan Google Sheets (CSV)
+            Data terhubung langsung dengan Google Sheets &amp; Google Docs
           </p>
         </div>
       </div>

@@ -1,19 +1,25 @@
-import { Suspense } from 'react';
-import { getInitialServerData } from '@/lib/serverFetch';
-import DashboardClient from './DashboardClient';
+import React, { Suspense } from 'react';
+import PortalClient from '@/components/portal/PortalClient';
 
-/**
- * Server Component: pre-fetch ringkasan data dari Google Sheets di sisi server
- * menggunakan ISR (revalidate 180 detik / 3 menit).
- * Data awal dikirim sebagai props ke Client Component agar hero section
- * langsung menampilkan angka yang benar tanpa kedipan "Memuat..." saat halaman
- * pertama kali dibuka.
- */
-export default async function DashboardPage() {
-  const initialData = await getInitialServerData();
+export const metadata = {
+  title: 'MMD • HOME — Majlis Musyawaroh Darussalam',
+  description:
+    'Halaman utama HOME Majlis Musyawaroh Darussalam (MMD), Madrasah Islamiyah Darussalamah, Pondok Pesantren Darussalam Sumbersari Kencong Pare Kediri.',
+};
+
+export default function HomePage() {
   return (
-    <Suspense fallback={null}>
-      <DashboardClient initialData={initialData} />
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center space-y-3">
+            <div className="w-10 h-10 border-4 border-[#1D7A6F] border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-sm font-medium text-[#5C6B64]">Memuat HOME MMD...</p>
+          </div>
+        </div>
+      }
+    >
+      <PortalClient />
     </Suspense>
   );
 }

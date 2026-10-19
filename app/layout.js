@@ -4,8 +4,9 @@ import Footer from '@/components/Footer';
 import { AuthProvider } from '@/lib/auth';
 
 export const metadata = {
-  title: 'WAKA III — MMD Madrasah Islamiyah Darussalamah',
-  description: 'Aplikasi Manajemen Anggota LBM dan Rekapitulasi Keuangan RAB & LPJ Terintegrasi Google Sheets',
+  title: 'MMD • Majlis Musyawaroh Darussalam — Madrasah Islamiyah Darussalamah',
+  description:
+    'Portal Resmi Majlis Musyawaroh Darussalam (MMD), Madrasah Islamiyah Darussalamah, Pondok Pesantren Darussalam Sumbersari Kencong Pare Kediri.',
   manifest: '/manifest.json',
   icons: {
     icon: [

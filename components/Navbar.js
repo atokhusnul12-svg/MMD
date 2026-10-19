@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import {
-  LayoutDashboard,
+  Sparkles,
   Users,
   BookOpen,
   CalendarDays,
@@ -16,26 +16,53 @@ import {
   X,
   ShieldCheck,
   GraduationCap,
+  UserCheck,
+  Layers,
+  Home,
+  ChevronRight,
 } from 'lucide-react';
 import JamIstiwaTopBar from '@/components/JamIstiwaTopBar';
+import Waka3SubNav from '@/components/waka3/Waka3SubNav';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { isAdmin, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  const mainNavItems = [
+    { name: 'HOME', href: '/', icon: Home },
+    { name: 'WAKA I', href: '/waka-i', icon: UserCheck },
+    { name: 'WAKA II', href: '/waka-ii', icon: GraduationCap },
+    { name: 'WAKA III', href: '/waka-iii', icon: Layers },
+  ];
+
+  const waka3SubItems = [
+    { name: 'Ringkasan WAKA III', href: '/waka-iii', icon: Layers },
     { name: 'Anggota LBM', href: '/anggota', icon: Users },
-    { name: 'Pemberangkatan Bahsu', href: '/bahsu', icon: BookOpen },
-    { name: 'WAKA II MMD', href: '/waka-ii', icon: GraduationCap },
+    { name: 'Delegasi Bahsu', href: '/bahsu', icon: BookOpen },
     { name: 'Kalender Kerja', href: '/kalender', icon: CalendarDays },
-    { name: 'Keuangan', href: '/keuangan', icon: Wallet },
+    { name: 'Keuangan RAB/LPJ', href: '/keuangan', icon: Wallet },
   ];
 
   const isActive = (href) => {
     if (href === '/') return pathname === '/';
-    return pathname.startsWith(href);
+    if (href === '/waka-i') return pathname === '/waka-i' || pathname.startsWith('/waka-i/');
+    if (href === '/waka-ii') return pathname === '/waka-ii' || pathname.startsWith('/waka-ii/');
+    if (href === '/waka-iii') {
+      return (
+        pathname === '/waka-iii' ||
+        pathname.startsWith('/waka-iii/') ||
+        pathname === '/anggota' ||
+        pathname.startsWith('/anggota/') ||
+        pathname === '/bahsu' ||
+        pathname.startsWith('/bahsu/') ||
+        pathname === '/kalender' ||
+        pathname.startsWith('/kalender/') ||
+        pathname === '/keuangan' ||
+        pathname.startsWith('/keuangan/')
+      );
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
   };
 
   return (
@@ -55,10 +82,13 @@ export default function Navbar() {
                 className="w-full h-full object-contain filter drop-shadow-2xs shrink-0"
               />
             </div>
-            <div className="min-w-0 max-w-[160px] sm:max-w-[200px] lg:max-w-[180px] xl:max-w-[260px] 2xl:max-w-none">
+            <div className="min-w-0 max-w-[160px] sm:max-w-[200px] lg:max-w-[180px] xl:max-w-[280px] 2xl:max-w-none">
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-sm sm:text-base xl:text-lg text-[#1D7A6F] tracking-tight transition-colors whitespace-nowrap">
-                  WAKA III MMD
+                  MMD
+                </span>
+                <span className="hidden sm:inline-block text-xs font-semibold text-[#8C6D23] bg-[#FAF3E6] border border-[#ECD8A5]/40 px-1.5 py-0.5 rounded">
+                  HOME
                 </span>
                 {isAdmin && (
                   <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold px-1.5 py-0.5 rounded-xs bg-[#FAF3E6] text-[#8C6D23] border border-[#C6A66B]/30 shrink-0 whitespace-nowrap">
@@ -67,36 +97,36 @@ export default function Navbar() {
                   </span>
                 )}
               </div>
-              <p className="text-[11px] xl:text-xs text-[#5C6B64] hidden sm:block truncate leading-tight mt-0.5" title="Madrasah Islamiyah Darussalamah • Pondok Pesantren Darussalam Sumbersari">
-                <span>Madrasah Islamiyah Darussalamah</span>
-                <span className="hidden 2xl:inline"> • Pondok Pesantren Darussalam Sumbersari</span>
+              <p className="text-[11px] xl:text-xs text-[#5C6B64] hidden sm:block truncate leading-tight mt-0.5" title="Majlis Musyawaroh Darussalam • Madrasah Islamiyah Darussalamah">
+                <span>Majlis Musyawaroh Darussalam</span>
+                <span className="hidden 2xl:inline"> • Madrasah Islamiyah Darussalamah</span>
               </p>
             </div>
           </Link>
 
           {/* Navigasi Desktop (Tengah & Kanan) */}
-          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 shrink-0">
-            {navItems.map((item) => {
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0">
+            {mainNavItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-1 xl:gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-md text-xs xl:text-sm font-medium whitespace-nowrap shrink-0 transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs xl:text-sm font-medium whitespace-nowrap shrink-0 transition-colors ${
                     active
                       ? 'bg-[#1D7A6F] text-white shadow-2xs font-semibold'
                       : 'text-[#26332E] hover:text-[#1D7A6F] hover:bg-[#F7F5EF]'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
+                  <Icon className="w-4 h-4 shrink-0" />
                   <span>{item.name}</span>
                 </Link>
               );
             })}
 
             {/* Menu Login / Logout Desktop */}
-            <div className="ml-1.5 pl-2.5 border-l border-[#DCE5E0] flex items-center shrink-0">
+            <div className="ml-2 pl-3 border-l border-[#DCE5E0] flex items-center shrink-0">
               {isAdmin ? (
                 <button
                   onClick={logout}
@@ -138,10 +168,16 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Sub-Navigasi Khusus Internal WAKA III (Hanya Muncul di Rute WAKA III) */}
+      <Waka3SubNav />
+
       {/* Menu Dropdown Mobile */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-[#DCE5E0] bg-[#FFFFFF] px-4 pt-3 pb-5 space-y-1 shadow-lg animate-in fade-in duration-150">
-          {navItems.map((item) => {
+          <div className="text-[11px] font-bold text-[#5C6E66] uppercase tracking-wider px-3 py-1">
+            MENU UTAMA (HOME)
+          </div>
+          {mainNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
             return (
@@ -160,6 +196,33 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          {/* Sub-Menu WAKA III di Mobile Drawer */}
+          <div className="pt-2 border-t border-[#DCE5E0] mt-2">
+            <div className="text-[11px] font-bold text-[#5C6E66] uppercase tracking-wider px-3 py-1 flex items-center justify-between">
+              <span>Divisi WAKA III</span>
+              <Layers className="w-3 h-3 text-[#C6A66B]" />
+            </div>
+            {waka3SubItems.map((sub) => {
+              const SubIcon = sub.icon;
+              const isSubActive = pathname === sub.href;
+              return (
+                <Link
+                  key={sub.href}
+                  href={sub.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center gap-2.5 px-4 py-2 rounded-md text-xs font-medium transition-colors ${
+                    isSubActive
+                      ? 'bg-[#E8F5F3] text-[#1D7A6F] font-semibold'
+                      : 'text-[#5C6E66] hover:bg-[#F7F5EF] hover:text-[#26332E]'
+                  }`}
+                >
+                  <SubIcon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{sub.name}</span>
+                </Link>
+              );
+            })}
+          </div>
 
           <div className="pt-2 border-t border-[#DCE5E0] mt-2">
             {isAdmin ? (
