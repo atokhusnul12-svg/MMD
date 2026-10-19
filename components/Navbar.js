@@ -17,7 +17,6 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import JamIstiwaTopBar from '@/components/JamIstiwaTopBar';
-import NotificationButton from '@/components/NotificationButton';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -82,7 +81,7 @@ export default function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-1 xl:gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-md text-xs xl:text-sm font-medium whitespace-nowrap shrink-0 transition-colors ${
+                  className={`flex items-center gap-1 xl:gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-md text-xs xl:text-sm font-medium whitespace-nowrap shrink-0 transition-colors ${
                     active
                       ? 'bg-[#1D7A6F] text-white shadow-2xs font-semibold'
                       : 'text-[#26332E] hover:text-[#1D7A6F] hover:bg-[#F7F5EF]'
@@ -94,14 +93,12 @@ export default function Navbar() {
               );
             })}
 
-            {/* Tombol Notifikasi & Menu Login / Logout Desktop */}
-            <div className="ml-1 pl-2 border-l border-[#DCE5E0] flex items-center gap-1.5 shrink-0">
-              <NotificationButton variant="header" />
-
+            {/* Menu Login / Logout Desktop */}
+            <div className="ml-1.5 pl-2.5 border-l border-[#DCE5E0] flex items-center shrink-0">
               {isAdmin ? (
                 <button
                   onClick={logout}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs xl:text-sm font-medium whitespace-nowrap shrink-0 text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs xl:text-sm font-semibold whitespace-nowrap shrink-0 text-rose-700 bg-rose-50/70 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer"
                   title="Keluar dari mode admin"
                 >
                   <LogOut className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
@@ -110,7 +107,7 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs xl:text-sm font-semibold whitespace-nowrap shrink-0 border border-[#1D7A6F]/30 text-[#1D7A6F] hover:bg-[#1D7A6F] hover:text-white transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs xl:text-sm font-semibold whitespace-nowrap shrink-0 border border-[#1D7A6F]/30 text-[#1D7A6F] hover:bg-[#1D7A6F] hover:text-white transition-colors ${
                     pathname === '/login' ? 'bg-[#1D7A6F] text-white' : 'bg-transparent'
                   }`}
                 >
@@ -121,11 +118,10 @@ export default function Navbar() {
             </div>
           </nav>
 
-          {/* Tombol Hamburger & Notifikasi Menu Mobile (di bawah lg) */}
-          <div className="flex lg:hidden items-center gap-1 sm:gap-1.5 shrink-0">
-            <NotificationButton variant="header" />
+          {/* Tombol Hamburger & Status Admin Mobile (di bawah lg) */}
+          <div className="flex lg:hidden items-center gap-1.5 sm:gap-2 shrink-0">
             {isAdmin && (
-              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-xs bg-[#FAF3E6] text-[#8C6D23] border border-[#C6A66B]/30 whitespace-nowrap">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-xs bg-[#FAF3E6] text-[#8C6D23] border border-[#C6A66B]/30 whitespace-nowrap">
                 Admin
               </span>
             )}
