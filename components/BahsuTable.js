@@ -2,22 +2,13 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  Calendar,
-  Search,
-  RotateCcw,
-  Users,
-  MapPin,
   CheckCircle2,
   XCircle,
   Clock,
-  Sparkles,
   BookOpen,
   Hourglass,
-  Printer,
   Edit3,
-  Plus,
 } from 'lucide-react';
-import AdminButton from './AdminButton';
 import EditBahsuModal from './EditBahsuModal';
 import { PrintHeader, PrintSignatures } from './PrintHeaderFooter';
 import { useAuth } from '@/lib/auth';
@@ -33,7 +24,6 @@ export default function BahsuTable({
   onCloseAddModal,
 }) {
   const { isAdmin } = useAuth();
-  const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL'); // 'ALL' | 'BELUM' | 'SUDAH' | 'IZIN'
   const [editingBahsuEvent, setEditingBahsuEvent] = useState(null);
   const [isBahsuModalOpen, setIsBahsuModalOpen] = useState(false);
@@ -51,11 +41,6 @@ export default function BahsuTable({
   }, [events]);
 
   const effectiveModalOpen = isBahsuModalOpen || isAddModalOpen;
-
-  const handleOpenAddEvent = () => {
-    setEditingBahsuEvent(null);
-    setIsBahsuModalOpen(true);
-  };
 
   const handleOpenEditEvent = (eventItem) => {
     setEditingBahsuEvent(eventItem);
@@ -77,32 +62,16 @@ export default function BahsuTable({
     }
   };
 
-  const handlePrint = () => {
-    if (typeof window !== 'undefined') {
-      window.print();
-    }
-  };
-
-  // Filter pencarian dan status
+  // Filter status berdasarkan kartu ringkasan di atas (ALL, BELUM, SUDAH, IZIN)
   const filteredEvents = useMemo(() => {
+    if (filterStatus === 'ALL') return events;
     return events.filter((item) => {
-      const q = search.toLowerCase();
-      const matchSearch =
-        search === '' ||
-        item.acara.toLowerCase().includes(q) ||
-        item.tanggal.toLowerCase().includes(q) ||
-        item.delegasi.some((d) => d.toLowerCase().includes(q)) ||
-        item.keterangan.toLowerCase().includes(q);
-
-      const matchStatus =
-        filterStatus === 'ALL' ||
-        (filterStatus === 'BELUM' && item.statusKeberangkatan === 'BELUM_BERANGKAT') ||
-        (filterStatus === 'SUDAH' && item.statusKeberangkatan === 'SUDAH_BERANGKAT') ||
-        (filterStatus === 'IZIN' && item.statusKeberangkatan === 'IZIN');
-
-      return matchSearch && matchStatus;
+      if (filterStatus === 'BELUM') return item.statusKeberangkatan === 'BELUM_BERANGKAT';
+      if (filterStatus === 'SUDAH') return item.statusKeberangkatan === 'SUDAH_BERANGKAT';
+      if (filterStatus === 'IZIN') return item.statusKeberangkatan === 'IZIN';
+      return true;
     });
-  }, [events, search, filterStatus]);
+  }, [events, filterStatus]);
 
   const totalBelumBerangkat = useMemo(() => {
     return events.filter((e) => e.statusKeberangkatan === 'BELUM_BERANGKAT').length;
@@ -117,13 +86,11 @@ export default function BahsuTable({
   }, [events]);
 
   const filterDescription = useMemo(() => {
-    const parts = [];
-    if (search) parts.push(`Pencarian: "${search}"`);
-    if (filterStatus === 'BELUM') parts.push('Status: Belum Berangkat');
-    if (filterStatus === 'SUDAH') parts.push('Status: Sudah Berangkat');
-    if (filterStatus === 'IZIN') parts.push('Status: Izin / Berhalangan');
-    return parts.length > 0 ? parts.join(' | ') : 'Semua Agenda Terjadwal';
-  }, [search, filterStatus]);
+    if (filterStatus === 'BELUM') return 'Status: Belum Berangkat';
+    if (filterStatus === 'SUDAH') return 'Status: Sudah Berangkat';
+    if (filterStatus === 'IZIN') return 'Status: Izin / Berhalangan';
+    return 'Semua Agenda Terjadwal';
+  }, [filterStatus]);
 
   return (
     <div className="space-y-6">
@@ -307,84 +274,7 @@ export default function BahsuTable({
 
       {/* Kontainer Utama Tabel / List */}
       <div id="table-bahsu-agenda" className="bg-white rounded-xl shadow-xs border border-[#DCE5E0] overflow-hidden card-print scroll-mt-28">
-        {/* Baris Pencarian & Filter Status */}
-        <div className="p-4 sm:p-5 bg-white border-b border-[#DCE5E0] space-y-3.5 no-print">
-          
-          {/* Header Aksi Tabel: Judul & Tombol Tambah Agenda */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#DCE5E0]/60">
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-[#26332E] font-serif flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[#1D7A6F]" />
-                <span>Jadwal Kegiatan &amp; Utusan Delegasi</span>
-              </h2>
-              <p className="text-xs text-[#5C6E66] mt-0.5">
-                Kelola jadwal forum Bahtsul Masail dan utusan santri LBM Darussalamah langsung tersinkron ke Google Sheets
-              </p>
-            </div>
 
-            <button
-              type="button"
-              onClick={handleOpenAddEvent}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#1D7A6F] text-white hover:bg-[#165E55] text-xs sm:text-sm font-bold transition-all shadow-xs hover:shadow-md cursor-pointer shrink-0"
-              title="Tambah Agenda Bahtsul Masail Baru dan Sinkronkan Otomatis ke Google Sheets"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Tambah Agenda</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
-            
-            {/* Input Search */}
-            <div className="sm:col-span-8 relative">
-              <Search className="w-4 h-4 text-[#5C6E66] absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Cari nama forum, lokasi (Lirboyo, Ploso, Tuban), atau nama santri..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-[#DCE5E0] text-sm focus:outline-hidden focus:border-[#1D7A6F] focus:ring-1 focus:ring-[#1D7A6F]/20 text-[#26332E] placeholder-[#5C6E66]/60 bg-white"
-              />
-            </div>
-
-            {/* Filter Status */}
-            <div className="sm:col-span-3">
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[#DCE5E0] text-sm focus:outline-hidden focus:border-[#1D7A6F] focus:ring-1 focus:ring-[#1D7A6F]/20 text-[#26332E] bg-white font-medium cursor-pointer"
-              >
-                <option value="ALL">Semua Status ({events.length})</option>
-                <option value="BELUM">★ Belum Berangkat ({totalBelumBerangkat})</option>
-                <option value="SUDAH">Sudah Berangkat ({totalSudahBerangkat})</option>
-                <option value="IZIN">Izin / Berhalangan ({totalIzin})</option>
-              </select>
-            </div>
-
-            {/* Reset */}
-            <div className="sm:col-span-1 flex items-center justify-center">
-              {(search || filterStatus !== 'ALL') && (
-                <button
-                  onClick={() => {
-                    setSearch('');
-                    setFilterStatus('ALL');
-                  }}
-                  title="Reset Filter"
-                  className="w-full sm:w-auto p-2 rounded-lg text-[#5C6E66] hover:text-[#8A2F1B] hover:bg-[#FAF0ED] border border-[#DCE5E0] transition-colors flex items-center justify-center cursor-pointer"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-          </div>
-
-          {(search || filterStatus !== 'ALL') && (
-            <div className="text-xs text-[#5C6E66] flex items-center gap-2 pt-0.5">
-              <span>Menemukan <strong>{filteredEvents.length}</strong> dari {events.length} agenda</span>
-            </div>
-          )}
-        </div>
 
         {/* Tabel Tampilan Desktop */}
         <div className="overflow-x-auto hidden md:block print:block">
