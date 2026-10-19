@@ -19,19 +19,17 @@ import { hitungJamIstiwa } from '@/lib/jamIstiwa';
  * 5. Tampilan jam, detik, dan tanggal diperbarui secara otomatis.
  */
 export default function JamIstiwaCard() {
-  // State untuk menyimpan hasil perhitungan waktu
-  const [dataWaktu, setDataWaktu] = useState(null);
+  const [dataWaktu, setDataWaktu] = useState(() =>
+    typeof window !== 'undefined' ? hitungJamIstiwa() : null
+  );
 
   useEffect(() => {
-    // 1. Hitung langsung saat komponen pertama kali dimuat di browser
-    setDataWaktu(hitungJamIstiwa());
-
-    // 2. Buat interval agar jam terus berdetak setiap 1 detik (1000 milidetik)
+    // 1. Buat interval agar jam terus berdetak setiap 1 detik (1000 milidetik)
     const intervalId = setInterval(() => {
       setDataWaktu(hitungJamIstiwa());
     }, 1000);
 
-    // 3. Bersihkan timer jika berpindah halaman agar memori tetap hemat
+    // 2. Bersihkan timer jika berpindah halaman agar memori tetap hemat
     return () => clearInterval(intervalId);
   }, []);
 

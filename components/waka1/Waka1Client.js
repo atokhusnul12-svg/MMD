@@ -8,11 +8,8 @@ import {
   RefreshCw,
   Printer,
   ShieldCheck,
-  Sparkles,
   BarChart3,
-  Calendar,
   AlertCircle,
-  FileSpreadsheet,
 } from 'lucide-react';
 import Waka1SummaryCards from './Waka1SummaryCards';
 import Waka1Table from './Waka1Table';
@@ -20,8 +17,8 @@ import Waka1Table from './Waka1Table';
 export default function Waka1Client({ initialData, serverError = null }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [data, setData] = useState(initialData);
-  const [error, setError] = useState(serverError);
+  const [data] = useState(initialData);
+  const [error] = useState(serverError);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('ALL');
 
@@ -52,25 +49,25 @@ export default function Waka1Client({ initialData, serverError = null }) {
         <div>
           <div className="flex items-center gap-2 text-xs text-[#5C6E66] mb-1">
             <Link href="/" className="hover:text-[#1D7A6F] flex items-center gap-1 transition-colors">
-              <ArrowLeft className="w-3.5 h-3.5 text-[#C6A66B]" /> Dashboard
+              <ArrowLeft className="w-3.5 h-3.5 text-[#C6A66B]" /> HOME
             </Link>
             <span>/</span>
             <span className="text-[#1D7A6F] font-bold">WAKA I MMD</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#26332E] tracking-tight font-serif flex items-center gap-2">
-            <span>WAKA I — Kesiswaan &amp; Ketertiban</span>
+            <span>Data Santri dan Takziran</span>
             <span className="text-xs font-sans font-bold px-2.5 py-0.5 rounded-full bg-[#E8F5F3] text-[#1D7A6F] border border-[#C8E3DC] hidden sm:inline-flex">
               MI • MTs • MA
             </span>
           </h1>
           <p className="text-xs sm:text-sm text-[#5C6E66] mt-1 max-w-2xl">
-            Pusat pendataan siswa, monitoring kedisiplinan, dan rekapitulasi takziran bulanan santri Madrasah Islamiyah Darussalamah
+            Pusat informasi data santri, evaluasi kedisiplinan, dan rekapitulasi takziran bulanan santri Madrasah Islamiyah Darussalamah.
           </p>
         </div>
 
         {/* Tombol Aksi Kanan */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 no-print">
           <button
             type="button"
             onClick={handlePrint}

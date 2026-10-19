@@ -1,18 +1,13 @@
 import React from 'react';
-import Link from 'next/link';
 import {
-  GraduationCap,
-  BookOpen,
   Users,
   FileText,
   Sparkles,
-  ArrowRight,
-  ShieldCheck,
-  Calendar,
   Layers,
+  BookOpen,
 } from 'lucide-react';
 import ProgramCards from '@/components/waka2/ProgramCards';
-import { WAKA2_PROGRAMS, getAllProgramSlugs } from '@/lib/waka2Config';
+import { getAllProgramSlugs } from '@/lib/waka2Config';
 import { getWaka2Absensi } from '@/lib/fetchWaka2';
 
 export const metadata = {
@@ -25,7 +20,7 @@ export default async function Waka2DashboardPage() {
   const slugs = getAllProgramSlugs();
   const programStats = {};
 
-  // Fetch ringkasan data untuk masing-masing program secara paralel di server
+  // Fetch ringkasan data untuk masing-masing program secara paralel di server dengan ISR revalidate 60
   await Promise.all(
     slugs.map(async (slug) => {
       try {
@@ -76,7 +71,7 @@ export default async function Waka2DashboardPage() {
       </div>
 
       {/* Grid 3 Kartu Program */}
-      <section className="space-y-4">
+      <section id="program-cards" className="space-y-4 scroll-mt-28 sm:scroll-mt-36">
         <div>
           <h2 className="text-xl font-black text-[#26332E] font-serif">
             Program Kegiatan Akademik
@@ -96,7 +91,7 @@ export default async function Waka2DashboardPage() {
           <span>Tentang Sumber Data &amp; Integrasi WAKA II MMD</span>
         </h3>
         <p className="text-xs text-[#5C6E66] leading-relaxed">
-          Seluruh data presensi dan rekapitulasi kehadiran santri diambil secara otomatis dari Google Sheets melalui tautan publikasi CSV, sementara notulensi materi dan ibarot musyawarah terhubung langsung ke Google Docs resmi. Pengaturan tautan untuk masing-masing program telah dirancang secara modular dan dapat disesuaikan secara terpisah di kemudian hari.
+          Seluruh data presensi dan rekapitulasi kehadiran santri diambil secara otomatis dari Google Sheets melalui tautan publikasi CSV, sementara notulensi materi dan ibarot musyawarah terhubung langsung ke Google Docs resmi.
         </p>
       </section>
     </div>

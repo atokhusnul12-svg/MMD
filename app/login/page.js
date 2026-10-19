@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import {
@@ -8,17 +9,15 @@ import {
   User,
   KeyRound,
   ShieldCheck,
-  LogOut,
   ArrowRight,
+  LogOut,
   AlertCircle,
   CheckCircle2,
-  ExternalLink,
 } from 'lucide-react';
-import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { isAdmin, login, logout, isLoaded } = useAuth();
+  const { isAdmin, login, logout } = useAuth();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -29,45 +28,40 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
 
-    const ok = login(username, password);
-    if (ok) {
+    const isSuccess = login(username, password);
+    if (isSuccess) {
       setSuccess(true);
       setTimeout(() => {
         router.push('/');
-      }, 800);
+      }, 700);
     } else {
-      setError('Username atau password salah! Silakan periksa kembali.');
+      setError('Username atau Password yang Anda masukkan salah.');
     }
   };
 
-  if (!isLoaded) {
-    return null;
-  }
-
   return (
-    <div className="max-w-md mx-auto py-8 sm:py-14">
-      
-      {/* Jika Admin Sudah Login */}
+    <div className="max-w-md mx-auto py-8 sm:py-12">
       {isAdmin ? (
-        <div className="bg-white rounded-2xl p-8 shadow-xs border border-[#DCE5E0] text-center space-y-6">
-          <div className="w-14 h-14 rounded-2xl bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center mx-auto border border-[#1D7A6F]/15">
-            <ShieldCheck className="w-7 h-7" />
+        /* Status Saat Sudah Login */
+        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#DCE5E0] text-center space-y-4">
+          <div className="w-16 h-16 rounded-full bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center mx-auto border border-[#C8E3DC]">
+            <ShieldCheck className="w-8 h-8" />
           </div>
 
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold font-serif text-[#1D7A6F]">
-              Anda Sedang Login sebagai Admin
+            <h1 className="text-xl sm:text-2xl font-bold font-serif text-[#26332E]">
+              Anda Sedang Masuk sebagai Pengurus
             </h1>
-            <p className="text-xs sm:text-sm text-[#5C6D66] mt-2">
-              Tombol <strong className="text-[#1D7A6F]">"Edit Data di Google Sheets"</strong> dan fitur penyiaran pesan khusus admin kini aktif.
+            <p className="text-xs sm:text-sm text-[#5C6D66] mt-1">
+              Akun pengurus aktif. Anda memiliki akses untuk mengelola data operasional.
             </p>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#DCE5E0] text-xs text-left text-[#26332E] space-y-2">
+          <div className="p-4 rounded-xl bg-[#FAF6EF] border border-[#ECD8A5] text-xs text-left text-[#26332E] space-y-2">
             <p className="font-bold text-[#1D7A6F]">Hak Akses Administrator:</p>
             <ul className="list-disc list-inside space-y-1 text-[#5C6D66]">
               <li>Membuka lembar kerja Google Sheets untuk edit data santri</li>
-              <li>Membuka spreadsheet rekapitulasi keuangan RAB & LPJ</li>
+              <li>Membuka spreadsheet rekapitulasi keuangan RAB &amp; LPJ</li>
               <li>Membuat dan mengirim penyiaran (broadcast) notifikasi resmi</li>
             </ul>
           </div>
@@ -77,7 +71,7 @@ export default function LoginPage() {
               href="/"
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-white bg-[#1D7A6F] hover:bg-[#1A453B] transition-colors shadow-xs"
             >
-              <span>Buka Dashboard</span>
+              <span>Buka HOME</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
 
@@ -99,10 +93,10 @@ export default function LoginPage() {
               <Lock className="w-6 h-6" />
             </div>
             <h1 className="text-2xl font-bold font-serif text-[#1D7A6F]">
-              Login Administrator
+              Login Pengurus MMD
             </h1>
             <p className="text-xs sm:text-sm text-[#5C6D66] mt-1">
-              Masuk untuk memunculkan tautan kelola Google Sheets dan Broadcast
+              Masuk untuk memunculkan tautan kelola Google Sheets dan integrasi sistem
             </p>
           </div>
 
@@ -116,12 +110,11 @@ export default function LoginPage() {
           {success && (
             <div className="mb-4 p-3.5 rounded-xl bg-[#E8F5F3] border border-[#DCE5E0] text-[#1D7A6F] text-xs flex items-center gap-2 font-medium">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-[#1D7A6F]" />
-              <span>Login berhasil! Mengalihkan ke dashboard...</span>
+              <span>Login berhasil! Mengalihkan ke menu utama...</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            
             {/* Input Username */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-[#5C6D66] mb-1.5">
@@ -164,14 +157,12 @@ export default function LoginPage() {
               className="w-full mt-2 py-3 px-4 rounded-xl font-semibold text-white bg-[#1D7A6F] hover:bg-[#1A453B] transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-2"
             >
               <ShieldCheck className="w-4 h-4" />
-              <span>Masuk sebagai Admin</span>
+              <span>Masuk sebagai Pengurus</span>
             </button>
-
           </form>
 
         </div>
       )}
-
     </div>
   );
 }

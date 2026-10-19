@@ -4,20 +4,18 @@ import React from 'react';
 import Link from 'next/link';
 import {
   GraduationCap,
-  BookMarked,
+  BookOpen,
   Award,
   Users,
   FileText,
   ArrowRight,
   Sparkles,
-  Calendar,
-  CheckCircle2,
 } from 'lucide-react';
 import { WAKA2_PROGRAMS } from '@/lib/waka2Config';
 
 const ICON_MAP = {
   GraduationCap,
-  BookMarked,
+  BookOpen,
   Award,
 };
 

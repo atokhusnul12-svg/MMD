@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import {
-  Sparkles,
   Users,
   BookOpen,
   CalendarDays,
@@ -19,7 +18,6 @@ import {
   UserCheck,
   Layers,
   Home,
-  ChevronRight,
 } from 'lucide-react';
 import JamIstiwaTopBar from '@/components/JamIstiwaTopBar';
 import Waka3SubNav from '@/components/waka3/Waka3SubNav';
@@ -34,14 +32,14 @@ export default function Navbar() {
     { name: 'WAKA I', href: '/waka-i', icon: UserCheck },
     { name: 'WAKA II', href: '/waka-ii', icon: GraduationCap },
     { name: 'WAKA III', href: '/waka-iii', icon: Layers },
+    { name: 'Keuangan', href: '/keuangan', icon: Wallet },
+    { name: 'Kalender MMD', href: '/kalender-mmd', icon: CalendarDays },
   ];
 
   const waka3SubItems = [
     { name: 'Ringkasan WAKA III', href: '/waka-iii', icon: Layers },
     { name: 'Anggota LBM', href: '/anggota', icon: Users },
     { name: 'Delegasi Bahsu', href: '/bahsu', icon: BookOpen },
-    { name: 'Kalender Kerja', href: '/kalender', icon: CalendarDays },
-    { name: 'Keuangan RAB/LPJ', href: '/keuangan', icon: Wallet },
   ];
 
   const isActive = (href) => {
@@ -55,39 +53,43 @@ export default function Navbar() {
         pathname === '/anggota' ||
         pathname.startsWith('/anggota/') ||
         pathname === '/bahsu' ||
-        pathname.startsWith('/bahsu/') ||
+        pathname.startsWith('/bahsu/')
+      );
+    }
+    if (href === '/keuangan') return pathname === '/keuangan' || pathname.startsWith('/keuangan/');
+    if (href === '/kalender-mmd') {
+      return (
+        pathname === '/kalender-mmd' ||
+        pathname.startsWith('/kalender-mmd/') ||
         pathname === '/kalender' ||
-        pathname.startsWith('/kalender/') ||
-        pathname === '/keuangan' ||
-        pathname.startsWith('/keuangan/')
+        pathname.startsWith('/kalender/')
       );
     }
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-[#FFFFFF]/98 backdrop-blur-md border-b border-[#DCE5E0] shadow-2xs">
+    <header className="sticky top-0 z-50 bg-[#FFFFFF] border-b border-[#DCE5E0] shadow-xs no-print">
       {/* TopBar Jam Istiwa' Real-Time Tampil di Semua Halaman */}
       <JamIstiwaTopBar />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-5">
-        <div className="flex items-center justify-between h-16 sm:h-18 gap-2 xl:gap-4">
-          
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 gap-2">
           {/* Logo & Judul Organisasi (Kiri) */}
-          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0 min-w-0">
-            <div className="relative w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-lg bg-[#FAF6EF] p-1 flex items-center justify-center border border-[#DCE5E0] shadow-2xs group-hover:border-[#1D7A6F] transition-colors shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0 min-w-0">
+            <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#FAF6EF] p-1 flex items-center justify-center border border-[#DCE5E0] shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
               <img
                 src="/logo.png"
                 alt="Logo MIDA Sumbersari Kediri"
                 className="w-full h-full object-contain filter drop-shadow-2xs shrink-0"
               />
             </div>
-            <div className="min-w-0 max-w-[160px] sm:max-w-[200px] lg:max-w-[180px] xl:max-w-[280px] 2xl:max-w-none">
+            <div className="min-w-0 max-w-[130px] sm:max-w-[180px] lg:max-w-[150px] xl:max-w-[240px] 2xl:max-w-none">
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-sm sm:text-base xl:text-lg text-[#1D7A6F] tracking-tight transition-colors whitespace-nowrap">
                   MMD
                 </span>
-                <span className="hidden sm:inline-block text-xs font-semibold text-[#8C6D23] bg-[#FAF3E6] border border-[#ECD8A5]/40 px-1.5 py-0.5 rounded">
+                <span className="hidden sm:inline-block text-[11px] font-semibold text-[#8C6D23] bg-[#FAF3E6] border border-[#ECD8A5]/40 px-1.5 py-0.5 rounded">
                   HOME
                 </span>
                 {isAdmin && (
@@ -97,15 +99,17 @@ export default function Navbar() {
                   </span>
                 )}
               </div>
-              <p className="text-[11px] xl:text-xs text-[#5C6B64] hidden sm:block truncate leading-tight mt-0.5" title="Majlis Musyawaroh Darussalam • Madrasah Islamiyah Darussalamah">
+              <p
+                className="text-[11px] xl:text-xs text-[#5C6B64] hidden sm:block truncate leading-tight mt-0.5"
+                title="Majlis Musyawaroh Darussalam • Madrasah Islamiyah Darussalamah"
+              >
                 <span>Majlis Musyawaroh Darussalam</span>
-                <span className="hidden 2xl:inline"> • Madrasah Islamiyah Darussalamah</span>
               </p>
             </div>
           </Link>
 
           {/* Navigasi Desktop (Tengah & Kanan) */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 shrink-0">
             {mainNavItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
@@ -113,7 +117,7 @@ export default function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs xl:text-sm font-medium whitespace-nowrap shrink-0 transition-colors ${
+                  className={`flex items-center gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-lg text-xs xl:text-sm font-medium whitespace-nowrap shrink-0 transition-colors ${
                     active
                       ? 'bg-[#1D7A6F] text-white shadow-2xs font-semibold'
                       : 'text-[#26332E] hover:text-[#1D7A6F] hover:bg-[#F7F5EF]'
@@ -126,37 +130,32 @@ export default function Navbar() {
             })}
 
             {/* Menu Login / Logout Desktop */}
-            <div className="ml-2 pl-3 border-l border-[#DCE5E0] flex items-center shrink-0">
+            <div className="ml-1 pl-2.5 border-l border-[#DCE5E0] flex items-center shrink-0">
               {isAdmin ? (
                 <button
                   onClick={logout}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs xl:text-sm font-semibold whitespace-nowrap shrink-0 text-rose-700 bg-rose-50/70 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs xl:text-sm font-semibold whitespace-nowrap shrink-0 text-rose-700 bg-rose-50/70 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer"
                   title="Keluar dari mode admin"
                 >
-                  <LogOut className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
+                  <LogOut className="w-3.5 h-3.5 shrink-0" />
                   <span>Logout</span>
                 </button>
               ) : (
                 <Link
                   href="/login"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs xl:text-sm font-semibold whitespace-nowrap shrink-0 border border-[#1D7A6F]/30 text-[#1D7A6F] hover:bg-[#1D7A6F] hover:text-white transition-colors ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs xl:text-sm font-semibold whitespace-nowrap shrink-0 border border-[#1D7A6F]/30 text-[#1D7A6F] hover:bg-[#1D7A6F] hover:text-white transition-colors ${
                     pathname === '/login' ? 'bg-[#1D7A6F] text-white' : 'bg-transparent'
                   }`}
                 >
-                  <LogIn className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
+                  <LogIn className="w-3.5 h-3.5 shrink-0" />
                   <span>Login</span>
                 </Link>
               )}
             </div>
           </nav>
 
-          {/* Tombol Hamburger & Status Admin Mobile (di bawah lg) */}
+          {/* Tombol Hamburger Mobile (di bawah lg) */}
           <div className="flex lg:hidden items-center gap-1.5 sm:gap-2 shrink-0">
-            {isAdmin && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-xs bg-[#FAF3E6] text-[#8C6D23] border border-[#C6A66B]/30 whitespace-nowrap">
-                Admin
-              </span>
-            )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle Menu"
@@ -200,7 +199,7 @@ export default function Navbar() {
           {/* Sub-Menu WAKA III di Mobile Drawer */}
           <div className="pt-2 border-t border-[#DCE5E0] mt-2">
             <div className="text-[11px] font-bold text-[#5C6E66] uppercase tracking-wider px-3 py-1 flex items-center justify-between">
-              <span>Divisi WAKA III</span>
+              <span>Internal WAKA III (LBM)</span>
               <Layers className="w-3 h-3 text-[#C6A66B]" />
             </div>
             {waka3SubItems.map((sub) => {

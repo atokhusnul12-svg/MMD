@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useTransition } from 'react';
+import React, { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -8,13 +8,12 @@ import {
   Users,
   FileText,
   RefreshCw,
-  AlertCircle,
-  ExternalLink,
   Printer,
-  Sparkles,
+  AlertCircle,
 } from 'lucide-react';
 import AbsensiTable from './AbsensiTable';
 import JurnalViewer from './JurnalViewer';
+import { smartScrollTo } from '@/lib/scrollTo';
 
 export default function ProgramDetailClient({
   program,
@@ -25,26 +24,20 @@ export default function ProgramDetailClient({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const initialTab = searchParams.get('tab') === 'jurnal' ? 'jurnal' : 'absensi';
-  const [activeTab, setActiveTab] = useState(initialTab);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState(serverError);
-  const [data, setData] = useState(initialData);
+  const tabFromQuery = searchParams.get('tab');
+  const [tabOverride, setTabOverride] = useState(null);
+  const activeTab = tabOverride ?? (tabFromQuery === 'jurnal' ? 'jurnal' : 'absensi');
 
-  // Sinkronkan tab jika query parameter berubah
-  useEffect(() => {
-    const qTab = searchParams.get('tab');
-    if (qTab === 'jurnal' || qTab === 'absensi') {
-      setActiveTab(qTab);
-    }
-  }, [searchParams]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error] = useState(serverError);
+  const [data] = useState(initialData);
 
   const handleTabChange = (tab) => {
-    setActiveTab(tab);
-    // Perbarui query param tanpa reload penuh
+    setTabOverride(tab);
     const url = new URL(window.location.href);
     url.searchParams.set('tab', tab);
     window.history.replaceState({}, '', url.toString());
+    smartScrollTo('program-tab-content');
   };
 
   const handleRefresh = () => {
@@ -59,12 +52,12 @@ export default function ProgramDetailClient({
 
   return (
     <div className="space-y-6">
-      {/* Header Program & Breadcrumb */}
+      {/* Header Halaman Detail Program */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs text-[#5C6E66] mb-1">
             <Link href="/" className="hover:text-[#1D7A6F] flex items-center gap-1 transition-colors">
-              <ArrowLeft className="w-3.5 h-3.5 text-[#C6A66B]" /> Dashboard
+              <ArrowLeft className="w-3.5 h-3.5 text-[#C6A66B]" /> HOME
             </Link>
             <span>/</span>
             <Link href="/waka-ii" className="hover:text-[#1D7A6F] transition-colors">
@@ -86,7 +79,7 @@ export default function ProgramDetailClient({
         </div>
 
         {/* Tombol Aksi Kanan */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 no-print">
           {activeTab === 'absensi' && (
             <button
               type="button"
@@ -152,7 +145,7 @@ export default function ProgramDetailClient({
         </div>
       </div>
 
-      {/* Error Banner jika pengambilan data gagal */}
+      {/* Banner Error jika ada */}
       {error && (
         <div className="bg-[#FAF0ED] border border-[#E8BCB0] text-[#8A2F1B] rounded-xl p-4 flex items-start gap-3 text-sm">
           <AlertCircle className="w-5 h-5 shrink-0 text-[#8A2F1B] mt-0.5" />
@@ -168,24 +161,26 @@ export default function ProgramDetailClient({
         </div>
       )}
 
-      {/* Konten Tab Aktif */}
-      {activeTab === 'absensi' ? (
-        <AbsensiTable
-          members={data?.members || []}
-          availableMonths={data?.availableMonths || []}
-          monthlyAggregates={data?.monthlyAggregates || []}
-          summary={data?.summary || {}}
-          sourceUrl={program.csvUrl}
-          classes={data?.classes || []}
-          domisiliList={data?.domisiliList || []}
-        />
-      ) : (
-        <JurnalViewer
-          jurnalUrl={program.jurnalDocUrl}
-          programName={program.name}
-          tingkat={program.tingkat}
-        />
-      )}
+      {/* Konten Tab Aktif dengan ID Anchor Auto-Scroll */}
+      <div id="program-tab-content" className="scroll-mt-28 sm:scroll-mt-36">
+        {activeTab === 'absensi' ? (
+          <AbsensiTable
+            members={data?.members || []}
+            availableMonths={data?.availableMonths || []}
+            monthlyAggregates={data?.monthlyAggregates || []}
+            summary={data?.summary || {}}
+            sourceUrl={program.csvUrl}
+            classes={data?.classes || []}
+            domisiliList={data?.domisiliList || []}
+          />
+        ) : (
+          <JurnalViewer
+            jurnalUrl={program.jurnalDocUrl}
+            programName={program.name}
+            tingkat={program.tingkat}
+          />
+        )}
+      </div>
     </div>
   );
 }

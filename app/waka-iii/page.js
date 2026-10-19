@@ -3,9 +3,9 @@ import { getInitialServerData } from '@/lib/serverFetch';
 import DashboardClient from '@/app/DashboardClient';
 
 export const metadata = {
-  title: 'WAKA III • Lembaga Bahtsul Masail & Administrasi MMD',
+  title: 'WAKA III • Lembaga Bahtsul Masail & Kalender Kerja MMD',
   description:
-    'Pusat komando pembinaan santri LBM, monitoring agenda kalender kerja madrasah, koordinasi forum delegasi Bahtsul Masail, serta transparansi anggaran belanja (RAB & LPJ) terintegrasi Google Sheets.',
+    'Pusat pembinaan anggota santri LBM, kalender kerja madrasah, delegasi musyawarah bahtsul masail, dan transparansi anggaran belanja WAKA III.',
 };
 
 export default async function Waka3DashboardPage() {

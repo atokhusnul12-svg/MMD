@@ -1,13 +1,14 @@
 import { getKalenderServerData } from '@/lib/sheets';
-import KalenderClient from './KalenderClient';
+import KalenderMmdClient from '../kalender-mmd/KalenderMmdClient';
 
-/**
- * Next.js Server Component dengan Incremental Static Regeneration (ISR).
- * Menggunakan fetch(CSV_URL, { next: { revalidate: 60 } }) di sisi server.
- * Memastikan pemuatan Kalender Kerja instan tanpa loading di browser.
- */
+export const metadata = {
+  title: 'Kalender MMD • Jadwal Agenda & Kalender Kerja Madrasah',
+  description:
+    'Pusat informasi dan jadwal kalender kerja Majlis Musyawaroh Darussalam (MMD), kegiatan madrasah, musyawarah, ujian, dan rutinitas santri.',
+};
+
 export default async function KalenderPage() {
   const { data, error } = await getKalenderServerData({ revalidate: 60 });
 
-  return <KalenderClient initialData={data} serverError={error} />;
+  return <KalenderMmdClient initialData={data} serverError={error} />;
 }

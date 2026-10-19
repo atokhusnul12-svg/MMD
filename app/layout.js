@@ -1,7 +1,24 @@
 import './globals.css';
+import { Lora, Inter } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import ScrollToTop from '@/components/ScrollToTop';
+import AutoScrollManager from '@/components/AutoScrollManager';
 import { AuthProvider } from '@/lib/auth';
+
+const lora = Lora({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-serif',
+  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-sans',
+  display: 'swap',
+});
 
 export const metadata = {
   title: 'MMD • Majlis Musyawaroh Darussalam — Madrasah Islamiyah Darussalamah',
@@ -21,14 +38,16 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id" className="h-full">
-      <body className="min-h-full flex flex-col bg-[#F7F5EF] text-[#26332E] antialiased">
+    <html lang="id" className={`h-full scroll-smooth ${lora.variable} ${inter.variable}`}>
+      <body className="min-h-full flex flex-col bg-[#F7F5EF] text-[#26332E] font-sans antialiased">
         <AuthProvider>
+          <AutoScrollManager />
           <Navbar />
           <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 lg:py-10">
             {children}
           </main>
           <Footer />
+          <ScrollToTop />
         </AuthProvider>
       </body>
     </html>

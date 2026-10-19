@@ -13,13 +13,11 @@ import { hitungJamIstiwa } from '@/lib/jamIstiwa';
  * Dashboard, Anggota, Bahsu, Kalender, Keuangan, maupun Login.
  */
 export default function JamIstiwaTopBar() {
-  const [dataWaktu, setDataWaktu] = useState(null);
+  const [dataWaktu, setDataWaktu] = useState(() =>
+    typeof window !== 'undefined' ? hitungJamIstiwa() : null
+  );
 
   useEffect(() => {
-    // Jalankan pertama kali saat dibuka di browser
-    setDataWaktu(hitungJamIstiwa());
-
-    // Perbarui otomatis setiap 1 detik
     const timer = setInterval(() => {
       setDataWaktu(hitungJamIstiwa());
     }, 1000);
@@ -35,8 +33,8 @@ export default function JamIstiwaTopBar() {
         <div className="flex items-center gap-2 sm:gap-4 overflow-hidden min-w-0">
           
           {/* Jam Istiwa' (Jumbo & Monospace) */}
-          <div className="flex items-center gap-1 sm:gap-1.5 font-bold shrink-0">
-            <Sun className="w-3.5 h-3.5 text-[#C6A66B] shrink-0" />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Sun className="w-3.5 h-3.5 text-[#C6A66B] animate-spin shrink-0" style={{ animationDuration: '20s' }} />
             <span className="text-[#C6A66B] uppercase text-[9px] sm:text-xs tracking-wider font-semibold">
               WIS:
             </span>

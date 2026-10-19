@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Users, CheckCircle2, AlertTriangle, ShieldAlert, Sparkles } from 'lucide-react';
+import { Users, CheckCircle2, AlertTriangle, ShieldAlert } from 'lucide-react';
 
 export default function Waka1SummaryCards({
   summary = {},
@@ -99,7 +99,7 @@ export default function Waka1SummaryCards({
         <div className="text-2xl sm:text-3xl font-black text-[#8A2F1B] mt-2 font-serif">
           {totalPerhatianKhusus}
         </div>
-        <p className="text-xs text-[#8A2F1B]/80 mt-0.5">Takziran $\ge$ 3 bulan</p>
+        <p className="text-xs text-[#8A2F1B]/80 mt-0.5">Takziran 3 bulan atau lebih</p>
       </div>
     </div>
   );

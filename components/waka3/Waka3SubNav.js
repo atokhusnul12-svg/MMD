@@ -4,11 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard,
   Users,
   BookOpen,
-  CalendarDays,
-  Wallet,
   ArrowLeft,
   Layers,
 } from 'lucide-react';
@@ -16,7 +13,7 @@ import {
 export default function Waka3SubNav() {
   const pathname = usePathname();
 
-  const waka3Routes = ['/waka-iii', '/anggota', '/bahsu', '/kalender', '/keuangan'];
+  const waka3Routes = ['/waka-iii', '/anggota', '/bahsu'];
   const isInsideWaka3 = waka3Routes.some(
     (r) => pathname === r || pathname.startsWith(`${r}/`)
   );
@@ -24,11 +21,9 @@ export default function Waka3SubNav() {
   if (!isInsideWaka3) return null;
 
   const tabs = [
-    { name: 'Ringkasan WAKA III', href: '/waka-iii', icon: LayoutDashboard },
+    { name: 'Ringkasan WAKA III', href: '/waka-iii', icon: Layers },
     { name: 'Anggota LBM', href: '/anggota', icon: Users },
     { name: 'Delegasi Bahsu', href: '/bahsu', icon: BookOpen },
-    { name: 'Kalender Kerja', href: '/kalender', icon: CalendarDays },
-    { name: 'Keuangan RAB/LPJ', href: '/keuangan', icon: Wallet },
   ];
 
   const isTabActive = (href) => {
@@ -37,9 +32,9 @@ export default function Waka3SubNav() {
 
   return (
     <div className="bg-white border-b border-[#DCE5E0] shadow-2xs no-print">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-5">
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-3 py-2 overflow-x-auto scrollbar-thin">
-          {/* Label WAKA III & Tombol Kembali ke Portal */}
+          {/* Label WAKA III & Tombol Kembali ke HOME */}
           <div className="flex items-center gap-2 shrink-0">
             <Link
               href="/"
@@ -52,12 +47,12 @@ export default function Waka3SubNav() {
             <div className="h-4 w-px bg-[#DCE5E0] hidden sm:block" />
             <div className="hidden md:flex items-center gap-1.5 text-xs font-bold text-[#26332E] uppercase tracking-wider">
               <Layers className="w-3.5 h-3.5 text-[#C6A66B]" />
-              <span>WAKA III</span>
+              <span>WAKA III (LBM)</span>
             </div>
           </div>
 
           {/* Tab Navigasi Internal WAKA III */}
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const active = isTabActive(tab.href);

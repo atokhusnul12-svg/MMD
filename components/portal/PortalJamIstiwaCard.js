@@ -5,11 +5,11 @@ import { Sun, Clock, Compass, Calendar, MapPin } from 'lucide-react';
 import { hitungJamIstiwa } from '@/lib/jamIstiwa';
 
 export default function PortalJamIstiwaCard() {
-  const [dataWaktu, setDataWaktu] = useState(null);
+  const [dataWaktu, setDataWaktu] = useState(() =>
+    typeof window !== 'undefined' ? hitungJamIstiwa() : null
+  );
 
   useEffect(() => {
-    setDataWaktu(hitungJamIstiwa());
-
     const timer = setInterval(() => {
       setDataWaktu(hitungJamIstiwa());
     }, 1000);

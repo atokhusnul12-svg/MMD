@@ -78,7 +78,7 @@ export default function KalenderClient({ initialData, serverError = null }) {
         <div>
           <div className="flex items-center gap-2 text-xs text-[#5C6E66] mb-1">
             <Link href="/" className="hover:text-[#1D7A6F] flex items-center gap-1 transition-colors">
-              <ArrowLeft className="w-3.5 h-3.5 text-[#C6A66B]" /> Dashboard
+              <ArrowLeft className="w-3.5 h-3.5 text-[#C6A66B]" /> HOME
             </Link>
             <span>/</span>
             <span className="text-[#1D7A6F] font-bold">Kalender Kerja</span>
