@@ -84,7 +84,7 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
           }}
           disabled={isLoading}
           aria-label="Pengaturan Notifikasi"
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-md text-xs xl:text-sm font-medium whitespace-nowrap shrink-0 transition-all duration-150 cursor-pointer ${
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs xl:text-sm font-medium whitespace-nowrap shrink-0 transition-all duration-150 cursor-pointer ${
             isSubscribed
               ? 'bg-[#E8F5F3] text-[#1D7A6F] border border-[#1D7A6F]/20 hover:bg-[#1D7A6F] hover:text-white'
               : permission === 'denied'
@@ -116,13 +116,17 @@ export default function NotificationButton({ variant = 'header', showBroadcastBu
           )}
 
           <span className="hidden md:inline text-xs font-semibold whitespace-nowrap">
-            {isLoading
-              ? 'Memproses...'
-              : isSubscribed
-              ? 'Notifikasi Aktif'
-              : permission === 'denied'
-              ? 'Notif Diblokir'
-              : 'Aktifkan Notifikasi'}
+            {isLoading ? (
+              'Memproses...'
+            ) : isSubscribed ? (
+              <>
+                Notifikasi<span className="hidden 2xl:inline"> Aktif</span>
+              </>
+            ) : permission === 'denied' ? (
+              'Notif Diblokir'
+            ) : (
+              'Notifikasi'
+            )}
           </span>
 
           {isSubscribed && (
