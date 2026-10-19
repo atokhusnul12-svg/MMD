@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   ShieldCheck,
+  GraduationCap,
 } from 'lucide-react';
 import JamIstiwaTopBar from '@/components/JamIstiwaTopBar';
 
@@ -27,6 +28,7 @@ export default function Navbar() {
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Anggota LBM', href: '/anggota', icon: Users },
     { name: 'Pemberangkatan Bahsu', href: '/bahsu', icon: BookOpen },
+    { name: 'WAKA II MMD', href: '/waka-ii', icon: GraduationCap },
     { name: 'Kalender Kerja', href: '/kalender', icon: CalendarDays },
     { name: 'Keuangan', href: '/keuangan', icon: Wallet },
   ];
