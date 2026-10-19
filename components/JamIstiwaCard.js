@@ -86,8 +86,7 @@ export default function JamIstiwaCard() {
 
           {/* Keterangan Deskriptif */}
           <p className="text-xs sm:text-sm text-[#5C6E66] leading-relaxed max-w-xl">
-            Waktu Matahari Hakiki (Zawal) Pondok Pesantren Darussalam Sumbersari.
-            Matahari tepat berada di titik kulminasi atas saat jam 12:00:00 WIS sebagai patokan utama waktu sholat dan kegiatan pondok.
+            <strong className="text-[#26332E]">Waktu Istiwa&apos; Sumbersari (WIS) Tafawut</strong> dihitung menurut koordinat Sumbersari, Kencong, Kepung, Kediri. Jam ini tidak berlaku di luar koordinat Pare karena adanya perbedaan koordinat.
           </p>
         </div>
 

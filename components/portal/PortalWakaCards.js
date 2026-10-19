@@ -19,7 +19,7 @@ export default function PortalWakaCards() {
       id: 'waka-i',
       title: 'WAKA I',
       subtitle: 'Data Siswa & Kedisiplinan Takziran',
-      badge: 'Bidang I • Kesiswaan',
+      badge: 'Bidang I • Musyawaroh',
       badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-200',
       description:
         'Pusat informasi 1.098 data santri madrasah jenjang MI, MTs, dan MA, monitoring catatan kedisiplinan dan rekapitulasi takziran bulanan santri terpadu dari Google Sheets.',
@@ -37,7 +37,7 @@ export default function PortalWakaCards() {
       id: 'waka-ii',
       title: 'WAKA II',
       subtitle: 'Program Tafaqquh & Tarbiyatul Mubahitsin',
-      badge: 'Bidang II • Akademik',
+      badge: 'Bidang II • Pengembangan',
       badgeColor: 'bg-amber-50 text-amber-900 border-amber-200',
       description:
         'Pusat pemantauan kegiatan akademik santri, evaluasi kehadiran absensi multi-bulan dari Google Sheets, dan arsip jurnal pembahasan kajian fiqih dari Google Docs.',
@@ -55,7 +55,7 @@ export default function PortalWakaCards() {
       id: 'waka-iii',
       title: 'WAKA III',
       subtitle: 'Lembaga Bahtsul Masail & Santri LBM',
-      badge: 'Bidang III • Administrasi',
+      badge: 'Bidang III • Agen Khusus',
       badgeColor: 'bg-teal-50 text-teal-800 border-teal-200',
       description:
         'Pusat komando pembinaan santri Lembaga Bahtsul Masail (LBM), pemantauan perkembangan anggota, dan koordinasi utusan delegasi forum ilmiah se-Jawa Madura.',

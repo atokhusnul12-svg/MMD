@@ -179,8 +179,12 @@ export default function DashboardClient({ initialData }) {
             <div className="text-xs text-[#5C6E66] mb-1 font-medium">
               Madrasah Islamiyah Darussalamah, PP. Darussalam Sumbersari
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#26332E] tracking-tight font-serif">
-              Lembaga Bahtsul Masail &amp; Administrasi WAKA III
+            <h1
+              dir="rtl"
+              lang="ar"
+              className="text-3xl sm:text-4xl lg:text-5xl font-normal text-[#1D7A6F] tracking-normal font-diwani leading-tight sm:leading-snug py-1 w-fit"
+            >
+              لجنة بحث المسائل
             </h1>
             <p className="text-xs sm:text-sm text-[#5C6E66] mt-1.5 leading-relaxed">
               Pusat pembinaan {anggotaData?.total || initialData?.anggotaTotal || '…'} santri Lembaga Bahtsul Masail (LBM), koordinasi {bahsuData?.totalAgenda || initialData?.bahsuTotal || '…'} forum delegasi Bahtsul Masail se-Jawa Madura, serta administrasi kepengurusan WAKA III.

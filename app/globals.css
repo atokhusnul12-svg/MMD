@@ -13,6 +13,15 @@
   --color-border: #DCE5E0;
 }
 
+@font-face {
+  font-family: 'Diwani Letter';
+  src: url('/fonts/diwani-letter.woff2') format('woff2'),
+       url('/fonts/diwani-letter.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-cream: #F7F5EF;
   --color-cream-light: #FFFFFF;
@@ -27,6 +36,11 @@
   --color-border: #DCE5E0;
   --font-serif: var(--font-serif), Georgia, serif;
   --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+  --font-diwani: 'Diwani Letter', 'Amiri', 'Traditional Arabic', serif;
+}
+
+.font-diwani {
+  font-family: 'Diwani Letter', 'Amiri', 'Traditional Arabic', serif;
 }
 
 html {
