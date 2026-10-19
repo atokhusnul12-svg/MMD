@@ -392,12 +392,7 @@ export default function DashboardClient({ initialData }) {
         <JamIstiwaCard />
       </div>
 
-      {/* ============================================================== */}
-      {/* 2.5 PUSAT NOTIFIKASI SISTEM (ONESIGNAL WEB PUSH)              */}
-      {/* ============================================================== */}
-      <div className="no-print">
-        <NotificationButton variant="card" />
-      </div>
+
 
       {/* ============================================================== */}
       {/* 3. HIGHLIGHT KALENDER KERJA MMD (AGENDA TERDEKAT DARI HARI INI) */}
