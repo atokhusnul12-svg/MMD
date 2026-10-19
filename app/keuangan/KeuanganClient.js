@@ -51,7 +51,11 @@ export default function KeuanganClient({ initialData, serverError = null }) {
   const [error, setError] = useState(serverError || null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedBulan, setSelectedBulan] = useState('TOTAL');
-  const lastFetchRef = useRef(Date.now());
+  const lastFetchRef = useRef(0);
+
+  useEffect(() => {
+    lastFetchRef.current = Date.now();
+  }, []);
 
   // Sinkronisasi data latar belakang (Client-Side)
   const fetchKeuangan = useCallback(async (showIndicator = false) => {

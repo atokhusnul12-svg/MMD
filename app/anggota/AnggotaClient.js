@@ -19,7 +19,11 @@ export default function AnggotaClient({ initialData, serverError = null }) {
   const [data, setData] = useState(initialData || null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(serverError || null);
-  const lastFetchRef = useRef(Date.now());
+  const lastFetchRef = useRef(0);
+
+  useEffect(() => {
+    lastFetchRef.current = Date.now();
+  }, []);
 
   // Sinkronisasi data latar belakang (Client-Side) jika ada perubahan di Google Sheets
   const fetchAnggota = useCallback(async (showIndicator = false) => {

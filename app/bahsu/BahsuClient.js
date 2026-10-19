@@ -21,7 +21,11 @@ export default function BahsuClient({ initialData, initialAnggotaList = [], serv
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(serverError || null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const lastFetchRef = useRef(Date.now());
+  const lastFetchRef = useRef(0);
+
+  useEffect(() => {
+    lastFetchRef.current = Date.now();
+  }, []);
 
   // Sinkronisasi data latar belakang (Client-Side) jika ada update baru di Google Sheets
   const fetchBahsu = useCallback(async (showIndicator = false) => {
