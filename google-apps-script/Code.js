@@ -291,6 +291,21 @@ function handleSyncBahsuEvent(ss, payload) {
     try {
       bahsuSheet.getRange(actualSourceRow, 1, 1, 5).setWrap(true);
     } catch (eWrap2) {}
+
+    // Bersihkan sisa baris lanjutan lama di bawah baris ini jika sebelumnya menggunakan format multi-baris
+    try {
+      var maxCheck = Math.min(bahsuSheet.getLastRow(), actualSourceRow + 15);
+      for (var clr = actualSourceRow + 1; clr <= maxCheck; clr++) {
+        var checkNo = String(bahsuSheet.getRange(clr, 1).getValue() || "").trim();
+        var checkAcara = String(bahsuSheet.getRange(clr, 2).getValue() || "").trim();
+        var checkDelegasi = String(bahsuSheet.getRange(clr, 4).getValue() || "").trim();
+        // Berhenti jika sudah mencapai agenda berikutnya
+        if (checkNo || checkAcara) break;
+        if (!checkDelegasi) break;
+        // Kosongkan baris sisa lanjutan lama
+        bahsuSheet.getRange(clr, 1, 1, 5).clearContent();
+      }
+    } catch (eClr) {}
   }
 
   // 3. SINKRONISASI KE TAB PERKEMBANGAN (KOLOM BAHTSU YANG DIDATANGI)

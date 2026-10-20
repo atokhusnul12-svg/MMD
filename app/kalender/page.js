@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { getKalenderServerData } from '@/lib/sheets';
 import KalenderMmdClient from '../kalender-mmd/KalenderMmdClient';
+import PageLoading from '@/components/ui/PageLoading';
 
 export const metadata = {
   title: 'Kalender MMD • Jadwal Agenda & Kalender Kerja Madrasah',
@@ -12,16 +13,7 @@ export default async function KalenderPage() {
   const { data, error } = await getKalenderServerData({ revalidate: 60 });
 
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-[350px]">
-          <div className="text-center space-y-3">
-            <div className="w-9 h-9 border-3 border-[#1D7A6F] border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-sm font-medium text-[#5C6E66]">Memuat Kalender MMD...</p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<PageLoading message="Memuat Kalender MMD..." minHeight="min-h-[350px]" />}>
       <KalenderMmdClient initialData={data} serverError={error} />
     </Suspense>
   );

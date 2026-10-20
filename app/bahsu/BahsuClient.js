@@ -8,9 +8,7 @@ import BahsuTable from '@/components/BahsuTable';
 import AdminButton from '@/components/AdminButton';
 import { Calendar, RefreshCw, AlertCircle, ArrowLeft, Printer, Plus } from 'lucide-react';
 import Link from 'next/link';
-
-const SYNC_INTERVAL_MS = 180_000;
-const REFOCUS_COOLDOWN_MS = 60_000;
+import { useBackgroundSync } from '@/lib/useBackgroundSync';
 
 export default function BahsuClient({ initialData, initialAnggotaList = [], serverError = null }) {
   const router = useRouter();
@@ -21,11 +19,27 @@ export default function BahsuClient({ initialData, initialAnggotaList = [], serv
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(serverError || null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const dataRef = useRef(data);
   const lastFetchRef = useRef(0);
 
+  // Sinkronisasi data saat server component melakukan revalidasi ISR atau router.refresh()
   useEffect(() => {
-    lastFetchRef.current = Date.now();
-  }, []);
+    if (initialData) {
+      setData(initialData);
+    }
+  }, [initialData]);
+
+  useEffect(() => {
+    if (initialAnggotaList && initialAnggotaList.length > 0) {
+      setAnggotaList(initialAnggotaList);
+    }
+  }, [initialAnggotaList]);
+
+  useEffect(() => {
+    if (serverError !== undefined) {
+      setError(serverError);
+    }
+  }, [serverError]);
 
   // Sinkronisasi data latar belakang (Client-Side) jika ada update baru di Google Sheets
   const fetchBahsu = useCallback(async (showIndicator = false) => {
@@ -48,14 +62,14 @@ export default function BahsuClient({ initialData, initialAnggotaList = [], serv
       lastFetchRef.current = Date.now();
     } catch (err) {
       console.error('Fetch Bahsu client error:', err);
-      // Hanya tampilkan error jika kita belum memiliki data sama sekali
-      if (!data) {
-        setError(err?.message || 'Gagal memuat jadwal & delegasi Bahtsul Masail dari Google Sheets.');
+      // Tampilkan error jika data belum ada sama sekali atau jika pengguna menekan Perbarui secara manual
+      if (!dataRef.current || showIndicator) {
+        setError(err?.message || 'Gagal menyinkronkan jadwal & delegasi Bahtsul Masail dari Google Sheets.');
       }
     } finally {
       if (showIndicator) setIsRefreshing(false);
     }
-  }, [data]);
+  }, []);
 
   // Handler tombol "Perbarui" manual dengan Next.js Server Revalidation & Client Sync
   const handleManualRefresh = useCallback(() => {
@@ -117,29 +131,8 @@ export default function BahsuClient({ initialData, initialAnggotaList = [], serv
     fetchBahsu(false);
   }, [router, fetchBahsu]);
 
-  // Background auto-refresh timer & window focus listener
-  useEffect(() => {
-    const timer = setInterval(() => fetchBahsu(false), SYNC_INTERVAL_MS);
-
-    const throttledRefetch = () => {
-      if (Date.now() - lastFetchRef.current >= REFOCUS_COOLDOWN_MS) {
-        fetchBahsu(false);
-      }
-    };
-
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') throttledRefetch();
-    };
-
-    window.addEventListener('focus', throttledRefetch);
-    document.addEventListener('visibilitychange', onVisibilityChange);
-
-    return () => {
-      clearInterval(timer);
-      window.removeEventListener('focus', throttledRefetch);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    };
-  }, [fetchBahsu]);
+  // Sinkronisasi otomatis di latar belakang & saat tab aktif kembali
+  useBackgroundSync(fetchBahsu, { lastFetchRef });
 
   const spinning = isRefreshing || isPending;
 

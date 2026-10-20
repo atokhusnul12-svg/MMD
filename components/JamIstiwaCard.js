@@ -1,37 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Compass, Clock, Calendar, Sun, Sparkles, MapPin } from 'lucide-react';
-import { hitungJamIstiwa } from '@/lib/jamIstiwa';
+import { useJamIstiwa } from '@/lib/useJamIstiwa';
 
 /**
  * ==============================================================================
  * KOMPONEN: KARTU JAM ISTIWA' (WIS) REAL-TIME
  * ==============================================================================
  * Komponen ini menampilkan jam Istiwa' (Waktu Matahari Hakiki) untuk wilayah Pare
- * (Kediri) dan sekitarnya yang diperbarui setiap detik.
- *
- * Cara kerjanya:
- * 1. Saat halaman dibuka, browser menjalankan timer (setInterval) tiap 1000ms (1 detik).
- * 2. Fungsi `hitungJamIstiwa()` dipanggil untuk mengambil jam WIB saat ini.
- * 3. Nilai selisih dicari otomatis dari tabel berdasarkan tanggal & bulan hari ini.
- * 4. Jam Istiwa' dihitung: WIB ditambah selisih.
- * 5. Tampilan jam, detik, dan tanggal diperbarui secara otomatis.
+ * (Kediri) dan sekitarnya yang diperbarui setiap detik menggunakan hook useJamIstiwa.
  */
 export default function JamIstiwaCard() {
-  const [dataWaktu, setDataWaktu] = useState(() =>
-    typeof window !== 'undefined' ? hitungJamIstiwa() : null
-  );
-
-  useEffect(() => {
-    // 1. Buat interval agar jam terus berdetak setiap 1 detik (1000 milidetik)
-    const intervalId = setInterval(() => {
-      setDataWaktu(hitungJamIstiwa());
-    }, 1000);
-
-    // 2. Bersihkan timer jika berpindah halaman agar memori tetap hemat
-    return () => clearInterval(intervalId);
-  }, []);
+  const dataWaktu = useJamIstiwa();
 
   // Tampilan cadangan (placeholder) saat awal muat agar tidak berkedip
   if (!dataWaktu) {

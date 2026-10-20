@@ -27,9 +27,7 @@ import {
 } from 'lucide-react';
 import { PrintHeader, PrintSignatures } from '@/components/PrintHeaderFooter';
 import { smartScrollTo } from '@/lib/scrollTo';
-
-const SYNC_INTERVAL_MS = 180_000;
-const REFOCUS_COOLDOWN_MS = 60_000;
+import { useBackgroundSync } from '@/lib/useBackgroundSync';
 
 export default function DashboardClient({ initialData }) {
   const hasInitial = Boolean(initialData?.anggotaData || initialData?.bahsuData);
@@ -107,46 +105,17 @@ export default function DashboardClient({ initialData }) {
     }
   };
 
-  /**
-   * SINKRONISASI REAL-TIME:
-   * 1. Ambil data saat halaman dibuka
-   * 2. Auto-refresh otomatis setiap 3 menit (180 detik)
-   * 3. Revalidate on focus/visibility — dengan cooldown 60 detik
-   */
+  // Sinkronisasi data saat halaman dibuka
   useEffect(() => {
-    lastFetchRef.current = Date.now();
     if (!hasInitial) {
       loadData(true);
     } else {
       loadData(false);
     }
-
-    const timer = setInterval(() => {
-      loadData(false);
-    }, SYNC_INTERVAL_MS);
-
-    const throttledRefetch = () => {
-      const elapsed = Date.now() - lastFetchRef.current;
-      if (elapsed >= REFOCUS_COOLDOWN_MS) {
-        loadData(false);
-      }
-    };
-
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        throttledRefetch();
-      }
-    };
-
-    window.addEventListener('focus', throttledRefetch);
-    document.addEventListener('visibilitychange', onVisibilityChange);
-
-    return () => {
-      clearInterval(timer);
-      window.removeEventListener('focus', throttledRefetch);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    };
   }, []);
+
+  // Sinkronisasi otomatis di latar belakang & saat tab aktif kembali
+  useBackgroundSync(() => loadData(false), { lastFetchRef });
 
   // Filter daftar agenda Bahtsul Masail yang ditampilkan
   const displayedBahsuEvents = useMemo(() => {

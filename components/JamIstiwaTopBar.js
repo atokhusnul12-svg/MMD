@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Sun, Clock, MapPin, Calendar } from 'lucide-react';
-import { hitungJamIstiwa } from '@/lib/jamIstiwa';
+import { useJamIstiwa } from '@/lib/useJamIstiwa';
 
 /**
  * ==============================================================================
@@ -13,17 +13,7 @@ import { hitungJamIstiwa } from '@/lib/jamIstiwa';
  * Dashboard, Anggota, Bahsu, Kalender, Keuangan, maupun Login.
  */
 export default function JamIstiwaTopBar() {
-  const [dataWaktu, setDataWaktu] = useState(() =>
-    typeof window !== 'undefined' ? hitungJamIstiwa() : null
-  );
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setDataWaktu(hitungJamIstiwa());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
+  const dataWaktu = useJamIstiwa();
 
   return (
     <div className="bg-[#155D54] text-white py-1.5 px-3.5 sm:px-6 lg:px-8 border-b border-[#0F433C] text-xs shadow-xs">

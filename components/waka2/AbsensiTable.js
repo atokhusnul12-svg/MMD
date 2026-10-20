@@ -18,50 +18,28 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
+const STATUS_CONFIG = {
+  H: { title: 'Hadir', bg: 'bg-[#E8F5F3]', text: 'text-[#1D7A6F]', border: 'border-[#C8E3DC]' },
+  S: { title: 'Sakit', bg: 'bg-[#EFF5F9]', text: 'text-[#2D6A9F]', border: 'border-[#BFD5E7]' },
+  I: { title: 'Izin', bg: 'bg-[#FAF3E6]', text: 'text-[#8C6D23]', border: 'border-[#ECD8A5]' },
+  A: { title: 'Alpa / Ghaib', bg: 'bg-[#FAF0ED]', text: 'text-[#8A2F1B]', border: 'border-[#E8BCB0]' },
+};
+
 function StatusBadge({ status, value }) {
   if (!value || value === '0') {
     return <span className="text-[#5C6E66]/40 text-xs font-mono">-</span>;
   }
 
   const s = String(status).toUpperCase();
+  const cfg = STATUS_CONFIG[s];
 
-  if (s === 'H') {
+  if (cfg) {
     return (
       <span
-        title="Hadir"
-        className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-[#E8F5F3] text-[#1D7A6F] border border-[#C8E3DC] text-xs font-bold"
+        title={cfg.title}
+        className={`inline-flex items-center justify-center w-6 h-6 rounded-md ${cfg.bg} ${cfg.text} border ${cfg.border} text-xs font-bold`}
       >
-        H
-      </span>
-    );
-  }
-  if (s === 'S') {
-    return (
-      <span
-        title="Sakit"
-        className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-[#EFF5F9] text-[#2D6A9F] border border-[#BFD5E7] text-xs font-bold"
-      >
-        S
-      </span>
-    );
-  }
-  if (s === 'I') {
-    return (
-      <span
-        title="Izin"
-        className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-[#FAF3E6] text-[#8C6D23] border border-[#ECD8A5] text-xs font-bold"
-      >
-        I
-      </span>
-    );
-  }
-  if (s === 'A') {
-    return (
-      <span
-        title="Alpa / Ghaib"
-        className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-[#FAF0ED] text-[#8A2F1B] border border-[#E8BCB0] text-xs font-bold"
-      >
-        A
+        {s}
       </span>
     );
   }

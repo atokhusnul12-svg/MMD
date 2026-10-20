@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef, useEffect, useMemo, useTransition } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { DATA_LINKS } from '@/lib/dataLinks';
@@ -15,9 +15,7 @@ import {
   Printer,
   Sparkles,
 } from 'lucide-react';
-
-const SYNC_INTERVAL_MS = 180_000;
-const REFOCUS_COOLDOWN_MS = 60_000;
+import { useBackgroundSync } from '@/lib/useBackgroundSync';
 
 export default function KalenderMmdClient({ initialData, serverError = null }) {
   const router = useRouter();
@@ -27,10 +25,6 @@ export default function KalenderMmdClient({ initialData, serverError = null }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(serverError || null);
   const lastFetchRef = useRef(0);
-
-  useEffect(() => {
-    lastFetchRef.current = Date.now();
-  }, []);
 
   // Sinkronisasi data latar belakang (Client-Side)
   const fetchKalender = useCallback(async (showIndicator = false) => {
@@ -59,26 +53,7 @@ export default function KalenderMmdClient({ initialData, serverError = null }) {
     fetchKalender(true);
   }, [router, fetchKalender]);
 
-  // Background auto-refresh timer & window focus listener
-  useEffect(() => {
-    const timer = setInterval(() => fetchKalender(false), SYNC_INTERVAL_MS);
-
-    const throttledRefetch = () => {
-      if (Date.now() - lastFetchRef.current >= REFOCUS_COOLDOWN_MS) fetchKalender(false);
-    };
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') throttledRefetch();
-    };
-
-    window.addEventListener('focus', throttledRefetch);
-    document.addEventListener('visibilitychange', onVisibilityChange);
-
-    return () => {
-      clearInterval(timer);
-      window.removeEventListener('focus', throttledRefetch);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    };
-  }, [fetchKalender]);
+  useBackgroundSync(fetchKalender, { lastFetchRef });
 
   const spinning = isRefreshing || isPending;
 

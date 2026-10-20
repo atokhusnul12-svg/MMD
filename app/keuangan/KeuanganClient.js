@@ -22,9 +22,7 @@ import { useAuth } from '@/lib/auth';
 import { formatRupiah, getKeuanganData } from '@/lib/fetchCSV';
 import KeuanganDonutChart from '@/components/KeuanganDonutChart';
 import { smartScrollTo } from '@/lib/scrollTo';
-
-const SYNC_INTERVAL_MS = 180_000;
-const REFOCUS_COOLDOWN_MS = 60_000;
+import { useBackgroundSync } from '@/lib/useBackgroundSync';
 
 function AdminButton({ editUrl, title }) {
   const { isAdmin } = useAuth();
@@ -53,10 +51,6 @@ export default function KeuanganClient({ initialData, serverError = null }) {
   const [selectedBulan, setSelectedBulan] = useState('TOTAL');
   const lastFetchRef = useRef(0);
 
-  useEffect(() => {
-    lastFetchRef.current = Date.now();
-  }, []);
-
   // Sinkronisasi data latar belakang (Client-Side)
   const fetchKeuangan = useCallback(async (showIndicator = false) => {
     try {
@@ -83,25 +77,7 @@ export default function KeuanganClient({ initialData, serverError = null }) {
     fetchKeuangan(true);
   }, [router, fetchKeuangan]);
 
-  useEffect(() => {
-    const timer = setInterval(() => fetchKeuangan(false), SYNC_INTERVAL_MS);
-
-    const throttledRefetch = () => {
-      if (Date.now() - lastFetchRef.current >= REFOCUS_COOLDOWN_MS) fetchKeuangan(false);
-    };
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') throttledRefetch();
-    };
-
-    window.addEventListener('focus', throttledRefetch);
-    document.addEventListener('visibilitychange', onVisibilityChange);
-
-    return () => {
-      clearInterval(timer);
-      window.removeEventListener('focus', throttledRefetch);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    };
-  }, [fetchKeuangan]);
+  useBackgroundSync(fetchKeuangan, { lastFetchRef });
 
   const spinning = isRefreshing || isPending;
 

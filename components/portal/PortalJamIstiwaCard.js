@@ -1,21 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Sun, Clock, Compass, Calendar, MapPin } from 'lucide-react';
-import { hitungJamIstiwa } from '@/lib/jamIstiwa';
+import { useJamIstiwa } from '@/lib/useJamIstiwa';
 
 export default function PortalJamIstiwaCard() {
-  const [dataWaktu, setDataWaktu] = useState(() =>
-    typeof window !== 'undefined' ? hitungJamIstiwa() : null
-  );
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setDataWaktu(hitungJamIstiwa());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
+  const dataWaktu = useJamIstiwa();
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#124B44] via-[#1D7A6F] to-[#165E55] text-white p-6 sm:p-8 lg:p-10 shadow-lg border border-white/10">

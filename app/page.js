@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import PortalClient from '@/components/portal/PortalClient';
+import PageLoading from '@/components/ui/PageLoading';
 
 export const metadata = {
   title: 'MMD • HOME — Majlis Musyawaroh Darussalam',
@@ -9,16 +10,7 @@ export const metadata = {
 
 export default function HomePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center space-y-3">
-            <div className="w-10 h-10 border-4 border-[#1D7A6F] border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-sm font-medium text-[#5C6B64]">Memuat HOME MMD...</p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<PageLoading message="Memuat HOME MMD..." />}>
       <PortalClient />
     </Suspense>
   );

@@ -116,8 +116,23 @@ export default function KeuanganDonutChart({
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
 
-  // Akumulasi rotasi stroke dashoffset
-  let accumulatedPercent = 0;
+  // Hitung segmen slice SVG secara murni (mencegah mutasi render di React 19)
+  const chartSlices = useMemo(() => {
+    let accumulated = 0;
+    const slices = [];
+    for (let i = 0; i < chartData.length; i++) {
+      const item = chartData[i];
+      const fraction = calculatedTotal > 0 ? item.pengeluaran / calculatedTotal : 0;
+      slices.push({
+        ...item,
+        index: i,
+        strokeDasharray: `${fraction * circumference} ${circumference}`,
+        strokeDashoffset: -accumulated * circumference,
+      });
+      accumulated += fraction;
+    }
+    return slices;
+  }, [chartData, calculatedTotal, circumference]);
 
   // Item yang sedang aktif di-hover (atau fallback ke periode yang dipilih via filter tab jika cocok)
   const activeHoverItem = hoveredIndex !== null ? chartData[hoveredIndex] : null;
@@ -225,13 +240,8 @@ export default function KeuanganDonutChart({
             />
 
             {/* Slices Tiap Periode */}
-            {chartData.map((item, index) => {
-              const fraction = item.pengeluaran / calculatedTotal;
-              const strokeDasharray = `${fraction * circumference} ${circumference}`;
-              const strokeDashoffset = -accumulatedPercent * circumference;
-              accumulatedPercent += fraction;
-
-              const isHovered = hoveredIndex === index;
+            {chartSlices.map((item) => {
+              const isHovered = hoveredIndex === item.index;
               const isSelected = selectedBulan === item.bulan;
               const highlight = isHovered || isSelected;
 
@@ -243,8 +253,8 @@ export default function KeuanganDonutChart({
                   r={radius}
                   stroke={item.color}
                   strokeWidth={highlight ? strokeWidth + 6 : strokeWidth}
-                  strokeDasharray={strokeDasharray}
-                  strokeDashoffset={strokeDashoffset}
+                  strokeDasharray={item.strokeDasharray}
+                  strokeDashoffset={item.strokeDashoffset}
                   fill="transparent"
                   strokeLinecap="butt"
                   className="transition-all duration-300 cursor-pointer"
@@ -252,7 +262,7 @@ export default function KeuanganDonutChart({
                     opacity: hoveredIndex !== null && !highlight ? 0.45 : 1,
                     filter: highlight ? 'drop-shadow(0px 3px 6px rgba(0,0,0,0.15))' : 'none',
                   }}
-                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseEnter={() => setHoveredIndex(item.index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                   onClick={() => onSelectBulan(item.bulan)}
                 />

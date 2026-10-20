@@ -22,28 +22,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { cleanMemberName, findAnggotaByDelegasiName } from '@/lib/fetchCSV';
-
-const BULAN_INDONESIA = [
-  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-];
-
-/**
- * Format tanggal YYYY-MM-DD ke format resmi Indonesia Masehi
- * Contoh: 2026-05-18 -> 18 Mei 2026 M.
- */
-function formatIndonesianDate(isoDateStr) {
-  if (!isoDateStr) return '';
-  const parts = isoDateStr.split('-');
-  if (parts.length !== 3) return isoDateStr;
-  const year = parts[0];
-  const monthIdx = parseInt(parts[1], 10) - 1;
-  const day = parseInt(parts[2], 10);
-  if (monthIdx >= 0 && monthIdx < 12) {
-    return `${day} ${BULAN_INDONESIA[monthIdx]} ${year} M.`;
-  }
-  return isoDateStr;
-}
+import { BULAN_INDONESIA, formatIndonesianDate } from '@/lib/formatters';
 
 export default function EditBahsuModal({
   isOpen,
