@@ -47,7 +47,7 @@ export default function JurnalViewer({
   return (
     <div className="space-y-4">
       {/* Kartu Header Kontrol Jurnal */}
-      <div className="p-4 sm:p-5 bg-white rounded-xl border border-[#DCE5E0] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 bg-white rounded-2xl border border-[#DCE5E0] shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#FAF3E6] text-[#8C6D23] border border-[#ECD8A5]">

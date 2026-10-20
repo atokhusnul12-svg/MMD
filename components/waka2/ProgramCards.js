@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   GraduationCap,
   BookOpen,
@@ -20,18 +21,28 @@ const ICON_MAP = {
 };
 
 export default function ProgramCards({ programStats = {} }) {
+  const shouldReduceMotion = useReducedMotion();
   const programs = Object.values(WAKA2_PROGRAMS);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-      {programs.map((prog) => {
+      {programs.map((prog, idx) => {
         const IconComponent = ICON_MAP[prog.iconName] || GraduationCap;
         const stats = programStats[prog.id] || null;
 
         return (
-          <div
+          <motion.div
             key={prog.id}
-            className="group relative bg-white rounded-2xl border border-[#DCE5E0] shadow-2xs hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden"
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+            whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { duration: 0.45, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }
+            }
+            whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+            className="group relative bg-white rounded-2xl border border-[#DCE5E0] hover:border-[#1D7A6F]/40 shadow-xs hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between overflow-hidden"
           >
             {/* Aksen visual atas kartu */}
             <div className="h-1.5 w-full bg-gradient-to-r from-[#1D7A6F] via-[#C6A66B] to-[#1D7A6F]" />
@@ -39,7 +50,7 @@ export default function ProgramCards({ programStats = {} }) {
             <div className="p-5 sm:p-6 space-y-4 flex-1">
               {/* Header Kartu: Icon & Badge */}
               <div className="flex items-start justify-between gap-3">
-                <div className="w-12 h-12 rounded-xl bg-[#F7F5EF] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0] group-hover:scale-105 group-hover:border-[#1D7A6F]/40 transition-transform">
+                <div className="w-12 h-12 rounded-xl bg-[#F7F5EF] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0] group-hover:scale-108 group-hover:border-[#1D7A6F]/40 transition-transform duration-200">
                   <IconComponent className="w-6 h-6" />
                 </div>
                 <span
@@ -111,7 +122,7 @@ export default function ProgramCards({ programStats = {} }) {
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-          </div>
+          </motion.div>
         );
       })}
     </div>

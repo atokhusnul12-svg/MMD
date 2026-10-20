@@ -239,7 +239,7 @@ export default function KalenderMmdClient({ initialData, serverError = null }) {
             {upcomingActivities.map((act, index) => (
               <div
                 key={index}
-                className="p-4 rounded-xl bg-[#FAF6EF]/60 border border-[#DCE5E0] flex flex-col justify-between hover:bg-white hover:border-[#1D7A6F] hover:shadow-md transition-all duration-200 shadow-2xs"
+                className="p-4 rounded-xl bg-[#FAF6EF]/60 border border-[#DCE5E0] flex flex-col justify-between hover:bg-white hover:border-[#1D7A6F] hover:shadow-md hover:-translate-y-1 transition-all duration-200 shadow-xs"
               >
                 <div>
                   <div className="flex items-center justify-between text-xs text-[#5C6E66] mb-2 gap-2">

@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowLeft,
   Wallet,
@@ -43,6 +44,7 @@ function AdminButton({ editUrl, title }) {
 }
 
 export default function KeuanganClient({ initialData, serverError = null }) {
+  const shouldReduceMotion = useReducedMotion();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [data, setData] = useState(initialData || null);
@@ -224,15 +226,33 @@ export default function KeuanganClient({ initialData, serverError = null }) {
       {/* ============================================================== */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 print-avoid-break">
         {/* Kartu 1: RAB (Anggaran Masuk) */}
-        <div
+        <motion.div
+          role="button"
+          tabIndex={0}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.45, delay: 0 * 0.08, ease: [0.16, 1, 0.3, 1] }
+          }
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
           onClick={() => smartScrollTo('section-rekap-keuangan')}
-          className="p-4 sm:p-5 rounded-2xl bg-white border border-[#DCE5E0] shadow-xs flex flex-col justify-between hover:border-[#1D7A6F] hover:shadow-md transition-all cursor-pointer"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              smartScrollTo('section-rekap-keuangan');
+            }
+          }}
+          className="p-4 sm:p-5 rounded-2xl bg-white border border-[#DCE5E0] shadow-xs flex flex-col justify-between hover:border-[#1D7A6F] hover:shadow-md transition-shadow duration-200 cursor-pointer group select-none focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F]"
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66]">
               Angka Masuk (RAB)
             </span>
-            <div className="w-8 h-8 rounded-lg bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#C8E3DC]">
+            <div className="w-8 h-8 rounded-lg bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#C8E3DC] group-hover:scale-108 transition-transform duration-200">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
@@ -245,18 +265,36 @@ export default function KeuanganClient({ initialData, serverError = null }) {
               <span className="text-[#1D7A6F] font-semibold shrink-0">Lihat Rekap ↓</span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Kartu 2: LPJ (Pengeluaran Realisasi) */}
-        <div
+        <motion.div
+          role="button"
+          tabIndex={0}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.45, delay: 1 * 0.08, ease: [0.16, 1, 0.3, 1] }
+          }
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
           onClick={() => smartScrollTo('section-chart-keuangan')}
-          className="p-4 sm:p-5 rounded-2xl bg-[#FAF0ED]/60 border border-[#E8BCB0] shadow-xs flex flex-col justify-between hover:border-[#8A2F1B] hover:shadow-md transition-all cursor-pointer"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              smartScrollTo('section-chart-keuangan');
+            }
+          }}
+          className="p-4 sm:p-5 rounded-2xl bg-[#FAF0ED]/60 border border-[#E8BCB0] shadow-xs flex flex-col justify-between hover:border-[#8A2F1B] hover:shadow-md transition-shadow duration-200 cursor-pointer group select-none focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8A2F1B]"
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#8A2F1B]">
               Pengeluaran (LPJ)
             </span>
-            <div className="w-8 h-8 rounded-lg bg-white text-[#8A2F1B] flex items-center justify-center shrink-0 border border-[#E8BCB0]">
+            <div className="w-8 h-8 rounded-lg bg-white text-[#8A2F1B] flex items-center justify-center shrink-0 border border-[#E8BCB0] group-hover:scale-108 transition-transform duration-200">
               <TrendingDown className="w-4 h-4" />
             </div>
           </div>
@@ -269,18 +307,36 @@ export default function KeuanganClient({ initialData, serverError = null }) {
               <span className="font-semibold shrink-0">Lihat Diagram ↓</span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Kartu 3: Saldo Kas */}
-        <div
+        <motion.div
+          role="button"
+          tabIndex={0}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.45, delay: 2 * 0.08, ease: [0.16, 1, 0.3, 1] }
+          }
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
           onClick={() => smartScrollTo('section-rekap-keuangan')}
-          className="p-4 sm:p-5 rounded-2xl bg-[#FAF3E6]/60 border border-[#ECD8A5] shadow-xs flex flex-col justify-between hover:border-[#8C6D23] hover:shadow-md transition-all cursor-pointer"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              smartScrollTo('section-rekap-keuangan');
+            }
+          }}
+          className="p-4 sm:p-5 rounded-2xl bg-[#FAF3E6]/60 border border-[#ECD8A5] shadow-xs flex flex-col justify-between hover:border-[#8C6D23] hover:shadow-md transition-shadow duration-200 cursor-pointer group select-none focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8C6D23]"
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#8C6D23]">
               Saldo Kas (Sisa Dana)
             </span>
-            <div className="w-8 h-8 rounded-lg bg-white text-[#8C6D23] flex items-center justify-center shrink-0 border border-[#ECD8A5]">
+            <div className="w-8 h-8 rounded-lg bg-white text-[#8C6D23] flex items-center justify-center shrink-0 border border-[#ECD8A5] group-hover:scale-108 transition-transform duration-200">
               <Wallet className="w-4 h-4" />
             </div>
           </div>
@@ -293,7 +349,7 @@ export default function KeuanganClient({ initialData, serverError = null }) {
               <span className="font-semibold shrink-0">Lihat Rekap ↓</span>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* ============================================================== */}

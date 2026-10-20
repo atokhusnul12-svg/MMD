@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Sparkles, Compass } from 'lucide-react';
 
@@ -25,9 +26,12 @@ export default function PortalHeader({ isAnimating = false }) {
             transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
             className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#FAF6EF] p-2 border border-[#DCE5E0] shadow-xs flex items-center justify-center shrink-0"
           >
-            <img
+            <Image
               src="/logo.png"
               alt="Logo Resmi MMD"
+              width={80}
+              height={80}
+              priority
               className="w-full h-full object-contain filter drop-shadow-2xs"
             />
           </motion.div>

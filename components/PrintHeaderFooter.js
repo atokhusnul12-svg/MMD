@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 /**
  * ==============================================================================
@@ -19,29 +20,34 @@ export function PrintHeader({
   const [printTime, setPrintTime] = React.useState('');
 
   React.useEffect(() => {
-    setPrintDate(
-      new Date().toLocaleDateString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    );
-    setPrintTime(
-      new Date().toLocaleTimeString('id-ID', {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    );
+    queueMicrotask(() => {
+      setPrintDate(
+        new Date().toLocaleDateString('id-ID', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      );
+      setPrintTime(
+        new Date().toLocaleTimeString('id-ID', {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      );
+    });
   }, []);
 
   return (
     <div className="print-only mb-6">
       {/* KOP SURAT RESMI */}
       <div className="flex items-center justify-center gap-4 pb-3 border-b-2 border-black">
-        <img
+        <Image
           src="/logo.png"
           alt="Logo MIDA Sumbersari"
+          width={64}
+          height={64}
+          unoptimized
           className="w-16 h-16 object-contain shrink-0"
         />
         <div className="text-center flex-1">
@@ -111,13 +117,15 @@ export function PrintSignatures({
   const [currentDate, setCurrentDate] = React.useState('');
 
   React.useEffect(() => {
-    setCurrentDate(
-      new Date().toLocaleDateString('id-ID', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    );
+    queueMicrotask(() => {
+      setCurrentDate(
+        new Date().toLocaleDateString('id-ID', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      );
+    });
   }, []);
 
   return (

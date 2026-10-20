@@ -24,23 +24,23 @@ export default function BahsuClient({ initialData, initialAnggotaList = [], serv
   const recentlySavedRef = useRef(new Map());
 
   // Sinkronisasi data saat server component melakukan revalidasi ISR atau router.refresh()
-  useEffect(() => {
-    if (initialData) {
-      setData(initialData);
-    }
-  }, [initialData]);
+  const [prevInitialData, setPrevInitialData] = useState(initialData);
+  if (initialData !== prevInitialData) {
+    setPrevInitialData(initialData);
+    setData(initialData || null);
+  }
 
-  useEffect(() => {
-    if (initialAnggotaList && initialAnggotaList.length > 0) {
-      setAnggotaList(initialAnggotaList);
-    }
-  }, [initialAnggotaList]);
+  const [prevInitialAnggota, setPrevInitialAnggota] = useState(initialAnggotaList);
+  if (initialAnggotaList !== prevInitialAnggota) {
+    setPrevInitialAnggota(initialAnggotaList);
+    setAnggotaList(initialAnggotaList || []);
+  }
 
-  useEffect(() => {
-    if (serverError !== undefined) {
-      setError(serverError);
-    }
-  }, [serverError]);
+  const [prevServerError, setPrevServerError] = useState(serverError);
+  if (serverError !== prevServerError) {
+    setPrevServerError(serverError);
+    setError(serverError || null);
+  }
 
   // Sinkronisasi data latar belakang (Client-Side) jika ada update baru di Google Sheets
   const fetchBahsu = useCallback(async (showIndicator = false) => {

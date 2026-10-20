@@ -54,67 +54,69 @@ export default function EditBahsuModal({
   // Inisialisasi formulir saat modal dibuka atau target event berganti
   useEffect(() => {
     if (isOpen) {
-      setErrorMsg('');
-      setSuccessMsg('');
-      setIsPartialSuccess(false);
-      setPickerSearch('');
-      setShowPicker(false);
+      queueMicrotask(() => {
+        setErrorMsg('');
+        setSuccessMsg('');
+        setIsPartialSuccess(false);
+        setPickerSearch('');
+        setShowPicker(false);
 
-      if (event) {
-        setNo(event.no ? String(event.no) : '');
+        if (event) {
+          setNo(event.no ? String(event.no) : '');
 
-        // Pisahkan nama acara dan tempat jika terdapat tanda koma
-        const rawAcara = event.acara || '';
-        if (rawAcara.includes(',')) {
-          const firstCommaIdx = rawAcara.indexOf(',');
-          setNamaAcara(rawAcara.slice(0, firstCommaIdx).trim());
-          setLokasi(rawAcara.slice(firstCommaIdx + 1).trim());
+          // Pisahkan nama acara dan tempat jika terdapat tanda koma
+          const rawAcara = event.acara || '';
+          if (rawAcara.includes(',')) {
+            const firstCommaIdx = rawAcara.indexOf(',');
+            setNamaAcara(rawAcara.slice(0, firstCommaIdx).trim());
+            setLokasi(rawAcara.slice(firstCommaIdx + 1).trim());
+          } else {
+            setNamaAcara(rawAcara.trim());
+            setLokasi('');
+          }
+
+          setTanggal(event.tanggal || '');
+          setDelegasi(
+            Array.isArray(event.delegasi)
+              ? event.delegasi.join('\n')
+              : (event.delegasi || '')
+          );
+
+          const currentKet = (event.keterangan || '').trim();
+          const upperKet = currentKet.toUpperCase();
+          if (upperKet.includes('BELOM') || upperKet.includes('BELUM')) {
+            setKeterangan('BELUM');
+            setCustomKeterangan('');
+          } else if (
+            upperKet.includes('IZIN') ||
+            upperKet.includes('BATAL') ||
+            upperKet.includes('MUHAFADZOH') ||
+            upperKet.includes('MUHAFAZOH') ||
+            upperKet.includes('BERHALANGAN')
+          ) {
+            setKeterangan('IZIN');
+            setCustomKeterangan(currentKet);
+          } else if (upperKet.includes('SUDAH') || upperKet.includes('TERLAKSANA')) {
+            setKeterangan('SUDAH');
+            setCustomKeterangan('');
+          } else if (currentKet) {
+            setKeterangan('CUSTOM');
+            setCustomKeterangan(currentKet);
+          } else {
+            setKeterangan('SUDAH');
+            setCustomKeterangan('');
+          }
         } else {
-          setNamaAcara(rawAcara.trim());
+          // Mode Tambah Baru
+          setNo(suggestedNo ? String(suggestedNo) : '');
+          setNamaAcara('');
           setLokasi('');
-        }
-
-        setTanggal(event.tanggal || '');
-        setDelegasi(
-          Array.isArray(event.delegasi)
-            ? event.delegasi.join('\n')
-            : (event.delegasi || '')
-        );
-
-        const currentKet = (event.keterangan || '').trim();
-        const upperKet = currentKet.toUpperCase();
-        if (upperKet.includes('BELOM') || upperKet.includes('BELUM')) {
-          setKeterangan('BELUM');
-          setCustomKeterangan('');
-        } else if (
-          upperKet.includes('IZIN') ||
-          upperKet.includes('BATAL') ||
-          upperKet.includes('MUHAFADZOH') ||
-          upperKet.includes('MUHAFAZOH') ||
-          upperKet.includes('BERHALANGAN')
-        ) {
-          setKeterangan('IZIN');
-          setCustomKeterangan(currentKet);
-        } else if (upperKet.includes('SUDAH') || upperKet.includes('TERLAKSANA')) {
-          setKeterangan('SUDAH');
-          setCustomKeterangan('');
-        } else if (currentKet) {
-          setKeterangan('CUSTOM');
-          setCustomKeterangan(currentKet);
-        } else {
+          setTanggal('');
+          setDelegasi('');
           setKeterangan('SUDAH');
           setCustomKeterangan('');
         }
-      } else {
-        // Mode Tambah Baru
-        setNo(suggestedNo ? String(suggestedNo) : '');
-        setNamaAcara('');
-        setLokasi('');
-        setTanggal('');
-        setDelegasi('');
-        setKeterangan('SUDAH');
-        setCustomKeterangan('');
-      }
+      });
     }
   }, [isOpen, event, suggestedNo]);
 

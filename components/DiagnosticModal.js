@@ -47,7 +47,10 @@ export default function DiagnosticModal({ isOpen, onClose }) {
 
   React.useEffect(() => {
     if (isOpen) {
-      runDiagnostic();
+      const timer = setTimeout(() => {
+        runDiagnostic();
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 

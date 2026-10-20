@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import {
@@ -78,9 +79,12 @@ export default function Navbar() {
           {/* Logo & Judul Organisasi (Kiri) */}
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0 min-w-0">
             <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#FAF6EF] p-1 flex items-center justify-center border border-[#DCE5E0] shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
-              <img
+              <Image
                 src="/logo.png"
                 alt="Logo MIDA Sumbersari Kediri"
+                width={40}
+                height={40}
+                priority
                 className="w-full h-full object-contain filter drop-shadow-2xs shrink-0"
               />
             </div>

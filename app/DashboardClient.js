@@ -55,6 +55,7 @@ export default function DashboardClient({ initialData }) {
    */
   const loadData = async (showFullLoading = true) => {
     try {
+      await Promise.resolve();
       if (showFullLoading) {
         setLoading(true);
       } else {
@@ -107,12 +108,11 @@ export default function DashboardClient({ initialData }) {
 
   // Sinkronisasi data saat halaman dibuka
   useEffect(() => {
-    if (!hasInitial) {
-      loadData(true);
-    } else {
-      loadData(false);
-    }
-  }, []);
+    const timer = setTimeout(() => {
+      loadData(!hasInitial);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [hasInitial]);
 
   // Sinkronisasi otomatis di latar belakang & saat tab aktif kembali
   useBackgroundSync(() => loadData(false), { lastFetchRef });
@@ -269,12 +269,15 @@ export default function DashboardClient({ initialData }) {
       <div id="waka3-statistik" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 print-avoid-break scroll-mt-28 sm:scroll-mt-36">
         {/* Kartu 1: Total Anggota LBM */}
         <StatCard
+          index={0}
           title="Total Anggota LBM"
           value={`${anggotaData?.total || 0} Santri`}
           subvalue="Terdaftar aktif di sistem MMD"
           icon={Users}
           badgeText="LBM MMD"
-          badgeColor="bg-[#E8F5F3] text-[#1D7A6F] border-[#C8E3DC]"
+          badgeColor="bg-[#F0F4FA] text-[#0A192F] border-[#D0DDEB]"
+          iconBg="bg-[#F0F4FA]"
+          iconColor="text-[#0A192F]"
           isLoading={loading}
           href="/anggota"
           actionHint="Buka Data →"
@@ -284,6 +287,7 @@ export default function DashboardClient({ initialData }) {
 
         {/* Kartu 2: Forum Bahtsul Masail */}
         <StatCard
+          index={1}
           title="Forum Bahtsul Masail"
           value={`${bahsuData?.totalAgenda || 0} Forum`}
           subvalue={`${bahsuData?.totalSudahBerangkat || 0} Sudah • ${bahsuData?.totalBelumBerangkat || 0} Belum • ${bahsuData?.totalIzin || 0} Izin`}
@@ -301,6 +305,7 @@ export default function DashboardClient({ initialData }) {
 
         {/* Kartu 3: Delegasi Selesai Berangkat */}
         <StatCard
+          index={2}
           title="Delegasi Selesai"
           value={`${bahsuData?.totalSudahBerangkat || 0} Forum`}
           subvalue="Sudah selesai diberangkatkan"
@@ -318,6 +323,7 @@ export default function DashboardClient({ initialData }) {
 
         {/* Kartu 4: Delegasi Menunggu / Belum Berangkat */}
         <StatCard
+          index={3}
           title="Delegasi Mendatang"
           value={`${bahsuData?.totalBelumBerangkat || 0} Forum`}
           subvalue="Menunggu jadwal keberangkatan"
@@ -419,25 +425,25 @@ export default function DashboardClient({ initialData }) {
                 <Link
                   key={item.id || idx}
                   href="/bahsu"
-                  className="p-3.5 rounded-xl bg-white border border-[#DCE5E0] flex items-start justify-between gap-3 hover:bg-[#F7F5EF]/80 hover:border-[#1D7A6F] hover:shadow-xs transition-all duration-150 cursor-pointer group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] select-none"
+                  className="p-3.5 rounded-xl bg-white border border-[#E2E8F0] flex items-start justify-between gap-3 hover:bg-[#F0F4FA]/50 hover:border-[#0A192F]/40 hover:shadow-xs hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#0A192F] select-none"
                   title={`Buka detail agenda forum "${item.acara}" di Halaman Bahtsul Masail`}
                   aria-label={`Buka detail agenda forum ${item.acara}`}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-[10px] font-bold text-[#1D7A6F] bg-[#E8F5F3] border border-[#C8E3DC] px-2 py-0.5 rounded">
+                      <span className="text-[10px] font-bold text-[#0A192F] bg-[#F0F4FA] border border-[#D0DDEB] px-2 py-0.5 rounded font-mono">
                         #{item.no || idx + 1}
                       </span>
-                      <span className="text-xs text-[#5C6E66] flex items-center gap-1 font-medium font-mono">
+                      <span className="text-xs text-[#475569] flex items-center gap-1 font-medium font-mono">
                         <Clock className="w-3 h-3 text-[#C6A66B]" />
                         {item.tanggal}
                       </span>
                     </div>
-                    <h4 className="text-xs sm:text-sm font-bold text-[#26332E] line-clamp-1 group-hover:text-[#1D7A6F] transition-colors">
+                    <h4 className="text-xs sm:text-sm font-bold text-[#0A192F] line-clamp-1 group-hover:text-[#C5A059] transition-colors duration-200">
                       {item.acara}
                     </h4>
                     {item.delegasi && item.delegasi.length > 0 && (
-                      <p className="text-[11px] text-[#5C6E66] mt-1 line-clamp-1">
+                      <p className="text-[11px] text-[#475569] mt-1 line-clamp-1">
                         Delegasi: {item.delegasi.join(', ')}
                       </p>
                     )}

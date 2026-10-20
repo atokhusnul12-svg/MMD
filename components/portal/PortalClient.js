@@ -14,36 +14,23 @@ export default function PortalClient() {
     if (typeof window !== 'undefined') {
       const alreadySeen = sessionStorage.getItem('mmd_intro_seen');
       if (!alreadySeen && !shouldReduceMotion) {
-        setIsIntroAnimating(true);
-        const timer = setTimeout(() => {
+        const startTimer = setTimeout(() => {
+          setIsIntroAnimating(true);
+        }, 0);
+        const endTimer = setTimeout(() => {
           sessionStorage.setItem('mmd_intro_seen', '1');
           setIsIntroAnimating(false);
         }, 2200);
-        return () => clearTimeout(timer);
+        return () => {
+          clearTimeout(startTimer);
+          clearTimeout(endTimer);
+        };
       }
     }
   }, [shouldReduceMotion]);
 
-  const handleSkipIntro = () => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('mmd_intro_seen', '1');
-    }
-    setIsIntroAnimating(false);
-  };
-
   return (
     <div className="space-y-6 sm:space-y-8 relative">
-      {/* Tombol Lewati Animasi (Hanya muncul saat animasi intro berlangsung) */}
-      {isIntroAnimating && (
-        <div className="flex justify-end no-print">
-          <button
-            onClick={handleSkipIntro}
-            className="text-[11px] font-semibold text-[#5C6E66] hover:text-[#1D7A6F] bg-white/80 backdrop-blur-xs px-2.5 py-1 rounded-md border border-[#DCE5E0] shadow-2xs transition-colors cursor-pointer"
-          >
-            Lewati Animasi ✕
-          </button>
-        </div>
-      )}
 
       {/* 1. Header Identitas HOME MMD */}
       <PortalHeader isAnimating={isIntroAnimating} />

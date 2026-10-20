@@ -127,7 +127,7 @@ export default function Waka1Client({ initialData, serverError = null }) {
       {/* Panel Agregasi: Distribusi Tingkat & Tren Bulanan */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
         {/* 1. Rekapitulasi Tingkat Madrasah */}
-        <div className="p-5 sm:p-6 bg-white rounded-2xl border border-[#DCE5E0] shadow-xs space-y-4">
+        <div className="p-5 sm:p-6 bg-white rounded-2xl border border-[#DCE5E0] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-[#26332E] font-serif flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-[#1D7A6F]" />
@@ -164,7 +164,7 @@ export default function Waka1Client({ initialData, serverError = null }) {
         </div>
 
         {/* 2. Tren Takziran per Bulan */}
-        <div className="p-5 sm:p-6 bg-white rounded-2xl border border-[#DCE5E0] shadow-xs space-y-4">
+        <div className="p-5 sm:p-6 bg-white rounded-2xl border border-[#DCE5E0] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-[#26332E] font-serif flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-[#8C6D23]" />

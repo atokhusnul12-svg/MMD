@@ -1,14 +1,25 @@
 'use client';
 
 import React from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Sun, Clock, Compass, Calendar, MapPin } from 'lucide-react';
 import { useJamIstiwa } from '@/lib/useJamIstiwa';
 
 export default function PortalJamIstiwaCard() {
+  const shouldReduceMotion = useReducedMotion();
   const dataWaktu = useJamIstiwa();
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#124B44] via-[#1D7A6F] to-[#165E55] text-white p-6 sm:p-8 lg:p-10 shadow-lg border border-white/10">
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+      whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-20px' }}
+      transition={
+        shouldReduceMotion ? { duration: 0 } : { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+      }
+      whileHover={shouldReduceMotion ? {} : { y: -3, transition: { duration: 0.2 } }}
+      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#124B44] via-[#1D7A6F] to-[#165E55] text-white p-6 sm:p-8 lg:p-10 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-white/10"
+    >
       {/* Ornamen Latar Aksen Kaligrafi/Geometris */}
       <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 rounded-full bg-white/5 blur-2xl pointer-events-none" />
       <div className="absolute bottom-0 left-1/3 -mb-12 w-48 h-48 rounded-full bg-[#ECD8A5]/10 blur-xl pointer-events-none" />
@@ -128,6 +139,6 @@ export default function PortalJamIstiwaCard() {
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -88,13 +88,15 @@ export function NotificationProvider({ children }) {
   }, [fetchSubscriberCount]);
 
   useEffect(() => {
-    checkStatus();
+    const timer = setTimeout(() => {
+      checkStatus();
+    }, 0);
 
     // Mendaftarkan service worker di latar belakang jika browser mendukung
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js')
-        .then((reg) => {
+        .then(() => {
           // Service worker terdaftar
           checkStatus();
         })
@@ -105,7 +107,10 @@ export function NotificationProvider({ children }) {
 
     const handleFocus = () => checkStatus();
     window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [checkStatus]);
 
   // Handler: Aktifkan Notifikasi (Opt-In)

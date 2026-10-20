@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Compass, Clock, Calendar, Sun, Sparkles, MapPin } from 'lucide-react';
 import { useJamIstiwa } from '@/lib/useJamIstiwa';
 
@@ -12,6 +13,7 @@ import { useJamIstiwa } from '@/lib/useJamIstiwa';
  * (Kediri) dan sekitarnya yang diperbarui setiap detik menggunakan hook useJamIstiwa.
  */
 export default function JamIstiwaCard() {
+  const shouldReduceMotion = useReducedMotion();
   const dataWaktu = useJamIstiwa();
 
   // Tampilan cadangan (placeholder) saat awal muat agar tidak berkedip
@@ -26,7 +28,16 @@ export default function JamIstiwaCard() {
   }
 
   return (
-    <div className="bg-white rounded-xl p-5 sm:p-7 border border-[#DCE5E0] shadow-xs relative overflow-hidden">
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+      whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-20px' }}
+      transition={
+        shouldReduceMotion ? { duration: 0 } : { duration: 0.45, ease: [0.16, 1, 0.3, 1] }
+      }
+      whileHover={shouldReduceMotion ? {} : { y: -3, transition: { duration: 0.2 } }}
+      className="bg-white rounded-2xl p-5 sm:p-7 border border-[#DCE5E0] hover:border-[#1D7A6F]/30 shadow-xs hover:shadow-md transition-shadow duration-300 relative overflow-hidden"
+    >
       {/* Aksen garis emas halus di bagian atas */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1D7A6F] via-[#C6A66B] to-[#1D7A6F]" />
 
@@ -137,7 +148,7 @@ export default function JamIstiwaCard() {
 
       </div>
 
-    </div>
+    </motion.div>
   );
 }
 

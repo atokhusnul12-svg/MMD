@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 import { formatRupiah } from '@/lib/fetchCSV';
 import { Wallet, PieChart as PieChartIcon, TrendingDown, Info, ArrowUpRight } from 'lucide-react';
 
@@ -67,6 +68,7 @@ export default function KeuanganDonutChart({
   selectedBulan = 'TOTAL',
   onSelectBulan = () => {},
 }) {
+  const shouldReduceMotion = useReducedMotion();
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
   // Filter hanya periode yang valid dan bukan baris TOTAL
@@ -188,7 +190,16 @@ export default function KeuanganDonutChart({
   }
 
   return (
-    <div className="bg-white rounded-xl p-6 sm:p-7 border border-[#DCE5E0] shadow-xs">
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+      whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-20px' }}
+      transition={
+        shouldReduceMotion ? { duration: 0 } : { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+      }
+      whileHover={shouldReduceMotion ? {} : { y: -3, transition: { duration: 0.2 } }}
+      className="bg-white rounded-2xl p-6 sm:p-7 border border-[#DCE5E0] hover:border-[#1D7A6F]/30 shadow-xs hover:shadow-md transition-shadow duration-300"
+    >
       {/* Header Card */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-[#DCE5E0]">
         <div>
@@ -391,7 +402,7 @@ export default function KeuanganDonutChart({
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }
 

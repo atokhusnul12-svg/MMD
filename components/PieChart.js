@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
 // Pemetaan warna dan gaya untuk tiap status perkembangan (Islamic Contemporary Palette)
@@ -52,6 +53,7 @@ const DEFAULT_COLOR = {
 };
 
 export default function PieChart({ statusCounts = {}, total = 0 }) {
+  const shouldReduceMotion = useReducedMotion();
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
   // Ubah statusCounts menjadi array terurut
@@ -81,7 +83,14 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
   let accumulatedPercent = 0;
 
   return (
-    <div className="bg-white rounded-xl p-5 sm:p-6 border border-[#DCE5E0] shadow-xs">
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+      whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.45, delay: 0.15, ease: [0.25, 0.1, 0.25, 1.0] }}
+      whileHover={shouldReduceMotion ? undefined : { y: -3, transition: { duration: 0.22, ease: 'easeOut' } }}
+      className="bg-white rounded-2xl p-5 sm:p-6 border border-[#E2E8F0] shadow-xs hover:shadow-md transition-all duration-300 print-avoid-break"
+    >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-3 border-b border-[#DCE5E0]">
         <div>
           <h3 className="text-lg font-bold text-[#26332E] font-serif">
@@ -214,7 +223,7 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }
 

@@ -85,7 +85,7 @@ export default async function Waka2DashboardPage() {
       </section>
 
       {/* Panel Informasi & Panduan Integrasi */}
-      <section className="p-5 sm:p-6 bg-white rounded-2xl border border-[#DCE5E0] shadow-2xs space-y-3">
+      <section className="p-5 sm:p-6 bg-white rounded-2xl border border-[#DCE5E0] shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 space-y-3">
         <h3 className="text-sm font-bold text-[#26332E] font-serif flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-[#1D7A6F]" />
           <span>Tentang Sumber Data &amp; Integrasi WAKA II MMD</span>

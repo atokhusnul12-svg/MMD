@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   Calendar as CalendarIcon,
   Search,
@@ -26,6 +27,7 @@ export default function KalenderView({
   kordinatorList = [],
   editUrl,
 }) {
+  const shouldReduceMotion = useReducedMotion();
   const [selectedBulanIndex, setSelectedBulanIndex] = useState(0); // Default ke bulan pertama atau semua
   const [showAllBulan, setShowAllBulan] = useState(false);
   const [search, setSearch] = useState('');
@@ -119,12 +121,22 @@ export default function KalenderView({
     <div className="space-y-6">
       
       {/* 3 KARTU STATISTIK ATAS */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 no-print">
         
         {/* Kartu 1: Total Kegiatan (Reset Filter & Tampilkan Semua) */}
-        <div
+        <motion.div
           role="button"
           tabIndex={0}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.45, delay: 0 * 0.08, ease: [0.16, 1, 0.3, 1] }
+          }
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
           onClick={() => {
             setSelectedKordinator('');
             setShowAllBulan(true);
@@ -140,7 +152,7 @@ export default function KalenderView({
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }}
-          className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs flex items-center justify-between cursor-pointer hover:border-[#1D7A6F] hover:shadow-xs transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F]"
+          className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer hover:border-[#1D7A6F] transition-shadow duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F]"
           title="Klik untuk melihat seluruh agenda kegiatan madrasah"
           aria-label={`Total ${totalKegiatan} Agenda Kegiatan. Klik untuk melihat daftar lengkap.`}
         >
@@ -153,15 +165,25 @@ export default function KalenderView({
             </div>
             <p className="text-xs text-[#5C6E66] mt-0.5">Tercatat dalam 1 tahun ajaran (Klik detail ↓)</p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#F7F5EF] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0] group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-lg bg-[#F7F5EF] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0] group-hover:scale-108 transition-transform duration-200">
             <CalendarIcon className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
         {/* Kartu 2: Filter Agenda Khusus WAKA III */}
-        <div
+        <motion.div
           role="button"
           tabIndex={0}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.45, delay: 1 * 0.08, ease: [0.16, 1, 0.3, 1] }
+          }
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
           onClick={() => {
             setSelectedKordinator(selectedKordinator === 'WAKA_III' ? '' : 'WAKA_III');
             const el = document.getElementById('section-kalender-agenda');
@@ -175,10 +197,10 @@ export default function KalenderView({
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }}
-          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs hover:shadow-md flex items-center justify-between transition-shadow duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
             selectedKordinator === 'WAKA_III'
               ? 'bg-[#E8F5F3] border-[#C8E3DC] ring-1 ring-[#1D7A6F]'
-              : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F] hover:shadow-xs'
+              : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F]'
           }`}
           title="Klik untuk memfilter agenda khusus WAKA III"
           aria-label={`${totalWaka3} Kegiatan khusus WAKA III. Klik untuk filter.`}
@@ -197,15 +219,25 @@ export default function KalenderView({
             </div>
             <p className="text-xs text-[#1D7A6F]/80 mt-0.5">LBM, Bahtsu Santri, Ubudiyah, dll</p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#1D7A6F] text-[#C6A66B] flex items-center justify-center shrink-0 border border-[#C6A66B]/30 shadow-xs group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-lg bg-[#1D7A6F] text-[#C6A66B] flex items-center justify-center shrink-0 border border-[#C6A66B]/30 shadow-xs group-hover:scale-108 transition-transform duration-200">
             <Sparkles className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
         {/* Kartu 3: Rentang Periode (Buka Tampilan Semua Bulan) */}
-        <div
+        <motion.div
           role="button"
           tabIndex={0}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.45, delay: 2 * 0.08, ease: [0.16, 1, 0.3, 1] }
+          }
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
           onClick={() => {
             setShowAllBulan(true);
             const el = document.getElementById('section-kalender-agenda');
@@ -219,7 +251,7 @@ export default function KalenderView({
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }}
-          className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs flex items-center justify-between cursor-pointer hover:border-[#8C6D23] hover:shadow-xs transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8C6D23]"
+          className="bg-white rounded-xl p-5 border border-[#DCE5E0] shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer hover:border-[#8C6D23] transition-shadow duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8C6D23]"
           title="Klik untuk membuka kalender seluruh rentang periode"
           aria-label={`Rentang Periode ${bulanList.length} Bulan. Klik untuk melihat daftar bulan.`}
         >
@@ -232,10 +264,10 @@ export default function KalenderView({
             </div>
             <p className="text-xs text-[#5C6E66] mt-0.5">Mulai Syawwal hingga Sya&apos;ban (Lihat ↓)</p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#FAF3E6] text-[#8C6D23] flex items-center justify-center shrink-0 border border-[#E8D5A7] group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-lg bg-[#FAF3E6] text-[#8C6D23] flex items-center justify-center shrink-0 border border-[#E8D5A7] group-hover:scale-108 transition-transform duration-200">
             <Layers className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
       </div>
 

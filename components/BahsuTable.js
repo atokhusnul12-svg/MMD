@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   CheckCircle2,
   XCircle,
@@ -24,6 +25,7 @@ export default function BahsuTable({
   onCloseAddModal,
 }) {
   const { isAdmin } = useAuth();
+  const shouldReduceMotion = useReducedMotion();
   const [filterStatus, setFilterStatus] = useState('ALL'); // 'ALL' | 'BELUM' | 'SUDAH' | 'IZIN'
   const [editingBahsuEvent, setEditingBahsuEvent] = useState(null);
   const [isBahsuModalOpen, setIsBahsuModalOpen] = useState(false);
@@ -107,9 +109,15 @@ export default function BahsuTable({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 no-print">
         
         {/* Kartu 1: Total Forum (Reset Filter ke ALL) */}
-        <div
+        <motion.div
           role="button"
           tabIndex={0}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.45, delay: 0 * 0.08, ease: [0.16, 1, 0.3, 1] }}
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
           onClick={() => {
             setFilterStatus('ALL');
             const el = document.getElementById('table-bahsu-agenda');
@@ -123,10 +131,10 @@ export default function BahsuTable({
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }}
-          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs hover:shadow-md flex items-center justify-between transition-shadow duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
             filterStatus === 'ALL'
               ? 'bg-[#E8F5F3] border-[#C8E3DC] ring-1 ring-[#1D7A6F]'
-              : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F] hover:shadow-xs'
+              : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F]'
           }`}
           title="Klik untuk menampilkan semua agenda forum Bahtsul Masail"
           aria-label={`Total ${events.length} Forum Bahsu. Klik untuk menampilkan semua agenda.`}
@@ -142,15 +150,21 @@ export default function BahsuTable({
               {filterStatus === 'ALL' ? 'Menampilkan semua' : 'Klik untuk tampilkan semua'}
             </p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#F7F5EF] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0] group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-lg bg-[#F7F5EF] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#DCE5E0] group-hover:scale-108 transition-transform duration-200">
             <BookOpen className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
         {/* Kartu 2: Filter Belum Berangkat */}
-        <div
+        <motion.div
           role="button"
           tabIndex={0}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.45, delay: 1 * 0.08, ease: [0.16, 1, 0.3, 1] }}
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
           onClick={() => {
             setFilterStatus(filterStatus === 'BELUM' ? 'ALL' : 'BELUM');
             const el = document.getElementById('table-bahsu-agenda');
@@ -164,10 +178,10 @@ export default function BahsuTable({
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }}
-          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#C6A66B] ${
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs hover:shadow-md flex items-center justify-between transition-shadow duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#C6A66B] ${
             filterStatus === 'BELUM'
               ? 'bg-[#FAF3E6] border-[#E8D5A7] ring-1 ring-[#C6A66B]'
-              : 'bg-white border-[#DCE5E0] hover:border-[#C6A66B] hover:shadow-xs'
+              : 'bg-white border-[#DCE5E0] hover:border-[#C6A66B]'
           }`}
           title="Klik untuk memfilter agenda yang belum berangkat"
           aria-label={`${totalBelumBerangkat} forum belum berangkat. Klik untuk filter.`}
@@ -183,15 +197,21 @@ export default function BahsuTable({
               {filterStatus === 'BELUM' ? 'Filter aktif' : 'Klik untuk filter'}
             </p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#FAF3E6] text-[#8C6D23] flex items-center justify-center shrink-0 border border-[#E8D5A7] group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-lg bg-[#FAF3E6] text-[#8C6D23] flex items-center justify-center shrink-0 border border-[#E8D5A7] group-hover:scale-108 transition-transform duration-200">
             <Hourglass className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
         {/* Kartu 3: Filter Sudah Berangkat */}
-        <div
+        <motion.div
           role="button"
           tabIndex={0}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.45, delay: 2 * 0.08, ease: [0.16, 1, 0.3, 1] }}
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
           onClick={() => {
             setFilterStatus(filterStatus === 'SUDAH' ? 'ALL' : 'SUDAH');
             const el = document.getElementById('table-bahsu-agenda');
@@ -205,10 +225,10 @@ export default function BahsuTable({
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }}
-          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs hover:shadow-md flex items-center justify-between transition-shadow duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
             filterStatus === 'SUDAH'
               ? 'bg-[#E8F5F3] border-[#C8E3DC] ring-1 ring-[#1D7A6F]'
-              : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F] hover:shadow-xs'
+              : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F]'
           }`}
           title="Klik untuk memfilter agenda yang sudah berangkat"
           aria-label={`${totalSudahBerangkat} forum sudah berangkat. Klik untuk filter.`}
@@ -224,15 +244,21 @@ export default function BahsuTable({
               {filterStatus === 'SUDAH' ? 'Filter aktif' : 'Klik untuk filter'}
             </p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#C8E3DC] group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-lg bg-[#E8F5F3] text-[#1D7A6F] flex items-center justify-center shrink-0 border border-[#C8E3DC] group-hover:scale-108 transition-transform duration-200">
             <CheckCircle2 className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
         {/* Kartu 4: Filter Izin / Batal */}
-        <div
+        <motion.div
           role="button"
           tabIndex={0}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.45, delay: 3 * 0.08, ease: [0.16, 1, 0.3, 1] }}
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
           onClick={() => {
             setFilterStatus(filterStatus === 'IZIN' ? 'ALL' : 'IZIN');
             const el = document.getElementById('table-bahsu-agenda');
@@ -246,10 +272,10 @@ export default function BahsuTable({
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }}
-          className={`cursor-pointer rounded-xl p-5 border shadow-xs flex items-center justify-between transition-all duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#A8382B] ${
+          className={`cursor-pointer rounded-xl p-5 border shadow-xs hover:shadow-md flex items-center justify-between transition-shadow duration-200 select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#A8382B] ${
             filterStatus === 'IZIN'
               ? 'bg-[#FAF0ED] border-[#E8BCB0] ring-1 ring-[#A8382B]'
-              : 'bg-white border-[#DCE5E0] hover:border-[#A8382B] hover:shadow-xs'
+              : 'bg-white border-[#DCE5E0] hover:border-[#A8382B]'
           }`}
           title="Klik untuk memfilter agenda yang izin / batal"
           aria-label={`${totalIzin} forum izin / batal. Klik untuk filter.`}
@@ -265,10 +291,10 @@ export default function BahsuTable({
               {filterStatus === 'IZIN' ? 'Filter aktif' : 'Surat mepet / ujian'}
             </p>
           </div>
-          <div className="w-11 h-11 rounded-lg bg-[#FAF0ED] text-[#8A2F1B] flex items-center justify-center shrink-0 border border-[#E8BCB0] group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-lg bg-[#FAF0ED] text-[#8A2F1B] flex items-center justify-center shrink-0 border border-[#E8BCB0] group-hover:scale-108 transition-transform duration-200">
             <XCircle className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
       </div>
 

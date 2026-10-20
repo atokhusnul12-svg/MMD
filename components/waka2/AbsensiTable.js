@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   Users,
   Search,
@@ -87,6 +88,7 @@ export default function AbsensiTable({
   classes = [],
   domisiliList = [],
 }) {
+  const shouldReduceMotion = useReducedMotion();
   // Filter Periode (Poin 2): Default 'ALL' (Seluruh Periode)
   const [selectedPeriod, setSelectedPeriod] = useState('ALL'); // 'ALL' | monthId
   const [selectedYear, setSelectedYear] = useState('ALL'); // 'ALL' | year string
@@ -196,9 +198,20 @@ export default function AbsensiTable({
   return (
     <div className="space-y-6">
       {/* 4 Kartu Ringkasan Statistik Absensi */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 no-print">
         {/* Total Santri */}
-        <div className="p-4 rounded-xl bg-white border border-[#DCE5E0] shadow-2xs">
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.45, delay: 0 * 0.08, ease: [0.16, 1, 0.3, 1] }
+          }
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          className="p-4 rounded-xl bg-white border border-[#DCE5E0] shadow-xs hover:shadow-md transition-shadow duration-200"
+        >
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66]">
             Total Santri Terdata
           </span>
@@ -206,10 +219,21 @@ export default function AbsensiTable({
             {displayStats.totalSantri}
           </div>
           <p className="text-xs text-[#5C6E66] mt-0.5 truncate">{displayStats.labelPeriode}</p>
-        </div>
+        </motion.div>
 
         {/* Persentase Kehadiran */}
-        <div className="p-4 rounded-xl bg-[#E8F5F3] border border-[#C8E3DC] shadow-2xs">
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.45, delay: 1 * 0.08, ease: [0.16, 1, 0.3, 1] }
+          }
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          className="p-4 rounded-xl bg-[#E8F5F3] border border-[#C8E3DC] shadow-xs hover:shadow-md transition-shadow duration-200"
+        >
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#1D7A6F]">
             {selectedPeriod === 'ALL' ? 'Kehadiran Keseluruhan' : 'Kehadiran Periode'}
           </span>
@@ -219,10 +243,21 @@ export default function AbsensiTable({
           <p className="text-xs text-[#1D7A6F]/80 mt-0.5">
             {displayStats.totalHadir} hadir dari total kesempatan
           </p>
-        </div>
+        </motion.div>
 
         {/* Akumulasi Sakit & Izin */}
-        <div className="p-4 rounded-xl bg-[#FAF3E6] border border-[#ECD8A5] shadow-2xs">
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.45, delay: 2 * 0.08, ease: [0.16, 1, 0.3, 1] }
+          }
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          className="p-4 rounded-xl bg-[#FAF3E6] border border-[#ECD8A5] shadow-xs hover:shadow-md transition-shadow duration-200"
+        >
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#8C6D23]">
             Sakit &amp; Izin
           </span>
@@ -232,10 +267,21 @@ export default function AbsensiTable({
           <p className="text-xs text-[#8C6D23]/80 mt-0.5">
             {displayStats.totalSakit} Sakit, {displayStats.totalIzin} Izin
           </p>
-        </div>
+        </motion.div>
 
         {/* Total Alpa */}
-        <div className="p-4 rounded-xl bg-[#FAF0ED] border border-[#E8BCB0] shadow-2xs">
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.45, delay: 3 * 0.08, ease: [0.16, 1, 0.3, 1] }
+          }
+          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          className="p-4 rounded-xl bg-[#FAF0ED] border border-[#E8BCB0] shadow-xs hover:shadow-md transition-shadow duration-200"
+        >
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#8A2F1B]">
             Alpa (Ghaib)
           </span>
@@ -243,7 +289,7 @@ export default function AbsensiTable({
             {displayStats.totalAlpa}
           </div>
           <p className="text-xs text-[#8A2F1B]/80 mt-0.5">Tanpa keterangan sah</p>
-        </div>
+        </motion.div>
       </div>
 
       {/* Kontainer Utama Tabel & Filter */}
