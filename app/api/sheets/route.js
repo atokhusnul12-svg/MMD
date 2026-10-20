@@ -130,6 +130,9 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Parameter url atau type diperlukan' }, { status: 400 });
     }
 
+    // Normalisasi URL: pastikan awalan /2PACX- selalu kapital karena Google Docs URL case-sensitive
+    fetchUrl = fetchUrl.replace(/\/2PACx-/g, '/2PACX-');
+
     // Hanya izinkan domain Google Docs untuk keamanan
     if (!fetchUrl.includes('docs.google.com') && !fetchUrl.includes('googleusercontent.com')) {
       return NextResponse.json({ error: 'URL harus dari docs.google.com' }, { status: 400 });

@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { DATA_LINKS } from '@/lib/dataLinks';
-import { getBahsuData, getAnggotaData } from '@/lib/fetchCSV';
+import { getBahsuData, getAnggotaData, parseStatusKeberangkatan } from '@/lib/fetchCSV';
 import BahsuTable from '@/components/BahsuTable';
 import AdminButton from '@/components/AdminButton';
 import { Calendar, RefreshCw, AlertCircle, ArrowLeft, Printer, Plus } from 'lucide-react';
@@ -21,6 +21,7 @@ export default function BahsuClient({ initialData, initialAnggotaList = [], serv
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const dataRef = useRef(data);
   const lastFetchRef = useRef(0);
+  const recentlySavedRef = useRef(new Map());
 
   // Sinkronisasi data saat server component melakukan revalidasi ISR atau router.refresh()
   useEffect(() => {
@@ -55,7 +56,57 @@ export default function BahsuClient({ initialData, initialAnggotaList = [], serv
         }),
       ]);
 
-      setData(bahsuRes);
+      // Lindungi perubahan terbaru dari penimpaan cache Google Sheets yang belum terpropagasi
+      const now = Date.now();
+      const updatedEvents = [...(bahsuRes.events || [])];
+      let hasPreservedChanges = false;
+
+      recentlySavedRef.current.forEach((saved, key) => {
+        // Hapus entri yang sudah lebih dari 30 detik
+        if (now - saved.time > 30000) {
+          recentlySavedRef.current.delete(key);
+          return;
+        }
+
+        const idx = updatedEvents.findIndex(
+          (e) => (saved.event.no && String(e.no) === String(saved.event.no)) ||
+                 (e.acara.toLowerCase() === saved.event.acara.toLowerCase())
+        );
+
+        if (idx !== -1) {
+          const fetchedEvt = updatedEvents[idx];
+          const isFresh = (
+            fetchedEvt.statusKeberangkatan === saved.event.statusKeberangkatan &&
+            fetchedEvt.keterangan.trim().toLowerCase() === saved.event.keterangan.trim().toLowerCase()
+          );
+
+          if (isFresh) {
+            // Google Sheets CSV sudah mencerminkan status terbaru
+            recentlySavedRef.current.delete(key);
+          } else {
+            // Cache Google Sheets belum terpropagasi; pertahankan data terbaru agar tampilan tidak melompat mundur
+            updatedEvents[idx] = {
+              ...fetchedEvt,
+              ...saved.event,
+              id: fetchedEvt.id,
+            };
+            hasPreservedChanges = true;
+          }
+        }
+      });
+
+      const finalBahsuRes = hasPreservedChanges
+        ? {
+            ...bahsuRes,
+            events: updatedEvents,
+            totalAgenda: updatedEvents.length,
+            totalBelumBerangkat: updatedEvents.filter((e) => e.statusKeberangkatan === 'BELUM_BERANGKAT').length,
+            totalSudahBerangkat: updatedEvents.filter((e) => e.statusKeberangkatan === 'SUDAH_BERANGKAT').length,
+            totalIzin: updatedEvents.filter((e) => e.statusKeberangkatan === 'IZIN').length,
+          }
+        : bahsuRes;
+
+      setData(finalBahsuRes);
       if (anggotaRes?.anggota) {
         setAnggotaList(anggotaRes.anggota);
       }
@@ -83,6 +134,23 @@ export default function BahsuClient({ initialData, initialAnggotaList = [], serv
   // Handler optimistik saat agenda baru ditambahkan / diedit lewat modal
   const handleRefresh = useCallback((savedEvent = null) => {
     if (savedEvent && savedEvent.acara) {
+      const derivedStatus = savedEvent.statusKeberangkatan ||
+        parseStatusKeberangkatan(savedEvent.keterangan, savedEvent.no, savedEvent.tanggal, savedEvent.acara);
+
+      const formattedEvent = {
+        no: savedEvent.no ? String(savedEvent.no) : '',
+        acara: savedEvent.acara,
+        tanggal: savedEvent.tanggal,
+        delegasi: Array.isArray(savedEvent.delegasi) ? savedEvent.delegasi : [],
+        keterangan: savedEvent.keterangan || 'SUDAH',
+        isBelumBerangkat: derivedStatus === 'BELUM_BERANGKAT',
+        statusKeberangkatan: derivedStatus,
+      };
+
+      // Simpan di recentlySavedRef agar tidak tertimpa fetch Google Sheets yang masih dalam masa propagasi cache
+      const saveKey = String(savedEvent.no || savedEvent.acara).toLowerCase();
+      recentlySavedRef.current.set(saveKey, { event: formattedEvent, time: Date.now() });
+
       setData((prevData) => {
         if (!prevData) return prevData;
         const currentEvents = [...(prevData.events || [])];
@@ -91,16 +159,10 @@ export default function BahsuClient({ initialData, initialAnggotaList = [], serv
                  (e.acara.toLowerCase() === savedEvent.acara.toLowerCase() && (!savedEvent.tanggal || e.tanggal === savedEvent.tanggal))
         );
 
-        const formattedEvent = {
-          id: existingIdx !== -1 ? currentEvents[existingIdx].id : currentEvents.length + 1,
-          no: savedEvent.no || String(currentEvents.length + 1),
-          acara: savedEvent.acara,
-          tanggal: savedEvent.tanggal,
-          delegasi: Array.isArray(savedEvent.delegasi) ? savedEvent.delegasi : [],
-          keterangan: savedEvent.keterangan || 'SUDAH',
-          isBelumBerangkat: savedEvent.statusKeberangkatan === 'BELUM_BERANGKAT',
-          statusKeberangkatan: savedEvent.statusKeberangkatan || 'SUDAH_BERANGKAT',
-        };
+        formattedEvent.id = existingIdx !== -1 ? currentEvents[existingIdx].id : currentEvents.length + 1;
+        if (!formattedEvent.no) {
+          formattedEvent.no = String(existingIdx !== -1 ? currentEvents[existingIdx].no : currentEvents.length + 1);
+        }
 
         if (existingIdx !== -1) {
           currentEvents[existingIdx] = formattedEvent;

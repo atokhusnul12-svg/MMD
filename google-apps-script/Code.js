@@ -255,38 +255,78 @@ function handleSyncBahsuEvent(ss, payload) {
     } catch (eWrap) {}
 
   } else {
-    // Mode Edit Kegiatan yang Ada
+    // Mode Edit Kegiatan yang Ada: Verifikasi identitas agenda secara ketat
+    var cleanOldAcara = oldAcara ? oldAcara.trim().toLowerCase() : "";
+    var cleanNewAcara = newAcara ? newAcara.trim().toLowerCase() : "";
+    var cleanOldTanggal = oldTanggal ? oldTanggal.trim().toLowerCase() : "";
+    var cleanNewTanggal = newTanggal ? newTanggal.trim().toLowerCase() : "";
+    var cleanNo = no ? no.trim() : "";
+
+    function checkRowMatch(rowIndex) {
+      if (rowIndex <= bHeaderRowIndex || rowIndex >= bahsuValues.length) return false;
+      var row = bahsuValues[rowIndex];
+      var rNo = String(row[bColMap.no] || "").trim();
+      var rAcara = String(row[bColMap.acara] || "").trim().toLowerCase();
+      var rTanggal = String(row[bColMap.tanggal] || "").trim().toLowerCase();
+
+      var matchOldAcara = cleanOldAcara && (rAcara === cleanOldAcara || rAcara.indexOf(cleanOldAcara) !== -1 || cleanOldAcara.indexOf(rAcara) !== -1);
+      var matchNewAcara = cleanNewAcara && (rAcara === cleanNewAcara || rAcara.indexOf(cleanNewAcara) !== -1 || cleanNewAcara.indexOf(rAcara) !== -1);
+      var matchAcara = matchOldAcara || matchNewAcara;
+
+      var matchOldTanggal = !cleanOldTanggal || (rTanggal === cleanOldTanggal || rTanggal.indexOf(cleanOldTanggal) !== -1);
+      var matchNewTanggal = !cleanNewTanggal || (rTanggal === cleanNewTanggal || rTanggal.indexOf(cleanNewTanggal) !== -1);
+      var matchTanggal = matchOldTanggal || matchNewTanggal;
+
+      var matchNo = cleanNo && rNo === cleanNo;
+
+      // Verifikasi identitas baris:
+      // 1. Acara cocok DAN Tanggal cocok, ATAU
+      // 2. Acara cocok DAN Nomor urut cocok, ATAU
+      // 3. Nomor urut cocok DAN Tanggal cocok (jika ada tanggal lama yang jelas)
+      if (matchAcara && matchTanggal) return true;
+      if (matchAcara && matchNo) return true;
+      if (matchNo && matchTanggal && cleanOldTanggal) return true;
+
+      return false;
+    }
+
+    var candidateRow = -1;
+
+    // 1. Uji targetRow terlebih dahulu jika dikirim oleh client
     if (targetRow && targetRow > bHeaderRowIndex + 1 && targetRow <= bahsuValues.length) {
-      actualSourceRow = targetRow;
-    } else {
-      // Cari baris berdasarkan kecocokan oldAcara atau no
+      if (checkRowMatch(targetRow - 1)) {
+        candidateRow = targetRow;
+      }
+    }
+
+    // 2. Jika targetRow tidak cocok (karena pergeseran baris di spreadsheet), cari di seluruh baris data
+    if (candidateRow === -1) {
       for (var bi2 = bHeaderRowIndex + 1; bi2 < bahsuValues.length; bi2++) {
-        var rAcara = String(bahsuValues[bi2][bColMap.acara] || "").trim();
-        var rNo = String(bahsuValues[bi2][bColMap.no] || "").trim();
-        var rTanggal = String(bahsuValues[bi2][bColMap.tanggal] || "").trim();
-        var matchAcara = oldAcara && rAcara.toLowerCase() === oldAcara.toLowerCase();
-        var matchTanggal = !oldTanggal || rTanggal.toLowerCase() === oldTanggal.toLowerCase();
-        if ((matchAcara && matchTanggal) || (no && rNo === no)) {
-          actualSourceRow = bi2 + 1;
+        if (checkRowMatch(bi2)) {
+          candidateRow = bi2 + 1;
           break;
         }
       }
     }
 
-    if (actualSourceRow === -1) {
-      return createJsonResponse(false, "Baris kegiatan yang akan diedit tidak ditemukan di tab DAFTAR PEMBERANGKATAN BAHSU.", 404);
+    // 3. Jika identitas baris sama sekali tidak cocok, batalkan penyimpanan demi keamanan data
+    if (candidateRow === -1) {
+      return createJsonResponse(false, "Verifikasi identitas agenda gagal: Baris kegiatan '" + (oldAcara || newAcara) + "' (No. " + (cleanNo || "-") + ") tidak ditemukan pada baris data yang sesuai di Google Sheets. Operasi dibatalkan demi keamanan data.", 404);
     }
+
+    actualSourceRow = candidateRow;
 
     var preserveNo = no;
     if (!preserveNo) {
-      preserveNo = String(bahsuSheet.getRange(actualSourceRow, 1).getValue() || "").trim();
+      preserveNo = String(bahsuSheet.getRange(actualSourceRow, bColMap.no + 1).getValue() || "").trim();
     }
 
-    // Tulis 5 kolom secara ATOMIK
-    var editRowData = [
-      [preserveNo, newAcara, newTanggal, delegasi, keterangan]
-    ];
-    bahsuSheet.getRange(actualSourceRow, 1, 1, 5).setValues(editRowData);
+    // Tulis kolom secara presisi pada sel masing-masing kolom yang terpetakan
+    bahsuSheet.getRange(actualSourceRow, bColMap.no + 1).setValue(preserveNo);
+    bahsuSheet.getRange(actualSourceRow, bColMap.acara + 1).setValue(newAcara);
+    bahsuSheet.getRange(actualSourceRow, bColMap.tanggal + 1).setValue(newTanggal);
+    bahsuSheet.getRange(actualSourceRow, bColMap.delegasi + 1).setValue(delegasi);
+    bahsuSheet.getRange(actualSourceRow, bColMap.keterangan + 1).setValue(keterangan);
 
     try {
       bahsuSheet.getRange(actualSourceRow, 1, 1, 5).setWrap(true);
@@ -296,17 +336,24 @@ function handleSyncBahsuEvent(ss, payload) {
     try {
       var maxCheck = Math.min(bahsuSheet.getLastRow(), actualSourceRow + 15);
       for (var clr = actualSourceRow + 1; clr <= maxCheck; clr++) {
-        var checkNo = String(bahsuSheet.getRange(clr, 1).getValue() || "").trim();
-        var checkAcara = String(bahsuSheet.getRange(clr, 2).getValue() || "").trim();
-        var checkDelegasi = String(bahsuSheet.getRange(clr, 4).getValue() || "").trim();
+        var checkNo = String(bahsuSheet.getRange(clr, bColMap.no + 1).getValue() || "").trim();
+        var checkAcara = String(bahsuSheet.getRange(clr, bColMap.acara + 1).getValue() || "").trim();
+        var checkTanggal = String(bahsuSheet.getRange(clr, bColMap.tanggal + 1).getValue() || "").trim();
+        var checkDelegasi = String(bahsuSheet.getRange(clr, bColMap.delegasi + 1).getValue() || "").trim();
         // Berhenti jika sudah mencapai agenda berikutnya
-        if (checkNo || checkAcara) break;
+        if (checkNo || checkAcara || checkTanggal) break;
         if (!checkDelegasi) break;
         // Kosongkan baris sisa lanjutan lama
         bahsuSheet.getRange(clr, 1, 1, 5).clearContent();
       }
     } catch (eClr) {}
   }
+
+  // Tentukan status keberangkatan secara seragam
+  var upperKet = (keterangan || "").toUpperCase();
+  var isBelumEvent = upperKet.indexOf("BELUM") !== -1 || upperKet.indexOf("BELOM") !== -1;
+  var isIzinEvent = upperKet.indexOf("IZIN") !== -1 || upperKet.indexOf("BATAL") !== -1 || upperKet.indexOf("MUHAFADZOH") !== -1 || upperKet.indexOf("MUHAFAZOH") !== -1 || upperKet.indexOf("BERHALANGAN") !== -1;
+  var derivedStatusKeberangkatan = isBelumEvent ? "BELUM_BERANGKAT" : (isIzinEvent ? "IZIN" : "SUDAH_BERANGKAT");
 
   // 3. SINKRONISASI KE TAB PERKEMBANGAN (KOLOM BAHTSU YANG DIDATANGI)
   var anggotaSheet = getSheetByGidOrName(ss, GID_ANGGOTA, "PERKEMBANGAN");
@@ -328,7 +375,7 @@ function handleSyncBahsuEvent(ss, payload) {
         tanggal: newTanggal,
         delegasi: delegasi.split(/\r?\n/).map(function(s) { return s.trim(); }).filter(Boolean),
         keterangan: keterangan,
-        statusKeberangkatan: keterangan.toUpperCase().indexOf("IZIN") !== -1 ? "IZIN" : (keterangan.toUpperCase().indexOf("BELUM") !== -1 ? "BELUM_BERANGKAT" : "SUDAH_BERANGKAT")
+        statusKeberangkatan: derivedStatusKeberangkatan
       }
     });
   }
@@ -383,7 +430,6 @@ function handleSyncBahsuEvent(ss, payload) {
     attendingNamesClean.push(cName);
   }
 
-  var isIzinEvent = keterangan.toUpperCase().indexOf("IZIN") !== -1;
   var newEventLine = (newTanggal && newTanggal.trim()) 
     ? (newAcara.trim() + " " + newTanggal.trim()) 
     : newAcara.trim();
@@ -534,7 +580,7 @@ function handleSyncBahsuEvent(ss, payload) {
       tanggal: newTanggal,
       delegasi: delegasiLines,
       keterangan: keterangan,
-      statusKeberangkatan: isIzinEvent ? "IZIN" : (keterangan.toUpperCase().indexOf("BELUM") !== -1 ? "BELUM_BERANGKAT" : "SUDAH_BERANGKAT")
+      statusKeberangkatan: derivedStatusKeberangkatan
     }
   });
 }

@@ -81,20 +81,29 @@ export default function EditBahsuModal({
             : (event.delegasi || '')
         );
 
-        const currentKet = (event.keterangan || 'SUDAH').trim();
+        const currentKet = (event.keterangan || '').trim();
         const upperKet = currentKet.toUpperCase();
-        if (upperKet.includes('SUDAH')) {
-          setKeterangan('SUDAH');
-          setCustomKeterangan('');
-        } else if (upperKet.includes('BELUM') || upperKet.includes('BELOM')) {
+        if (upperKet.includes('BELOM') || upperKet.includes('BELUM')) {
           setKeterangan('BELUM');
           setCustomKeterangan('');
-        } else if (upperKet.includes('IZIN')) {
+        } else if (
+          upperKet.includes('IZIN') ||
+          upperKet.includes('BATAL') ||
+          upperKet.includes('MUHAFADZOH') ||
+          upperKet.includes('MUHAFAZOH') ||
+          upperKet.includes('BERHALANGAN')
+        ) {
           setKeterangan('IZIN');
-          setCustomKeterangan(currentKet.length > 5 ? currentKet : '');
-        } else {
+          setCustomKeterangan(currentKet);
+        } else if (upperKet.includes('SUDAH') || upperKet.includes('TERLAKSANA')) {
+          setKeterangan('SUDAH');
+          setCustomKeterangan('');
+        } else if (currentKet) {
           setKeterangan('CUSTOM');
           setCustomKeterangan(currentKet);
+        } else {
+          setKeterangan('SUDAH');
+          setCustomKeterangan('');
         }
       } else {
         // Mode Tambah Baru
@@ -119,13 +128,35 @@ export default function EditBahsuModal({
     return cleanNama || cleanLok;
   }, [namaAcara, lokasi]);
 
-  // Keterangan final yang akan disimpan
+  // Keterangan final yang akan disimpan ke Google Sheets
   const finalKeterangan = useMemo(() => {
+    if (keterangan === 'IZIN') {
+      const custom = customKeterangan.trim();
+      if (!custom) return 'IZIN';
+      // Jika teks kustom sudah mengandung kata 'izin' atau 'batal', gunakan langsung
+      if (/^izin\b/i.test(custom) || custom.toUpperCase().includes('IZIN') || custom.toUpperCase().includes('BATAL')) {
+        return custom;
+      }
+      // Jika teks kustom berisi alasan spesifik (misal 'persiapan muhafadzoh'),
+      // bungkus dengan 'Izin (<alasan>)' agar selalu dikenali sebagai IZIN oleh backend & frontend
+      return `Izin (${custom})`;
+    }
+    if (keterangan === 'BELUM') {
+      const custom = customKeterangan.trim();
+      if (custom && (custom.toUpperCase().includes('BELUM') || custom.toUpperCase().includes('BELOM'))) {
+        return custom;
+      }
+      return 'BELUM';
+    }
+    if (keterangan === 'SUDAH') {
+      const custom = customKeterangan.trim();
+      if (custom && (custom.toUpperCase().includes('SUDAH') || custom.toUpperCase().includes('TERLAKSANA'))) {
+        return custom;
+      }
+      return 'SUDAH';
+    }
     if (keterangan === 'CUSTOM') {
       return customKeterangan.trim() || 'SUDAH';
-    }
-    if (keterangan === 'IZIN' && customKeterangan.trim()) {
-      return customKeterangan.trim();
     }
     return keterangan;
   }, [keterangan, customKeterangan]);
@@ -294,7 +325,20 @@ export default function EditBahsuModal({
       // Berikan jeda sejenak agar pengguna membaca notifikasi (lebih lama untuk peringatan parsial)
       setTimeout(() => {
         if (typeof onSuccess === 'function') {
-          onSuccess(data.data?.event || null);
+          const derivedStatus = keterangan === 'IZIN'
+            ? 'IZIN'
+            : (keterangan === 'BELUM' ? 'BELUM_BERANGKAT' : 'SUDAH_BERANGKAT');
+
+          const savedEventData = {
+            ...(data.data?.event || {}),
+            no: no.trim(),
+            acara: trimmedAcara,
+            tanggal: trimmedTanggal,
+            delegasi: delegasi.trim().split(/\r?\n/).filter(Boolean),
+            keterangan: finalKeterangan,
+            statusKeberangkatan: data.data?.event?.statusKeberangkatan || derivedStatus,
+          };
+          onSuccess(savedEventData);
         }
         onClose();
       }, isPartial ? 3000 : 1500);
@@ -507,7 +551,10 @@ export default function EditBahsuModal({
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => setKeterangan('SUDAH')}
+                onClick={() => {
+                  setKeterangan('SUDAH');
+                  setCustomKeterangan('');
+                }}
                 disabled={isSubmitting}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer border ${
                   keterangan === 'SUDAH'
@@ -519,7 +566,10 @@ export default function EditBahsuModal({
               </button>
               <button
                 type="button"
-                onClick={() => setKeterangan('BELUM')}
+                onClick={() => {
+                  setKeterangan('BELUM');
+                  setCustomKeterangan('');
+                }}
                 disabled={isSubmitting}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer border ${
                   keterangan === 'BELUM'
@@ -531,7 +581,9 @@ export default function EditBahsuModal({
               </button>
               <button
                 type="button"
-                onClick={() => setKeterangan('IZIN')}
+                onClick={() => {
+                  setKeterangan('IZIN');
+                }}
                 disabled={isSubmitting}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer border ${
                   keterangan === 'IZIN'
@@ -550,7 +602,7 @@ export default function EditBahsuModal({
                   type="text"
                   value={customKeterangan}
                   onChange={(e) => setCustomKeterangan(e.target.value)}
-                  placeholder="Keterangan spesifik, misal: Izin (Persiapan Ujian / Surat Mepet)"
+                  placeholder="Keterangan spesifik (opsional), misal: Persiapan Muhafadzoh / Surat Terlambat"
                   disabled={isSubmitting}
                   className="w-full px-3 py-1.5 rounded-lg border border-[#DCE5E0] bg-white text-xs text-[#26332E] focus:outline-hidden focus:border-[#1D7A6F]"
                 />
