@@ -2,11 +2,18 @@ import { NextResponse } from 'next/server';
 import { DATA_LINKS } from '@/lib/dataLinks';
 
 const ACTIVE_APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbzuNoe2QQ3DVDQsIDZepDivH3-e9FBvmPYbnkvzN8Vf8phJdrDCU-PrGQqY8sWgTBQEGg/exec';
+  'https://script.google.com/macros/s/AKfycbyu_z0-iP8I5ZSOsolfi0uC-iIkxelbVciH3qvbKi41A2Wwqu0UB0mb2uP9CB8n6zmDEA/exec';
 
 function resolveScriptUrl() {
   const envUrl = process.env.GOOGLE_SHEETS_SCRIPT_URL || process.env.GOOGLE_APPS_SCRIPT_URL;
-  if (!envUrl || envUrl.includes('5SY1LiUuTg') || envUrl.includes('AKfycbz71opCqhj') || envUrl.includes('AKfycbyY5G0BrvGS87rndi5nK-nBEBRO95QxeXF2_1nYKsx0ZuJ68TzN7EJJzegaXWYZYDV2OQ')) {
+  if (
+    !envUrl ||
+    envUrl.includes('5SY1LiUuTg') ||
+    envUrl.includes('AKfycbz71opCqhj') ||
+    envUrl.includes('AKfycbyY5G0BrvGS87rndi5nK-nBEBRO95QxeXF2_1nYKsx0ZuJ68TzN7EJJzegaXWYZYDV2OQ') ||
+    envUrl.includes('AKfycbzuNoe2QQ3DVDQsIDZepDivH3-e9FBvmPYbnkvzN8Vf8phJdrDCU-PrGQqY8sWgTBQEGg') ||
+    envUrl.includes('AWDD_qWzKQ')
+  ) {
     return ACTIVE_APPS_SCRIPT_URL;
   }
   return envUrl.trim();

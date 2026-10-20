@@ -3,7 +3,7 @@
  * GOOGLE APPS SCRIPT — SINKRONISASI DATA WEBSITE WAKA III & GOOGLE SHEETS
  * ==============================================================================
  * File: Code.js
- * Spreadsheet ID: 1QHHc20jWFW3jTZUUIlsCvVCO7Qi6wLcS (statistik new 2)
+ * Spreadsheet ID: 1WzcN4eAqKNfGQVIO-WyT17J-FVwWcon-Zt5ewbhjGv4
  * Tab Anggota: PERKEMBANGAN (gid: 211010401)
  * Tab Pemberangkatan: DAFTAR PEMBERANGKATAN BAHSU (gid: 1165916830)
  *
@@ -22,7 +22,7 @@
  */
 
 // Konfigurasi Default
-var SPREADSHEET_ID = "1QHHc20jWFW3jTZUUIlsCvVCO7Qi6wLcS";
+var SPREADSHEET_ID = "1WzcN4eAqKNfGQVIO-WyT17J-FVwWcon-Zt5ewbhjGv4";
 var GID_ANGGOTA = 211010401;
 var GID_BAHSU = 1165916830;
 
@@ -31,6 +31,11 @@ var GID_BAHSU = 1165916830;
  */
 function doGet(e) {
   var isTokenConfigured = false;
+  var targetSpreadsheetId = SPREADSHEET_ID;
+  var currentSpreadsheetId = null;
+  var currentSpreadsheetName = null;
+  var error = null;
+
   try {
     var token = PropertiesService.getScriptProperties().getProperty("SHEETS_API_SECRET_TOKEN");
     isTokenConfigured = Boolean(token && token.trim().length > 0);
@@ -38,11 +43,36 @@ function doGet(e) {
     isTokenConfigured = false;
   }
 
+  try {
+    var ss = null;
+    try {
+      ss = SpreadsheetApp.getActiveSpreadsheet();
+      if (ss && ss.getId() !== SPREADSHEET_ID) {
+        ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+      }
+    } catch (e1) {
+      ss = null;
+    }
+    if (!ss) {
+      ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    }
+    if (ss) {
+      currentSpreadsheetId = ss.getId();
+      currentSpreadsheetName = ss.getName();
+    }
+  } catch (e2) {
+    error = e2.message;
+  }
+
   return ContentService.createTextOutput(
     JSON.stringify({
       status: "online",
       service: "WAKA III Google Sheets Sync API",
       configured: isTokenConfigured,
+      spreadsheetId: currentSpreadsheetId,
+      spreadsheetName: currentSpreadsheetName,
+      targetSpreadsheetId: targetSpreadsheetId,
+      error: error,
       timestamp: new Date().toISOString()
     })
   ).setMimeType(ContentService.MimeType.JSON);
@@ -94,6 +124,10 @@ function doPost(e) {
     var ss;
     try {
       ss = SpreadsheetApp.getActiveSpreadsheet();
+      // Pastikan spreadsheet aktif benar-benar spreadsheet target yang dituju
+      if (ss && ss.getId() !== SPREADSHEET_ID) {
+        ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+      }
     } catch (e) {
       ss = null;
     }
@@ -327,6 +361,7 @@ function handleSyncBahsuEvent(ss, payload) {
     bahsuSheet.getRange(actualSourceRow, bColMap.tanggal + 1).setValue(newTanggal);
     bahsuSheet.getRange(actualSourceRow, bColMap.delegasi + 1).setValue(delegasi);
     bahsuSheet.getRange(actualSourceRow, bColMap.keterangan + 1).setValue(keterangan);
+    SpreadsheetApp.flush();
 
     try {
       bahsuSheet.getRange(actualSourceRow, 1, 1, 5).setWrap(true);
@@ -346,6 +381,7 @@ function handleSyncBahsuEvent(ss, payload) {
         // Kosongkan baris sisa lanjutan lama
         bahsuSheet.getRange(clr, 1, 1, 5).clearContent();
       }
+      SpreadsheetApp.flush();
     } catch (eClr) {}
   }
 
@@ -567,6 +603,7 @@ function handleSyncBahsuEvent(ss, payload) {
     sourceSheet: "DAFTAR PEMBERANGKATAN BAHSU",
     sourceRow: actualSourceRow,
     targetSheet: "PERKEMBANGAN",
+    spreadsheetId: ss ? ss.getId() : SPREADSHEET_ID,
     agendaSaved: true,
     historySynced: syncedMembers.length > 0,
     isPartial: isPartial,
