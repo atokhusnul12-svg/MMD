@@ -10,26 +10,26 @@ export default function PortalClient() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="space-y-6 sm:space-y-8 relative">
+    <div className="space-y-3.5 sm:space-y-4 relative">
       {/* 1. Header Identitas HOME MMD */}
       <PortalHeader />
 
-      {/* 2. Kartu Jam Istiwa' (WIS) Real-Time */}
+      {/* 2. Kartu Jam Istiwa' (WIS) & Panel Jadwal Sholat Berdampingan */}
       <motion.div
-        initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
         whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.45, ease: 'easeOut' }}
       >
         <PortalJamIstiwaCard />
       </motion.div>
 
       {/* 3. Lima Kartu Navigasi Utama WAKA, Keuangan & Kalender MMD */}
       <motion.div
-        initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
         whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.45, ease: 'easeOut' }}
       >
         <PortalWakaCards />
       </motion.div>
