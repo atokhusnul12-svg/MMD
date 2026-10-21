@@ -92,6 +92,15 @@ export default function BahsuClient({ initialData, initialAnggotaList = [], serv
             };
             hasPreservedChanges = true;
           }
+        } else {
+          // Event baru ditambahkan namun belum muncul di CSV Google Sheets:
+          // Pertahankan event baru di updatedEvents agar jumlah kartu dan list tidak melompat mundur
+          updatedEvents.push({
+            ...saved.event,
+            id: saved.event.id || updatedEvents.length + 1,
+            no: saved.event.no || String(updatedEvents.length + 1),
+          });
+          hasPreservedChanges = true;
         }
       });
 
@@ -269,6 +278,8 @@ export default function BahsuClient({ initialData, initialAnggotaList = [], serv
       {/* Konten Utama */}
       <BahsuTable
         events={data?.events || []}
+        isLoading={isRefreshing || !data}
+        error={error}
         title={data?.title}
         editUrl={DATA_LINKS.bahsu.editUrl}
         anggotaList={anggotaList}

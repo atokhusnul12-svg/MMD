@@ -17,6 +17,8 @@ import { findAnggotaByDelegasiName } from '@/lib/fetchCSV';
 
 export default function BahsuTable({
   events = [],
+  isLoading = false,
+  error = null,
   title,
   editUrl,
   anggotaList = [],
@@ -75,6 +77,8 @@ export default function BahsuTable({
     });
   }, [events, filterStatus]);
 
+  const totalForum = events.length;
+
   const totalBelumBerangkat = useMemo(() => {
     return events.filter((e) => e.statusKeberangkatan === 'BELUM_BERANGKAT').length;
   }, [events]);
@@ -102,7 +106,11 @@ export default function BahsuTable({
         title="Laporan Jadwal Pemberangkatan & Delegasi Bahtsul Masail"
         subtitle="Pondok Pesantren Darussalam Sumbersari Kencong Pare Kediri"
         filterInfo={filterDescription}
-        totalInfo={`${filteredEvents.length} Forum (${totalBelumBerangkat} Belum Berangkat, ${totalSudahBerangkat} Selesai, ${totalIzin} Izin)`}
+        totalInfo={
+          filterStatus === 'ALL'
+            ? `${totalForum} Forum (${totalBelumBerangkat} Belum Berangkat, ${totalSudahBerangkat} Selesai, ${totalIzin} Izin)`
+            : `Menampilkan ${filteredEvents.length} dari ${totalForum} Forum (${filterDescription})`
+        }
       />
 
       {/* 4 Kartu Ringkasan Atas */}
@@ -136,15 +144,21 @@ export default function BahsuTable({
               ? 'bg-[#E8F5F3] border-[#C8E3DC] ring-1 ring-[#1D7A6F]'
               : 'bg-white border-[#DCE5E0] hover:border-[#1D7A6F]'
           }`}
-          title="Klik untuk menampilkan semua agenda forum Bahtsul Masail"
-          aria-label={`Total ${events.length} Forum Bahsu. Klik untuk menampilkan semua agenda.`}
+          title="Klik untuk menampilkan semua forum Bahtsul Masail"
+          aria-label={`Total ${totalForum} Forum Bahsu. Klik untuk menampilkan semua agenda.`}
         >
           <div>
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66] group-hover:text-[#1D7A6F] transition-colors">
               Total Forum Bahsu
             </span>
             <div className="text-2xl font-black text-[#26332E] mt-1 font-serif">
-              {events.length} Agenda
+              {isLoading && events.length === 0 ? (
+                <span className="inline-block w-14 h-7 bg-stone-200/80 rounded animate-pulse" />
+              ) : error && events.length === 0 ? (
+                <span className="text-stone-400 font-sans text-xl">—</span>
+              ) : (
+                `${totalForum} Forum`
+              )}
             </div>
             <p className="text-xs text-[#5C6E66] mt-0.5">
               {filterStatus === 'ALL' ? 'Menampilkan semua' : 'Klik untuk tampilkan semua'}
@@ -191,7 +205,13 @@ export default function BahsuTable({
               Belum Berangkat
             </span>
             <div className="text-2xl font-black text-[#8C6D23] mt-1 font-serif">
-              {totalBelumBerangkat} Forum
+              {isLoading && events.length === 0 ? (
+                <span className="inline-block w-12 h-7 bg-amber-100/80 rounded animate-pulse" />
+              ) : error && events.length === 0 ? (
+                <span className="text-stone-400 font-sans text-xl">—</span>
+              ) : (
+                `${totalBelumBerangkat} Forum`
+              )}
             </div>
             <p className="text-xs text-[#8C6D23]/80 mt-0.5">
               {filterStatus === 'BELUM' ? 'Filter aktif' : 'Klik untuk filter'}
@@ -238,7 +258,13 @@ export default function BahsuTable({
               Sudah Berangkat
             </span>
             <div className="text-2xl font-black text-[#1D7A6F] mt-1 font-serif">
-              {totalSudahBerangkat} Forum
+              {isLoading && events.length === 0 ? (
+                <span className="inline-block w-12 h-7 bg-teal-100/80 rounded animate-pulse" />
+              ) : error && events.length === 0 ? (
+                <span className="text-stone-400 font-sans text-xl">—</span>
+              ) : (
+                `${totalSudahBerangkat} Forum`
+              )}
             </div>
             <p className="text-xs text-[#1D7A6F]/80 mt-0.5">
               {filterStatus === 'SUDAH' ? 'Filter aktif' : 'Klik untuk filter'}
@@ -285,7 +311,13 @@ export default function BahsuTable({
               Izin / Batal
             </span>
             <div className="text-2xl font-black text-[#8A2F1B] mt-1 font-serif">
-              {totalIzin} Forum
+              {isLoading && events.length === 0 ? (
+                <span className="inline-block w-12 h-7 bg-red-100/80 rounded animate-pulse" />
+              ) : error && events.length === 0 ? (
+                <span className="text-stone-400 font-sans text-xl">—</span>
+              ) : (
+                `${totalIzin} Forum`
+              )}
             </div>
             <p className="text-xs text-[#8A2F1B]/80 mt-0.5">
               {filterStatus === 'IZIN' ? 'Filter aktif' : 'Surat mepet / ujian'}
@@ -421,7 +453,11 @@ export default function BahsuTable({
               ) : (
                 <tr>
                   <td colSpan={5} className="py-12 text-center text-[#5C6E66] text-sm">
-                    Tidak ada agenda Bahtsul Masail yang cocok dengan pencarian Anda.
+                    {isLoading
+                      ? 'Sedang menyinkronkan data forum dari Google Sheets...'
+                      : error
+                      ? 'Gagal memuat daftar forum Bahtsul Masail dari sumber data.'
+                      : 'Tidak ada agenda Bahtsul Masail yang cocok dengan filter Anda.'}
                   </td>
                 </tr>
               )}
@@ -513,7 +549,11 @@ export default function BahsuTable({
             })
           ) : (
             <div className="p-8 text-center text-[#5C6E66] text-sm">
-              Tidak ada agenda Bahtsul Masail yang cocok.
+              {isLoading
+                ? 'Sedang menyinkronkan data forum dari Google Sheets...'
+                : error
+                ? 'Gagal memuat daftar forum Bahtsul Masail dari sumber data.'
+                : 'Tidak ada agenda Bahtsul Masail yang cocok dengan filter Anda.'}
             </div>
           )}
         </div>

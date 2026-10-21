@@ -207,7 +207,7 @@ export default function DashboardClient({ initialData }) {
         title="Laporan Administrasi WAKA III — Lembaga Bahtsul Masail (LBM)"
         subtitle="Pondok Pesantren Darussalam Sumbersari Kencong Pare Kediri"
         filterInfo="Tahun Ajaran 1447-1448 H / 2026-2027 M"
-        totalInfo={`${anggotaData?.total ?? initialData?.anggotaTotal ?? '…'} Santri LBM | ${bahsuData?.totalAgenda ?? initialData?.bahsuTotal ?? '…'} Forum Bahtsul Masail | ${bahsuData?.totalSudahBerangkat ?? '…'} Selesai Berangkat | ${bahsuData?.totalBelumBerangkat ?? '…'} Mendatang`}
+        totalInfo={`${anggotaData?.total ?? initialData?.anggotaTotal ?? '…'} Santri LBM | ${bahsuData?.totalAgenda ?? initialData?.bahsuTotal ?? '…'} Forum Bahtsul Masail | ${bahsuData?.totalSudahBerangkat ?? '…'} Selesai Berangkat | ${bahsuData?.totalBelumBerangkat ?? '…'} Mendatang | ${bahsuData?.totalIzin ?? '…'} Izin`}
       />
 
       {/* ============================================================== */}
