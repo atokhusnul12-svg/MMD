@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
 import AutoScrollManager from '@/components/AutoScrollManager';
 import { AuthProvider } from '@/lib/auth';
+import MotionProvider from '@/components/motion/MotionProvider';
 
 const lora = Lora({
   subsets: ['latin'],
@@ -41,13 +42,15 @@ export default function RootLayout({ children }) {
     <html lang="id" className={`h-full scroll-smooth ${lora.variable} ${inter.variable}`}>
       <body className="min-h-full flex flex-col bg-[#F7F5EF] text-[#26332E] font-sans antialiased">
         <AuthProvider>
-          <AutoScrollManager />
-          <Navbar />
-          <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 lg:py-10">
-            {children}
-          </main>
-          <Footer />
-          <ScrollToTop />
+          <MotionProvider>
+            <AutoScrollManager />
+            <Navbar />
+            <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 lg:py-10">
+              {children}
+            </main>
+            <Footer />
+            <ScrollToTop />
+          </MotionProvider>
         </AuthProvider>
       </body>
     </html>

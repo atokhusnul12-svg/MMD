@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Users,
   Search,
@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ExternalLink,
 } from 'lucide-react';
+import { smartScrollTo } from '@/lib/scrollTo';
 
 const ITEMS_PER_PAGE = 50;
 
@@ -86,11 +87,36 @@ export default function Waka1Table({
     setCurrentPage(1);
   }
 
+  // Efek transisi fade singkat (opacity 0.4 -> 1, 150-200ms) saat halaman atau filter berubah
+  const dataKey = `${currentPage}|${filterKey}`;
+  const [prevDataKey, setPrevDataKey] = useState(dataKey);
+  const [isFading, setIsFading] = useState(false);
+
+  if (prevDataKey !== dataKey) {
+    setPrevDataKey(dataKey);
+    setIsFading(true);
+  }
+
+  useEffect(() => {
+    if (isFading) {
+      const timer = setTimeout(() => {
+        setIsFading(false);
+      }, 40);
+      return () => clearTimeout(timer);
+    }
+  }, [isFading]);
+
   const totalPages = Math.max(1, Math.ceil(filteredStudents.length / ITEMS_PER_PAGE));
   const paginatedStudents = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredStudents.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredStudents, currentPage]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === currentPage) return;
+    setCurrentPage(newPage);
+    smartScrollTo('waka1-table-top', { force: true });
+  };
 
   const isFiltered =
     selectedTingkat !== 'ALL' ||
@@ -113,7 +139,7 @@ export default function Waka1Table({
   const endIndex = Math.min(currentPage * ITEMS_PER_PAGE, filteredStudents.length);
 
   return (
-    <div className="bg-white rounded-2xl border border-[#DCE5E0] shadow-xs overflow-hidden">
+    <div id="waka1-table-top" className="bg-white rounded-2xl border border-[#DCE5E0] shadow-xs overflow-hidden scroll-mt-24">
       {/* ============================================================== */}
       {/* 1. TOOLBAR FILTER & PENCARIAN SISWA                            */}
       {/* ============================================================== */}
@@ -244,7 +270,7 @@ export default function Waka1Table({
       {/* ============================================================== */}
       {/* 3. TABEL DATA SISWA (DESKTOP)                                  */}
       {/* ============================================================== */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto min-h-[480px] sm:min-h-[540px]">
         <table className="w-full text-left text-xs sm:text-sm border-collapse">
           <thead>
             <tr className="bg-[#FAF6EF] text-[#26332E] font-bold border-b border-[#DCE5E0] text-[11px] sm:text-xs uppercase tracking-wider">
@@ -256,7 +282,11 @@ export default function Waka1Table({
               <th className="py-3 px-4 min-w-[240px]">Bulan Takziran</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#DCE5E0]">
+          <tbody
+            className={`divide-y divide-[#DCE5E0] transition-opacity duration-200 ease-out motion-reduce:transition-none ${
+              isFading ? 'opacity-40' : 'opacity-100'
+            }`}
+          >
             {paginatedStudents.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-12 text-center text-[#5C6E66] space-y-2">
@@ -383,7 +413,7 @@ export default function Waka1Table({
         <div className="flex items-center gap-1.5 self-center sm:self-auto">
           <button
             type="button"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage <= 1}
             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DCE5E0] bg-white text-[#26332E] hover:bg-[#FAF6EF] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
           >
@@ -397,7 +427,7 @@ export default function Waka1Table({
 
           <button
             type="button"
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage >= totalPages}
             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DCE5E0] bg-white text-[#26332E] hover:bg-[#FAF6EF] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
           >

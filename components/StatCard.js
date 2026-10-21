@@ -24,6 +24,7 @@ export default function StatCard({
   iconBg = 'bg-[#F0F4FA]',
   iconColor = 'text-[#0A192F]',
   isLoading = false,
+  isHighlighted = false,
   href,
   onClick,
   ariaLabel,
@@ -35,8 +36,13 @@ export default function StatCard({
   const shouldReduceMotion = useReducedMotion();
 
   const containerClasses = `
-    w-full h-full bg-white rounded-2xl p-4 sm:p-5 lg:p-6 border border-[#E2E8F0] shadow-xs
-    flex flex-col justify-between text-left transition-all duration-300
+    w-full h-full rounded-2xl p-4 sm:p-5 lg:p-6 border shadow-xs
+    flex flex-col justify-between text-left transition-all duration-800
+    ${
+      isHighlighted
+        ? 'bg-[#E8F5F3] border-[#1D7A6F] ring-1 ring-[#1D7A6F]'
+        : 'bg-white border-[#E2E8F0]'
+    }
     ${
       isInteractive
         ? 'cursor-pointer group hover:border-[#0A192F]/40 hover:shadow-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#0A192F] focus-visible:ring-offset-2 select-none'

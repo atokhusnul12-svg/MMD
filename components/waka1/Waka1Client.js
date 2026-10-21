@@ -1,24 +1,23 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   RefreshCw,
   Printer,
-  ShieldCheck,
-  BarChart3,
   AlertCircle,
 } from 'lucide-react';
 import Waka1SummaryCards from './Waka1SummaryCards';
 import Waka1Table from './Waka1Table';
+import Waka1Aggregations from './Waka1Aggregations';
 
 export default function Waka1Client({ initialData, serverError = null }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [data] = useState(initialData);
-  const [error] = useState(serverError);
+  const data = initialData;
+  const error = serverError;
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('ALL');
 
@@ -125,75 +124,11 @@ export default function Waka1Client({ initialData, serverError = null }) {
       />
 
       {/* Panel Agregasi: Distribusi Tingkat & Tren Bulanan */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
-        {/* 1. Rekapitulasi Tingkat Madrasah */}
-        <div className="p-5 sm:p-6 bg-white rounded-2xl border border-[#DCE5E0] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-[#26332E] font-serif flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#1D7A6F]" />
-              <span>Kedisiplinan per Tingkat Madrasah</span>
-            </h3>
-            <span className="text-xs text-[#5C6E66]">MI, MTs, MA</span>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 text-center">
-            {['MI', 'MTs', 'MA'].map((t) => {
-              const stat = tingkatStats[t] || { total: 0, bebas: 0, takzir: 0 };
-              const persenBebas =
-                stat.total > 0 ? Math.round((stat.bebas / stat.total) * 100) : 0;
-
-              return (
-                <div
-                  key={t}
-                  className="p-3.5 rounded-xl bg-[#F7F5EF]/70 border border-[#DCE5E0] space-y-1"
-                >
-                  <span className="text-xs font-black text-[#1D7A6F] block">{t}</span>
-                  <span className="text-lg font-black text-[#26332E] font-serif block">
-                    {stat.total} Siswa
-                  </span>
-                  <div className="pt-1 text-[11px] font-semibold text-[#1D7A6F]">
-                    {persenBebas}% Tertib
-                  </div>
-                  <span className="text-[10px] text-[#8A2F1B] block">
-                    {stat.takzir} Kena Takzir
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 2. Tren Takziran per Bulan */}
-        <div className="p-5 sm:p-6 bg-white rounded-2xl border border-[#DCE5E0] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-[#26332E] font-serif flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-[#8C6D23]" />
-              <span>Jumlah Santri Takzir per Bulan</span>
-            </h3>
-            <span className="text-xs text-[#5C6E66]">6 Periode Terdata</span>
-          </div>
-
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">
-            {bulanList.map((b) => {
-              const count = monthlyCounts[b.id] || 0;
-              return (
-                <div
-                  key={b.id}
-                  className="p-2.5 rounded-xl bg-[#F7F5EF]/70 border border-[#DCE5E0] space-y-0.5"
-                >
-                  <span className="text-[10px] font-bold text-[#5C6E66] block truncate">
-                    {b.name}
-                  </span>
-                  <span className="text-base font-black text-[#8A2F1B] font-serif block">
-                    {count}
-                  </span>
-                  <span className="text-[9px] text-[#5C6E66]/80 block">santri</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      <Waka1Aggregations
+        tingkatStats={tingkatStats}
+        monthlyCounts={monthlyCounts}
+        bulanList={bulanList}
+      />
     </div>
   );
 }

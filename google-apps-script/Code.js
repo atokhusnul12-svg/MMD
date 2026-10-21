@@ -391,7 +391,7 @@ function handleSyncBahsuEvent(ss, payload) {
   var isIzinEvent = upperKet.indexOf("IZIN") !== -1 || upperKet.indexOf("BATAL") !== -1 || upperKet.indexOf("MUHAFADZOH") !== -1 || upperKet.indexOf("MUHAFAZOH") !== -1 || upperKet.indexOf("BERHALANGAN") !== -1;
   var derivedStatusKeberangkatan = isBelumEvent ? "BELUM_BERANGKAT" : (isIzinEvent ? "IZIN" : "SUDAH_BERANGKAT");
 
-  // 3. SINKRONISASI KE TAB PERKEMBANGAN (KOLOM BAHTSU YANG DIDATANGI)
+  // 3. SINKRONISASI KE TAB PERKEMBANGAN (KOLOM J: BAHTSU YANG DIDATANGI)
   var anggotaSheet = getSheetByGidOrName(ss, GID_ANGGOTA, "PERKEMBANGAN");
   if (!anggotaSheet) {
     return createJsonResponse(true, "Data kegiatan berhasil disimpan ke 'DAFTAR PEMBERANGKATAN BAHSU', namun tab 'PERKEMBANGAN' tidak ditemukan untuk sinkronisasi delegasi.", 200, {
@@ -416,10 +416,26 @@ function handleSyncBahsuEvent(ss, payload) {
     });
   }
 
+  // Ambil nilai riil Kolom B (Acara) dan Kolom C (Tanggal) langsung dari baris yang tersimpan pada DAFTAR PEMBERANGKATAN
+  var colBValue = String(bahsuSheet.getRange(actualSourceRow, bColMap.acara + 1).getValue() || "").trim();
+  var colCValue = String(bahsuSheet.getRange(actualSourceRow, bColMap.tanggal + 1).getValue() || "").trim();
+  if (!colBValue) colBValue = newAcara;
+  if (!colCValue) colCValue = newTanggal;
+
+  // Format gabungan Kolom B dan Kolom C sesuai struktur data sheet PERKEMBANGAN
+  var newEventLine = "";
+  if (colBValue && colCValue) {
+    newEventLine = colBValue + " " + colCValue;
+  } else if (colBValue) {
+    newEventLine = colBValue;
+  } else if (colCValue) {
+    newEventLine = colCValue;
+  }
+
   var aValues = anggotaSheet.getDataRange().getValues();
   var aHeaderRowIndex = -1;
-  // Kolom A: No (0), Kolom B: Nama (1), Kolom D: ID (3), Kolom J: Bahtsu yang didatangi (9)
-  var aColMap = { no: 0, nama: 1, id: 3, bahtsu: 9 };
+  // Kolom A: No (0), Kolom B: Nama (1), Kolom C: Kelas (2), Kolom D: ID (3), Kolom J: Bahtsu yang didatangi (9)
+  var aColMap = { no: 0, nama: 1, kelas: 2, id: 3, bahtsu: 9 };
 
   for (var ar = 0; ar < Math.min(10, aValues.length); ar++) {
     var aRow = aValues[ar];
@@ -439,6 +455,7 @@ function handleSyncBahsuEvent(ss, payload) {
       var ah = String(aHeaders[ahc] || "").trim().toUpperCase();
       if (ah === "NO." || ah === "NO" || ah.indexOf("NO.") !== -1) aColMap.no = ahc;
       else if (ah === "NAMA" || ah.indexOf("NAMA") !== -1) aColMap.nama = ahc;
+      else if (ah.indexOf("KELAS") !== -1) aColMap.kelas = ahc;
       else if (ah === "ID" || ah === "ID_ANGGOTA" || ah === "ID ANGGOTA") aColMap.id = ahc;
       else if (ah.indexOf("BAHTSU") !== -1 || ah.indexOf("DIDATANGI") !== -1) aColMap.bahtsu = ahc;
     }
@@ -451,10 +468,11 @@ function handleSyncBahsuEvent(ss, payload) {
     aColMap.bahtsu = 9;
   }
 
-  // Ekstrak baris delegasi dari input teks
+  // Ekstrak baris delegasi dari input teks dan objek santri yang dipilih
   var delegasiLines = delegasi.split(/\r?\n/).map(function(s) { return s.trim(); }).filter(Boolean);
   var attendingNamesClean = [];
   var matchedMemberIds = Array.isArray(event.matchedMemberIds) ? event.matchedMemberIds : [];
+  var selectedStudents = Array.isArray(event.selectedStudents) ? event.selectedStudents : [];
 
   for (var dl = 0; dl < delegasiLines.length; dl++) {
     var dLine = delegasiLines[dl];
@@ -466,10 +484,6 @@ function handleSyncBahsuEvent(ss, payload) {
     attendingNamesClean.push(cName);
   }
 
-  var newEventLine = (newTanggal && newTanggal.trim()) 
-    ? (newAcara.trim() + " " + newTanggal.trim()) 
-    : newAcara.trim();
-
   var cleanOldAcara = oldAcara ? oldAcara.trim().toLowerCase() : "";
   var cleanNewAcara = newAcara ? newAcara.trim().toLowerCase() : "";
   var cleanOldTanggal = oldTanggal ? oldTanggal.trim().toLowerCase() : "";
@@ -477,6 +491,7 @@ function handleSyncBahsuEvent(ss, payload) {
 
   var syncedMembers = [];
   var removedMembers = [];
+  var foundStudentKeys = {};
 
   // Telusuri seluruh santri di tab PERKEMBANGAN
   for (var ai = aHeaderRowIndex + 1; ai < aValues.length; ai++) {
@@ -487,23 +502,58 @@ function handleSyncBahsuEvent(ss, payload) {
     var mNamaClean = cleanNameForCompare(mNama);
     if (!mNamaClean) continue;
 
-    // Periksa ID anggota jika ada
+    // Periksa atribut identitas siswa pada baris ini
     var mRawNo = aColMap.no !== undefined ? String(mRow[aColMap.no] || "").trim() : "";
+    var mRowKelas = aColMap.kelas !== undefined ? String(mRow[aColMap.kelas] || "").trim().toLowerCase() : "";
     var mId = aColMap.id !== undefined ? String(mRow[aColMap.id] || "").trim().toUpperCase() : "";
     if (!mId && mRawNo && !isNaN(parseInt(mRawNo, 10))) {
       mId = "LBM-" + padZero(parseInt(mRawNo, 10), 3);
     }
 
-    // Cek apakah santri ini tercatat sebagai delegasi yang hadir
     var isAttending = false;
+    var matchedStudentObj = null;
 
-    // 1. Cek kecocokan via ID anggota stabil
-    if (mId && matchedMemberIds.length > 0 && matchedMemberIds.indexOf(mId) !== -1) {
+    // 1. Verifikasi kecocokan via selectedStudents (Identitas Presisi: No, ID, Nama, Kelas)
+    if (selectedStudents.length > 0) {
+      for (var sIdx = 0; sIdx < selectedStudents.length; sIdx++) {
+        var sTarget = selectedStudents[sIdx];
+        var targetClean = cleanNameForCompare(sTarget.nama);
+        var targetNo = sTarget.noOriginal !== undefined && sTarget.noOriginal !== null ? String(sTarget.noOriginal).trim() : "";
+        var targetKelas = sTarget.kelas ? String(sTarget.kelas).trim().toLowerCase() : "";
+        var targetId = sTarget.id ? String(sTarget.id).trim().toUpperCase() : "";
+
+        // Kriteria 1: Nomor Urut (Kolom A) cocok DAN Nama (Kolom B) cocok
+        if (targetNo && mRawNo && targetNo === mRawNo && (targetClean === mNamaClean || mNamaClean.indexOf(targetClean) !== -1 || targetClean.indexOf(mNamaClean) !== -1)) {
+          isAttending = true;
+          matchedStudentObj = sTarget;
+          break;
+        }
+
+        // Kriteria 2: ID Anggota cocok
+        if (targetId && mId && targetId === mId) {
+          isAttending = true;
+          matchedStudentObj = sTarget;
+          break;
+        }
+
+        // Kriteria 3: Nama cocok DAN Kelas cocok
+        if (targetClean && mNamaClean && (targetClean === mNamaClean || mNamaClean.indexOf(targetClean) !== -1 || targetClean.indexOf(mNamaClean) !== -1)) {
+          if (!targetKelas || !mRowKelas || targetKelas === mRowKelas || targetKelas.indexOf(mRowKelas) !== -1 || mRowKelas.indexOf(targetKelas) !== -1) {
+            isAttending = true;
+            matchedStudentObj = sTarget;
+            break;
+          }
+        }
+      }
+    }
+
+    // 2. Fallback: Cek kecocokan via matchedMemberIds
+    if (!isAttending && mId && matchedMemberIds.length > 0 && matchedMemberIds.indexOf(mId) !== -1) {
       isAttending = true;
     }
 
-    // 2. Cek kecocokan via nama yang sudah dibersihkan
-    if (!isAttending) {
+    // 3. Fallback: Cek kecocokan via baris teks delegasi
+    if (!isAttending && attendingNamesClean.length > 0) {
       for (var att = 0; att < attendingNamesClean.length; att++) {
         var aTarget = attendingNamesClean[att];
         if (mNamaClean === aTarget) {
@@ -522,42 +572,40 @@ function handleSyncBahsuEvent(ss, payload) {
     var lineModified = false;
 
     if (isAttending && !isIzinEvent) {
-      // Santri HADIR: cari apakah kegiatan ini sudah ada di riwayat menggunakan KUNCI KOMPOSIT (Acara + Tanggal)
-      var foundIdx = -1;
+      // Tandai santri ditemukan
+      var keyFound = matchedStudentObj ? (matchedStudentObj.id || matchedStudentObj.nama) : mNama;
+      foundStudentKeys[keyFound] = true;
+
+      // Cek apakah entri agenda ini sudah ada di riwayat (Pencegahan duplikasi akibat retry / kirim ulang)
+      var alreadyPresent = false;
       for (var li = 0; li < mLines.length; li++) {
         var lineLower = mLines[li].toLowerCase();
-
-        // 1. Mode Edit: cari baris yang cocok dengan oldAcara DAN oldTanggal
-        if (cleanOldAcara && lineLower.indexOf(cleanOldAcara) !== -1) {
-          if (!cleanOldTanggal || lineLower.indexOf(cleanOldTanggal) !== -1) {
-            foundIdx = li;
-            break;
-          }
+        // Exact match
+        if (lineLower === newEventLine.toLowerCase()) {
+          alreadyPresent = true;
+          break;
         }
-
-        // 2. Cari baris yang cocok dengan newAcara DAN newTanggal
+        // Composite match: baris sudah memuat acara dan tanggal
         if (cleanNewAcara && lineLower.indexOf(cleanNewAcara) !== -1) {
           if (!cleanNewTanggal || lineLower.indexOf(cleanNewTanggal) !== -1) {
-            foundIdx = li;
+            alreadyPresent = true;
+            // Jika teksnya sedikit berbeda di mode edit, perbarui ke newEventLine
+            if (mode === "edit" && mLines[li] !== newEventLine) {
+              mLines[li] = newEventLine;
+              lineModified = true;
+            }
             break;
           }
         }
       }
 
-      if (foundIdx !== -1) {
-        if (mLines[foundIdx] !== newEventLine) {
-          mLines[foundIdx] = newEventLine;
-          lineModified = true;
-        }
-      } else {
-        // Tambahkan baris baru tanpa menghapus riwayat lama terdahulu
+      if (!alreadyPresent) {
+        // Tambahkan data baru di akhir riwayat tanpa menghapus catatan lama
         mLines.push(newEventLine);
         lineModified = true;
       }
 
-      if (lineModified) {
-        syncedMembers.push(mNama);
-      }
+      syncedMembers.push(mNama);
 
     } else {
       // Santri TIDAK HADIR atau Status IZIN: Hanya hapus kegiatan spesifik ini jika sebelumnya pernah terdaftar
@@ -581,7 +629,7 @@ function handleSyncBahsuEvent(ss, payload) {
       }
     }
 
-    // Tulis kembali ke sel kolom J (aColMap.bahtsu + 1) jika ada modifikasi
+    // Tulis kembali HANYA ke Kolom J (aColMap.bahtsu + 1) baris siswa ini
     if (lineModified) {
       var updatedBahtsuText = mLines.join("\n");
       anggotaSheet.getRange(ai + 1, aColMap.bahtsu + 1).setValue(updatedBahtsuText);
@@ -590,9 +638,24 @@ function handleSyncBahsuEvent(ss, payload) {
 
   SpreadsheetApp.flush();
 
+  // Evaluasi santri yang tidak ditemukan
+  var missingStudents = [];
+  if (selectedStudents.length > 0) {
+    for (var mIdx = 0; mIdx < selectedStudents.length; mIdx++) {
+      var sCheck = selectedStudents[mIdx];
+      var sCheckKey = sCheck.id || sCheck.nama;
+      if (!foundStudentKeys[sCheckKey]) {
+        missingStudents.push(sCheck.nama);
+      }
+    }
+  }
+
   var isPartial = false;
   var statusMsg = "";
-  if (attendingNamesClean.length > 0 && syncedMembers.length === 0) {
+  if (missingStudents.length > 0) {
+    isPartial = true;
+    statusMsg = "Data agenda berhasil tersimpan di 'DAFTAR PEMBERANGKATAN BAHSU', namun santri berikut tidak ditemukan pada tab 'PERKEMBANGAN': " + missingStudents.join(", ") + ".";
+  } else if (syncedMembers.length === 0 && (selectedStudents.length > 0 || attendingNamesClean.length > 0)) {
     isPartial = true;
     statusMsg = "Data agenda berhasil tersimpan di 'DAFTAR PEMBERANGKATAN BAHSU', namun tidak ada santri LBM yang cocok untuk disinkronkan ke sheet 'PERKEMBANGAN'.";
   } else {
@@ -602,13 +665,17 @@ function handleSyncBahsuEvent(ss, payload) {
   return createJsonResponse(true, statusMsg, 200, {
     sourceSheet: "DAFTAR PEMBERANGKATAN BAHSU",
     sourceRow: actualSourceRow,
+    colBValue: colBValue,
+    colCValue: colCValue,
     targetSheet: "PERKEMBANGAN",
+    targetColumn: "J (BAHTSU YANG DIDATANGI)",
     spreadsheetId: ss ? ss.getId() : SPREADSHEET_ID,
     agendaSaved: true,
     historySynced: syncedMembers.length > 0,
     isPartial: isPartial,
     syncedCount: syncedMembers.length,
     syncedMembers: syncedMembers,
+    missingStudents: missingStudents,
     removedCount: removedMembers.length,
     removedMembers: removedMembers,
     event: {

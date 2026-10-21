@@ -11,6 +11,7 @@ import {
 import StatCard from '@/components/StatCard';
 import PieChart from '@/components/PieChart';
 import AdminButton from '@/components/AdminButton';
+import CountUp from '@/components/motion/CountUp';
 import {
   Users,
   TrendingUp,
@@ -39,6 +40,28 @@ export default function DashboardClient({ initialData }) {
   const [error, setError] = useState(null);
   const [lastRefreshed, setLastRefreshed] = useState(hasInitial ? 'Sinkron Server' : null);
   const lastFetchRef = useRef(0);
+
+  // Scroll-spy untuk pintasan bagian
+  const [activeSection, setActiveSection] = useState('waka3-statistik');
+  // Sorotan tosca tipis saat nilai berubah
+  const [highlightedCards, setHighlightedCards] = useState({});
+  const highlightTimerRef = useRef(null);
+  const anggotaDataRef = useRef(anggotaData);
+  const bahsuDataRef = useRef(bahsuData);
+
+  useEffect(() => {
+    anggotaDataRef.current = anggotaData;
+  }, [anggotaData]);
+
+  useEffect(() => {
+    bahsuDataRef.current = bahsuData;
+  }, [bahsuData]);
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    };
+  }, []);
 
   const handlePrint = () => {
     if (typeof window !== 'undefined') {
@@ -70,16 +93,29 @@ export default function DashboardClient({ initialData }) {
       ]);
 
       const failedSources = [];
+      const changed = {};
 
       if (resAnggota.status === 'fulfilled') {
-        setAnggotaData(resAnggota.value);
+        const newVal = resAnggota.value;
+        const oldVal = anggotaDataRef.current;
+        if (oldVal && oldVal.total !== undefined && oldVal.total !== newVal.total) {
+          changed.totalAnggota = true;
+        }
+        setAnggotaData(newVal);
       } else {
         console.error('Gagal memuat anggota:', resAnggota.reason);
         failedSources.push(`Anggota LBM (${resAnggota.reason?.message || 'Error'})`);
       }
 
       if (resBahsu.status === 'fulfilled') {
-        setBahsuData(resBahsu.value);
+        const newVal = resBahsu.value;
+        const oldVal = bahsuDataRef.current;
+        if (oldVal) {
+          if (oldVal.totalAgenda !== undefined && oldVal.totalAgenda !== newVal.totalAgenda) changed.totalAgenda = true;
+          if (oldVal.totalSudahBerangkat !== undefined && oldVal.totalSudahBerangkat !== newVal.totalSudahBerangkat) changed.totalSudahBerangkat = true;
+          if (oldVal.totalBelumBerangkat !== undefined && oldVal.totalBelumBerangkat !== newVal.totalBelumBerangkat) changed.totalBelumBerangkat = true;
+        }
+        setBahsuData(newVal);
       } else {
         console.error('Gagal memuat bahsu:', resBahsu.reason);
         failedSources.push(`Bahtsul Masail (${resBahsu.reason?.message || 'Error'})`);
@@ -93,6 +129,15 @@ export default function DashboardClient({ initialData }) {
 
       if (failedSources.length === 2) {
         setError(`Data WAKA III gagal dimuat. Detail: ${failedSources.join('; ')}`);
+      }
+
+      // Jika ada nilai yang berubah, sorot kartu selama 800ms
+      if (Object.keys(changed).length > 0) {
+        setHighlightedCards(changed);
+        if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+        highlightTimerRef.current = setTimeout(() => {
+          setHighlightedCards({});
+        }, 800);
       }
 
       setLastRefreshed(new Date().toLocaleTimeString('id-ID'));
@@ -113,6 +158,32 @@ export default function DashboardClient({ initialData }) {
     }, 0);
     return () => clearTimeout(timer);
   }, [hasInitial]);
+
+  // Scroll-spy observer untuk mendeteksi bagian aktif saat di-scroll
+  useEffect(() => {
+    const sectionIds = ['waka3-statistik', 'waka3-charts', 'waka3-bahsu'];
+    const elements = sectionIds.map((id) => document.getElementById(id)).filter(Boolean);
+    if (!elements.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries.filter((e) => e.isIntersecting);
+        if (visibleEntries.length > 0) {
+          visibleEntries.sort(
+            (a, b) => Math.abs(a.boundingClientRect.top) - Math.abs(b.boundingClientRect.top)
+          );
+          setActiveSection(visibleEntries[0].target.id);
+        }
+      },
+      {
+        rootMargin: '-10% 0px -40% 0px',
+        threshold: [0, 0.2, 0.5],
+      }
+    );
+
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [loading]);
 
   // Sinkronisasi otomatis di latar belakang & saat tab aktif kembali
   useBackgroundSync(() => loadData(false), { lastFetchRef });
@@ -187,10 +258,7 @@ export default function DashboardClient({ initialData }) {
         {/* Status Sinkronisasi Real-Time */}
         <div className="mt-5 pt-4 border-t border-[#DCE5E0] flex flex-wrap items-center justify-between gap-3 text-xs text-[#5C6E66]">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1D7A6F] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#1D7A6F]"></span>
-            </span>
+            <span className="w-2 h-2 rounded-full bg-[#1D7A6F] shrink-0" />
             <span className="font-semibold text-[#1D7A6F]">
               Live Auto-Sync Google Sheets Aktif
             </span>
@@ -220,26 +288,47 @@ export default function DashboardClient({ initialData }) {
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           <button
             type="button"
-            onClick={() => smartScrollTo('waka3-statistik')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-[#E8F5F3] text-[#26332E] hover:text-[#1D7A6F] border border-[#DCE5E0] transition-colors shrink-0 shadow-2xs cursor-pointer"
+            onClick={() => {
+              setActiveSection('waka3-statistik');
+              smartScrollTo('waka3-statistik');
+            }}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all shrink-0 shadow-2xs cursor-pointer ${
+              activeSection === 'waka3-statistik'
+                ? 'bg-[#1D7A6F] text-white border-[#1D7A6F] shadow-xs'
+                : 'bg-white hover:bg-[#E8F5F3] text-[#26332E] hover:text-[#1D7A6F] border-[#DCE5E0]'
+            }`}
           >
-            <TrendingUp className="w-3.5 h-3.5 text-[#1D7A6F]" />
-            <span>Statistik</span>
+            <TrendingUp className={`w-3.5 h-3.5 ${activeSection === 'waka3-statistik' ? 'text-white' : 'text-[#1D7A6F]'}`} />
+            <span>Statistik Operasional</span>
           </button>
           <button
             type="button"
-            onClick={() => smartScrollTo('waka3-charts')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-[#E8F5F3] text-[#26332E] hover:text-[#1D7A6F] border border-[#DCE5E0] transition-colors shrink-0 shadow-2xs cursor-pointer"
+            onClick={() => {
+              setActiveSection('waka3-charts');
+              smartScrollTo('waka3-charts');
+            }}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all shrink-0 shadow-2xs cursor-pointer ${
+              activeSection === 'waka3-charts'
+                ? 'bg-[#1D7A6F] text-white border-[#1D7A6F] shadow-xs'
+                : 'bg-white hover:bg-[#E8F5F3] text-[#26332E] hover:text-[#1D7A6F] border-[#DCE5E0]'
+            }`}
           >
-            <Users className="w-3.5 h-3.5 text-[#1D7A6F]" />
-            <span>Santri LBM</span>
+            <Users className={`w-3.5 h-3.5 ${activeSection === 'waka3-charts' ? 'text-white' : 'text-[#1D7A6F]'}`} />
+            <span>Statistik Santri LBM</span>
           </button>
           <button
             type="button"
-            onClick={() => smartScrollTo('waka3-bahsu')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-[#E8F5F3] text-[#26332E] hover:text-[#1D7A6F] border border-[#DCE5E0] transition-colors shrink-0 shadow-2xs cursor-pointer"
+            onClick={() => {
+              setActiveSection('waka3-bahsu');
+              smartScrollTo('waka3-bahsu');
+            }}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all shrink-0 shadow-2xs cursor-pointer ${
+              activeSection === 'waka3-bahsu'
+                ? 'bg-[#1D7A6F] text-white border-[#1D7A6F] shadow-xs'
+                : 'bg-white hover:bg-[#E8F5F3] text-[#26332E] hover:text-[#1D7A6F] border-[#DCE5E0]'
+            }`}
           >
-            <BookOpen className="w-3.5 h-3.5 text-[#1D7A6F]" />
+            <BookOpen className={`w-3.5 h-3.5 ${activeSection === 'waka3-bahsu' ? 'text-white' : 'text-[#1D7A6F]'}`} />
             <span>Delegasi Bahsu</span>
           </button>
         </div>
@@ -271,7 +360,11 @@ export default function DashboardClient({ initialData }) {
         <StatCard
           index={0}
           title="Total Anggota LBM"
-          value={`${anggotaData?.total || 0} Santri`}
+          value={
+            <>
+              <CountUp target={anggotaData?.total || 0} duration={1000} threshold={0.4} formatThousand={false} /> Santri
+            </>
+          }
           subvalue="Terdaftar aktif di sistem MMD"
           icon={Users}
           badgeText="LBM MMD"
@@ -279,6 +372,7 @@ export default function DashboardClient({ initialData }) {
           iconBg="bg-[#F0F4FA]"
           iconColor="text-[#0A192F]"
           isLoading={loading}
+          isHighlighted={Boolean(highlightedCards.totalAnggota)}
           href="/anggota"
           actionHint="Buka Data →"
           titleTooltip="Klik untuk membuka Halaman Data Anggota LBM"
@@ -289,7 +383,11 @@ export default function DashboardClient({ initialData }) {
         <StatCard
           index={1}
           title="Forum Bahtsul Masail"
-          value={`${bahsuData?.totalAgenda || 0} Forum`}
+          value={
+            <>
+              <CountUp target={bahsuData?.totalAgenda || 0} duration={1000} threshold={0.4} formatThousand={false} /> Forum
+            </>
+          }
           subvalue={`${bahsuData?.totalSudahBerangkat || 0} Sudah • ${bahsuData?.totalBelumBerangkat || 0} Belum • ${bahsuData?.totalIzin || 0} Izin`}
           icon={BookOpen}
           iconBg="bg-[#FAF3E6]"
@@ -297,6 +395,7 @@ export default function DashboardClient({ initialData }) {
           badgeText="Agenda 2026"
           badgeColor="bg-[#FAF3E6] text-[#8C6D23] border-[#E8D5A7]"
           isLoading={loading}
+          isHighlighted={Boolean(highlightedCards.totalAgenda)}
           href="/bahsu"
           actionHint="Buka Jadwal →"
           titleTooltip="Klik untuk membuka Halaman Jadwal & Delegasi Bahtsul Masail"
@@ -307,7 +406,11 @@ export default function DashboardClient({ initialData }) {
         <StatCard
           index={2}
           title="Delegasi Selesai"
-          value={`${bahsuData?.totalSudahBerangkat || 0} Forum`}
+          value={
+            <>
+              <CountUp target={bahsuData?.totalSudahBerangkat || 0} duration={1000} threshold={0.4} formatThousand={false} /> Forum
+            </>
+          }
           subvalue="Sudah selesai diberangkatkan"
           icon={CheckCircle2}
           iconBg="bg-[#E8F5F3]"
@@ -315,6 +418,7 @@ export default function DashboardClient({ initialData }) {
           badgeText="Terealisasi"
           badgeColor="bg-[#E8F5F3] text-[#1D7A6F] border-[#C8E3DC]"
           isLoading={loading}
+          isHighlighted={Boolean(highlightedCards.totalSudahBerangkat)}
           href="/bahsu"
           actionHint="Lihat Detail →"
           titleTooltip="Klik untuk melihat agenda yang sudah selesai diberangkatkan"
@@ -325,7 +429,11 @@ export default function DashboardClient({ initialData }) {
         <StatCard
           index={3}
           title="Delegasi Mendatang"
-          value={`${bahsuData?.totalBelumBerangkat || 0} Forum`}
+          value={
+            <>
+              <CountUp target={bahsuData?.totalBelumBerangkat || 0} duration={1000} threshold={0.4} formatThousand={false} /> Forum
+            </>
+          }
           subvalue="Menunggu jadwal keberangkatan"
           icon={Hourglass}
           iconBg="bg-[#FAF3E6]"
@@ -333,6 +441,7 @@ export default function DashboardClient({ initialData }) {
           badgeText="Persiapan"
           badgeColor="bg-[#FAF3E6] text-[#8C6D23] border-[#E8D5A7]"
           isLoading={loading}
+          isHighlighted={Boolean(highlightedCards.totalBelumBerangkat)}
           href="/bahsu"
           actionHint="Lihat Jadwal →"
           titleTooltip="Klik untuk melihat jadwal pemberangkatan forum berikutnya"

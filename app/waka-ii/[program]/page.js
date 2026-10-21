@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import ProgramDetailClient from '@/components/waka2/ProgramDetailClient';
 import { getProgramConfig, getAllProgramSlugs } from '@/lib/waka2Config';
 import { getWaka2Absensi } from '@/lib/fetchWaka2';
-import PageLoading from '@/components/ui/PageLoading';
+import ProgramDetailSkeleton from '@/components/waka2/ProgramDetailSkeleton';
 
 export async function generateStaticParams() {
   return getAllProgramSlugs().map((slug) => ({
@@ -48,7 +48,7 @@ export default async function ProgramDetailPage({ params }) {
   }
 
   return (
-    <Suspense fallback={<PageLoading message={`Memuat halaman program ${config.name}...`} minHeight="min-h-[350px]" />}>
+    <Suspense fallback={<ProgramDetailSkeleton />}>
       <ProgramDetailClient
         program={config}
         initialData={absensiData}

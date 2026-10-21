@@ -24,6 +24,7 @@ import { formatRupiah, getKeuanganData } from '@/lib/fetchCSV';
 import KeuanganDonutChart from '@/components/KeuanganDonutChart';
 import { smartScrollTo } from '@/lib/scrollTo';
 import { useBackgroundSync } from '@/lib/useBackgroundSync';
+import CountUp from '@/components/motion/CountUp';
 
 function AdminButton({ editUrl, title }) {
   const { isAdmin } = useAuth();
@@ -51,6 +52,7 @@ export default function KeuanganClient({ initialData, serverError = null }) {
   const [error, setError] = useState(serverError || null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedBulan, setSelectedBulan] = useState('TOTAL');
+  const [hoveredBulan, setHoveredBulan] = useState(null);
   const lastFetchRef = useRef(0);
 
   // Sinkronisasi data latar belakang (Client-Side)
@@ -258,7 +260,11 @@ export default function KeuanganClient({ initialData, serverError = null }) {
           </div>
           <div className="mt-3">
             <div className="text-xl sm:text-2xl font-black text-[#26332E] font-serif tracking-tight truncate">
-              {formatRupiah(activeKeuangan.subsidi)}
+              <CountUp
+                target={activeKeuangan.subsidi}
+                prefix="Rp "
+                duration={1000}
+              />
             </div>
             <div className="flex items-center justify-between gap-1 text-[11px] text-[#5C6E66] mt-1">
               <span className="truncate">{activeKeuangan.label}</span>
@@ -300,10 +306,23 @@ export default function KeuanganClient({ initialData, serverError = null }) {
           </div>
           <div className="mt-3">
             <div className="text-xl sm:text-2xl font-black text-[#8A2F1B] font-serif tracking-tight truncate">
-              {formatRupiah(activeKeuangan.pengeluaran)}
+              <CountUp
+                target={activeKeuangan.pengeluaran}
+                prefix="Rp "
+                duration={1000}
+              />
             </div>
             <div className="flex items-center justify-between gap-1 text-[11px] text-[#8A2F1B]/90 mt-1">
-              <span>Realisasi: <strong>{activeKeuangan.serap}%</strong></span>
+              <span>
+                Realisasi: <strong>
+                  <CountUp
+                    target={typeof activeKeuangan.serap === 'number' ? activeKeuangan.serap : parseFloat(activeKeuangan.serap) || 0}
+                    decimals={1}
+                    suffix="%"
+                    duration={800}
+                  />
+                </strong>
+              </span>
               <span className="font-semibold shrink-0">Lihat Diagram ↓</span>
             </div>
           </div>
@@ -342,7 +361,11 @@ export default function KeuanganClient({ initialData, serverError = null }) {
           </div>
           <div className="mt-3">
             <div className="text-xl sm:text-2xl font-black text-[#8C6D23] font-serif tracking-tight truncate">
-              {formatRupiah(activeKeuangan.saldo)}
+              <CountUp
+                target={activeKeuangan.saldo}
+                prefix="Rp "
+                duration={1000}
+              />
             </div>
             <div className="flex items-center justify-between gap-1 text-[11px] text-[#8C6D23]/90 mt-1">
               <span className="truncate">Sisa anggaran kas periode ini</span>
@@ -361,7 +384,9 @@ export default function KeuanganClient({ initialData, serverError = null }) {
           totalPengeluaran={data?.total?.pengeluaran || 0}
           isLoading={spinning}
           selectedBulan={selectedBulan}
+          hoveredBulan={hoveredBulan}
           onSelectBulan={setSelectedBulan}
+          onHoverBulan={setHoveredBulan}
         />
       </div>
 
@@ -401,13 +426,17 @@ export default function KeuanganClient({ initialData, serverError = null }) {
               <tbody className="divide-y divide-[#DCE5E0]/60">
                 {data?.rekapitulasi?.map((item, idx) => {
                   const isSelected = selectedBulan === item.bulan;
+                  const isHovered = hoveredBulan === item.bulan;
+                  const highlight = isSelected || isHovered;
                   const persen = item.subsidi > 0 ? ((item.pengeluaran / item.subsidi) * 100).toFixed(1) : 0;
                   return (
                     <tr
                       key={idx}
                       onClick={() => setSelectedBulan(item.bulan)}
-                      className={`cursor-pointer transition-colors ${
-                        isSelected
+                      onMouseEnter={() => setHoveredBulan(item.bulan)}
+                      onMouseLeave={() => setHoveredBulan(null)}
+                      className={`cursor-pointer transition-colors duration-150 ${
+                        highlight
                           ? 'bg-[#E8F5F3] font-semibold text-[#1D7A6F]'
                           : 'hover:bg-[#FAF6EF]/60'
                       }`}

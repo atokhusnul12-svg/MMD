@@ -4,6 +4,7 @@ import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Sun, Clock, Compass, Calendar, MapPin } from 'lucide-react';
 import { useJamIstiwa } from '@/lib/useJamIstiwa';
+import Collapsible from '@/components/motion/Collapsible';
 
 export default function PortalJamIstiwaCard() {
   const shouldReduceMotion = useReducedMotion();
@@ -12,12 +13,12 @@ export default function PortalJamIstiwaCard() {
   return (
     <motion.div
       initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
-      whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+      whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-20px' }}
       transition={
         shouldReduceMotion ? { duration: 0 } : { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
       }
-      whileHover={shouldReduceMotion ? {} : { y: -3, transition: { duration: 0.2 } }}
+      whileHover={shouldReduceMotion ? undefined : { y: -3, transition: { duration: 0.2 } }}
       className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#124B44] via-[#1D7A6F] to-[#165E55] text-white p-6 sm:p-8 lg:p-10 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-white/10"
     >
       {/* Ornamen Latar Aksen Kaligrafi/Geometris */}
@@ -36,12 +37,12 @@ export default function PortalJamIstiwaCard() {
           {/* Header Pill & Lokasi Astronomi */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF6EF]/15 backdrop-blur-md text-xs font-bold text-[#ECD8A5] border border-[#ECD8A5]/30">
-              <Sun className="w-3.5 h-3.5 text-[#ECD8A5] animate-spin" style={{ animationDuration: '20s' }} />
+              <Sun className="w-3.5 h-3.5 text-[#ECD8A5] shrink-0" />
               <span>JAM ISTIWA&apos; (WIS)</span>
             </span>
 
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 text-xs font-medium text-white/90 border border-white/15">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <span className="w-2 h-2 rounded-full bg-[#1D7A6F] shrink-0" />
               <span>Real-Time Per Detik</span>
             </span>
 
@@ -55,7 +56,7 @@ export default function PortalJamIstiwaCard() {
           <div className="flex items-baseline gap-3">
             <span
               suppressHydrationWarning
-              className="text-4xl sm:text-6xl lg:text-7xl font-black font-mono tracking-tight text-white drop-shadow-sm"
+              className="text-4xl sm:text-6xl lg:text-7xl font-black font-mono tracking-tight text-white drop-shadow-sm tabular-nums [font-variant-numeric:tabular-nums]"
             >
               {dataWaktu ? dataWaktu.wis.teks : '--:--:--'}
             </span>
@@ -64,10 +65,17 @@ export default function PortalJamIstiwaCard() {
             </span>
           </div>
 
-          {/* Penjelasan Filosofi Jam Istiwa' */}
-          <p className="text-xs sm:text-sm text-white/85 leading-relaxed max-w-xl">
-            <strong className="text-[#ECD8A5]">Waktu Istiwa&apos; Sumbersari (WIS) Tafawut</strong> dihitung menurut koordinat Sumbersari, Kencong, Kepung, Kediri. Jam ini tidak berlaku di luar koordinat Pare karena adanya perbedaan koordinat.
-          </p>
+          {/* Penjelasan Filosofi Jam Istiwa' (Akordion Reusable CSS Grid) */}
+          <Collapsible
+            title="Waktu Istiwa' (WIS) Tafawut"
+            icon={Compass}
+            badge="Pare, Kediri"
+            className="max-w-xl"
+          >
+            <p className="text-xs text-white/90 leading-relaxed pt-1">
+              <strong className="text-[#ECD8A5]">Waktu Istiwa&apos; Sumbersari (WIS) Tafawut</strong> dihitung menurut koordinat astronomi Sumbersari, Kencong, Kepung, Kediri. Jam ini berpatokan pada posisi lintasan matahari lokal dan tidak berlaku di luar koordinat Pare karena adanya perbedaan bujur astronomis bumi.
+            </p>
+          </Collapsible>
         </div>
 
         {/* ============================================================== */}
@@ -85,7 +93,7 @@ export default function PortalJamIstiwaCard() {
                 <div className="text-[10px] font-semibold text-white/70 uppercase tracking-wider">
                   Waktu Patokan Nasional
                 </div>
-                <div suppressHydrationWarning className="text-base font-bold font-mono text-white">
+                <div suppressHydrationWarning className="text-base font-bold font-mono text-white tabular-nums [font-variant-numeric:tabular-nums]">
                   {dataWaktu ? dataWaktu.wib.teks : '--:--:--'}{' '}
                   <span className="text-xs text-white/80 font-normal">WIB</span>
                 </div>

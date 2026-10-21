@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import CountUp from '@/components/motion/CountUp';
 
 // Pemetaan warna dan gaya untuk tiap status perkembangan (Islamic Contemporary Palette)
 export const STATUS_COLORS = {
@@ -80,7 +81,21 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
 
-  let accumulatedPercent = 0;
+  // Hitung segmen slice SVG secara murni
+  const slices = useMemo(() => {
+    let accumulated = 0;
+    return data.map((item, index) => {
+      const len = total > 0 ? (item.count / total) * circumference : 0;
+      const offset = -accumulated * circumference;
+      accumulated += total > 0 ? item.count / total : 0;
+      return {
+        ...item,
+        index,
+        len,
+        offset,
+      };
+    });
+  }, [data, total, circumference]);
 
   return (
     <motion.div
@@ -124,26 +139,34 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
               strokeWidth={strokeWidth}
               fill="transparent"
             />
-            {data.map((item, index) => {
-              const strokeDasharray = `${(item.count / total) * circumference} ${circumference}`;
-              const strokeDashoffset = -accumulatedPercent * circumference;
-              accumulatedPercent += item.count / total;
-
-              const isHovered = hoveredIndex === index;
+            {slices.map((item) => {
+              const isHovered = hoveredIndex === item.index;
 
               return (
-                <circle
+                <motion.circle
                   key={item.status}
                   cx={size / 2}
                   cy={size / 2}
                   r={radius}
                   stroke={item.color}
                   strokeWidth={isHovered ? strokeWidth + 6 : strokeWidth}
-                  strokeDasharray={strokeDasharray}
-                  strokeDashoffset={strokeDashoffset}
+                  strokeDasharray={`${item.len} ${circumference}`}
+                  strokeDashoffset={item.offset}
+                  initial={shouldReduceMotion ? false : { strokeDasharray: `0 ${circumference}` }}
+                  whileInView={shouldReduceMotion ? undefined : { strokeDasharray: `${item.len} ${circumference}` }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : { duration: 0.75, delay: item.index * 0.08, ease: [0.16, 1, 0.3, 1] }
+                  }
                   fill="transparent"
                   className="transition-all duration-200 cursor-pointer"
-                  onMouseEnter={() => setHoveredIndex(index)}
+                  style={{
+                    opacity: hoveredIndex !== null && !isHovered ? 0.45 : 1,
+                    filter: isHovered ? 'drop-shadow(0px 3px 6px rgba(0,0,0,0.15))' : 'none',
+                  }}
+                  onMouseEnter={() => setHoveredIndex(item.index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                 />
               );
@@ -172,7 +195,7 @@ export default function PieChart({ statusCounts = {}, total = 0 }) {
             ) : (
               <>
                 <span className="text-3xl font-black text-[#26332E] tracking-tight font-serif group-hover:text-[#1D7A6F] transition-colors">
-                  {total}
+                  <CountUp target={total} duration={800} formatThousand={false} />
                 </span>
                 <span className="text-xs font-semibold text-[#5C6E66] group-hover:underline">
                   Total Anggota

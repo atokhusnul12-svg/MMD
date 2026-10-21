@@ -13,6 +13,7 @@ import {
   Sparkles,
   CheckCircle2,
 } from 'lucide-react';
+import CountUp from '@/components/motion/CountUp';
 
 export default function PortalWakaCards() {
   const shouldReduceMotion = useReducedMotion();
@@ -29,7 +30,9 @@ export default function PortalWakaCards() {
       href: '/waka-i',
       buttonText: 'Buka Halaman WAKA I',
       features: [
-        '1.098 Siswa Terdata (MI, MTs, MA)',
+        <span key="f1">
+          <CountUp target={1098} duration={1000} threshold={0.6} /> Siswa Terdata (MI, MTs, MA)
+        </span>,
         'Rekap Takziran 6 Bulan Hijriyah',
         'Filter Status Disiplin Santri',
       ],
@@ -134,24 +137,24 @@ export default function PortalWakaCards() {
           return (
             <motion.div
               key={item.id}
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
               whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.15 }}
+              viewport={{ once: true, amount: 0.1 }}
               transition={{
-                duration: 0.45,
+                duration: 0.5,
                 delay: idx * 0.08,
-                ease: [0.25, 0.1, 0.25, 1.0],
+                ease: 'easeOut',
               }}
               whileHover={
                 shouldReduceMotion
                   ? undefined
-                  : { y: -4, transition: { duration: 0.22, ease: 'easeOut' } }
+                  : { y: -4, transition: { duration: 0.25, ease: 'easeOut' } }
               }
               whileTap={shouldReduceMotion ? undefined : { scale: 0.99, y: -1 }}
-              className="group relative flex flex-col justify-between bg-white rounded-2xl border border-[#E2E8F0] p-5 shadow-xs hover:shadow-md hover:border-[#0A192F]/40 transition-all duration-300 overflow-hidden"
+              className="group relative flex flex-col justify-between bg-white rounded-2xl border border-[#E2E8F0] p-5 shadow-xs hover:shadow-md hover:border-[#1D7A6F]/50 transition-colors duration-250 overflow-hidden"
             >
-              {/* Garis Aksen Emas saat Hover */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#C5A059] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              {/* Garis Aksen Hijau Tosca saat Hover */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#1D7A6F] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-250" />
 
               <div className="space-y-3.5">
                 {/* Bagian Atas: Badge & Ikon */}
@@ -161,14 +164,14 @@ export default function PortalWakaCards() {
                   >
                     {item.badge}
                   </span>
-                  <div className="w-9 h-9 rounded-xl bg-[#F0F4FA] group-hover:bg-[#0A192F]/5 border border-[#E2E8F0] group-hover:border-[#0A192F]/30 flex items-center justify-center text-[#0A192F] transition-all duration-300 shadow-2xs shrink-0">
-                    <Icon className="w-4 h-4 transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-0.5" />
+                  <div className="w-9 h-9 rounded-xl bg-[#F0F4FA] group-hover:bg-[#1D7A6F]/10 border border-[#E2E8F0] group-hover:border-[#1D7A6F]/30 flex items-center justify-center text-[#1D7A6F] transition-colors duration-250 shadow-2xs shrink-0">
+                    <Icon className="w-4 h-4 transition-transform duration-250 group-hover:scale-105" />
                   </div>
                 </div>
 
                 {/* Judul & Subtitle */}
                 <div>
-                  <h3 className="text-lg sm:text-xl font-black font-serif text-[#26332E] group-hover:text-[#0A192F] transition-colors tracking-tight">
+                  <h3 className="text-lg sm:text-xl font-black font-serif text-[#26332E] group-hover:text-[#1D7A6F] transition-colors tracking-tight">
                     {item.title}
                   </h3>
                   <div className="text-[11px] font-semibold text-[#8C6D23] mt-0.5 line-clamp-1">
@@ -196,10 +199,10 @@ export default function PortalWakaCards() {
               <div className="pt-4 mt-2">
                 <Link
                   href={item.href}
-                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#F0F4FA] group-hover:bg-[#0A192F] text-[#0A192F] group-hover:text-white border border-[#E2E8F0] group-hover:border-[#0A192F] text-xs font-bold tracking-wide transition-all duration-200 shadow-2xs group-hover:shadow-sm"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#F0F4FA] group-hover:bg-[#1D7A6F] text-[#1D7A6F] group-hover:text-white border border-[#E2E8F0] group-hover:border-[#1D7A6F] text-xs font-bold tracking-wide transition-all duration-250 shadow-2xs group-hover:shadow-sm"
                 >
                   <span>{item.buttonText}</span>
-                  <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform duration-250 group-hover:translate-x-[5px]" />
                 </Link>
               </div>
             </motion.div>

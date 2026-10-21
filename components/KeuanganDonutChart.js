@@ -66,10 +66,22 @@ export default function KeuanganDonutChart({
   isLoading = false,
   error = null,
   selectedBulan = 'TOTAL',
+  hoveredBulan = null,
   onSelectBulan = () => {},
+  onHoverBulan = () => {},
 }) {
   const shouldReduceMotion = useReducedMotion();
   const [hoveredIndex, setHoveredIndex] = useState(null);
+
+  const handleItemHover = (index, bulan) => {
+    setHoveredIndex(index);
+    if (onHoverBulan) onHoverBulan(bulan);
+  };
+
+  const handleItemLeave = () => {
+    setHoveredIndex(null);
+    if (onHoverBulan) onHoverBulan(null);
+  };
 
   // Filter hanya periode yang valid dan bukan baris TOTAL
   const validPeriods = useMemo(() => {
@@ -252,12 +264,12 @@ export default function KeuanganDonutChart({
 
             {/* Slices Tiap Periode */}
             {chartSlices.map((item) => {
-              const isHovered = hoveredIndex === item.index;
+              const isHovered = hoveredIndex === item.index || hoveredBulan === item.bulan;
               const isSelected = selectedBulan === item.bulan;
               const highlight = isHovered || isSelected;
 
               return (
-                <circle
+                <motion.circle
                   key={item.bulan}
                   cx={size / 2}
                   cy={size / 2}
@@ -266,15 +278,23 @@ export default function KeuanganDonutChart({
                   strokeWidth={highlight ? strokeWidth + 6 : strokeWidth}
                   strokeDasharray={item.strokeDasharray}
                   strokeDashoffset={item.strokeDashoffset}
+                  initial={shouldReduceMotion ? false : { strokeDasharray: `0 ${circumference}` }}
+                  whileInView={shouldReduceMotion ? undefined : { strokeDasharray: item.strokeDasharray }}
+                  viewport={{ once: true, margin: '-20px' }}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : { duration: 0.75, delay: item.index * 0.08, ease: [0.16, 1, 0.3, 1] }
+                  }
                   fill="transparent"
                   strokeLinecap="butt"
                   className="transition-all duration-300 cursor-pointer"
                   style={{
-                    opacity: hoveredIndex !== null && !highlight ? 0.45 : 1,
+                    opacity: (hoveredIndex !== null || hoveredBulan !== null) && !highlight ? 0.45 : 1,
                     filter: highlight ? 'drop-shadow(0px 3px 6px rgba(0,0,0,0.15))' : 'none',
                   }}
-                  onMouseEnter={() => setHoveredIndex(item.index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
+                  onMouseEnter={() => handleItemHover(item.index, item.bulan)}
+                  onMouseLeave={handleItemLeave}
                   onClick={() => onSelectBulan(item.bulan)}
                 />
               );
@@ -325,15 +345,15 @@ export default function KeuanganDonutChart({
 
           <div className="space-y-1.5">
             {chartData.map((item, index) => {
-              const isHovered = hoveredIndex === index;
+              const isHovered = hoveredIndex === index || hoveredBulan === item.bulan;
               const isSelected = selectedBulan === item.bulan;
               const highlight = isHovered || isSelected;
 
               return (
                 <div
                   key={item.bulan}
-                  onMouseEnter={() => setHoveredIndex(index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
+                  onMouseEnter={() => handleItemHover(index, item.bulan)}
+                  onMouseLeave={handleItemLeave}
                   onClick={() => onSelectBulan(item.bulan)}
                   className={`flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer border ${
                     highlight

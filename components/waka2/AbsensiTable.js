@@ -18,6 +18,7 @@ import {
   Sparkles,
   ChevronDown,
 } from 'lucide-react';
+import CountUp from '@/components/motion/CountUp';
 
 const STATUS_CONFIG = {
   H: { title: 'Hadir', bg: 'bg-[#E8F5F3]', text: 'text-[#1D7A6F]', border: 'border-[#C8E3DC]' },
@@ -202,21 +203,21 @@ export default function AbsensiTable({
         {/* Total Santri */}
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
-          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-20px' }}
           transition={
             shouldReduceMotion
               ? { duration: 0 }
               : { duration: 0.45, delay: 0 * 0.08, ease: [0.16, 1, 0.3, 1] }
           }
-          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileHover={shouldReduceMotion ? undefined : { y: -4, transition: { duration: 0.25, ease: 'easeOut' } }}
           className="p-4 rounded-xl bg-white border border-[#DCE5E0] shadow-xs hover:shadow-md transition-shadow duration-200"
         >
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#5C6E66]">
             Total Santri Terdata
           </span>
           <div className="text-2xl font-black text-[#26332E] mt-1 font-serif">
-            {displayStats.totalSantri}
+            <CountUp target={displayStats.totalSantri || 0} duration={1000} threshold={0.5} formatThousand={false} />
           </div>
           <p className="text-xs text-[#5C6E66] mt-0.5 truncate">{displayStats.labelPeriode}</p>
         </motion.div>
@@ -224,21 +225,27 @@ export default function AbsensiTable({
         {/* Persentase Kehadiran */}
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
-          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-20px' }}
           transition={
             shouldReduceMotion
               ? { duration: 0 }
               : { duration: 0.45, delay: 1 * 0.08, ease: [0.16, 1, 0.3, 1] }
           }
-          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileHover={shouldReduceMotion ? undefined : { y: -4, transition: { duration: 0.25, ease: 'easeOut' } }}
           className="p-4 rounded-xl bg-[#E8F5F3] border border-[#C8E3DC] shadow-xs hover:shadow-md transition-shadow duration-200"
         >
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#1D7A6F]">
             {selectedPeriod === 'ALL' ? 'Kehadiran Keseluruhan' : 'Kehadiran Periode'}
           </span>
           <div className="text-2xl font-black text-[#1D7A6F] mt-1 font-serif">
-            {displayStats.persenKehadiran}
+            <CountUp
+              target={parseFloat(String(displayStats.persenKehadiran || '0').replace('%', '')) || 0}
+              decimals={String(displayStats.persenKehadiran || '').includes('.') ? 1 : 0}
+              suffix="%"
+              duration={1000}
+              threshold={0.5}
+            />
           </div>
           <p className="text-xs text-[#1D7A6F]/80 mt-0.5">
             {displayStats.totalHadir} hadir dari total kesempatan
@@ -248,21 +255,26 @@ export default function AbsensiTable({
         {/* Akumulasi Sakit & Izin */}
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
-          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-20px' }}
           transition={
             shouldReduceMotion
               ? { duration: 0 }
               : { duration: 0.45, delay: 2 * 0.08, ease: [0.16, 1, 0.3, 1] }
           }
-          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileHover={shouldReduceMotion ? undefined : { y: -4, transition: { duration: 0.25, ease: 'easeOut' } }}
           className="p-4 rounded-xl bg-[#FAF3E6] border border-[#ECD8A5] shadow-xs hover:shadow-md transition-shadow duration-200"
         >
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#8C6D23]">
             Sakit &amp; Izin
           </span>
           <div className="text-2xl font-black text-[#8C6D23] mt-1 font-serif">
-            {displayStats.totalSakit + displayStats.totalIzin}
+            <CountUp
+              target={(displayStats.totalSakit || 0) + (displayStats.totalIzin || 0)}
+              duration={1000}
+              threshold={0.5}
+              formatThousand={false}
+            />
           </div>
           <p className="text-xs text-[#8C6D23]/80 mt-0.5">
             {displayStats.totalSakit} Sakit, {displayStats.totalIzin} Izin
@@ -272,21 +284,26 @@ export default function AbsensiTable({
         {/* Total Alpa */}
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
-          whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-20px' }}
           transition={
             shouldReduceMotion
               ? { duration: 0 }
               : { duration: 0.45, delay: 3 * 0.08, ease: [0.16, 1, 0.3, 1] }
           }
-          whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+          whileHover={shouldReduceMotion ? undefined : { y: -4, transition: { duration: 0.25, ease: 'easeOut' } }}
           className="p-4 rounded-xl bg-[#FAF0ED] border border-[#E8BCB0] shadow-xs hover:shadow-md transition-shadow duration-200"
         >
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#8A2F1B]">
             Alpa (Ghaib)
           </span>
           <div className="text-2xl font-black text-[#8A2F1B] mt-1 font-serif">
-            {displayStats.totalAlpa}
+            <CountUp
+              target={displayStats.totalAlpa || 0}
+              duration={1000}
+              threshold={0.5}
+              formatThousand={false}
+            />
           </div>
           <p className="text-xs text-[#8A2F1B]/80 mt-0.5">Tanpa keterangan sah</p>
         </motion.div>

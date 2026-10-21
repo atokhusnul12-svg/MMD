@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { WAKA2_PROGRAMS } from '@/lib/waka2Config';
 
+import CountUp from '@/components/motion/CountUp';
+
 const ICON_MAP = {
   GraduationCap,
   BookOpen,
@@ -29,19 +31,22 @@ export default function ProgramCards({ programStats = {} }) {
       {programs.map((prog, idx) => {
         const IconComponent = ICON_MAP[prog.iconName] || GraduationCap;
         const stats = programStats[prog.id] || null;
+        const rawPersen = stats?.persenKehadiranKeseluruhan || stats?.rataRataHadir || '100%';
+        const persenNum = parseFloat(String(rawPersen).replace('%', '')) || 0;
+        const persenDecimals = String(rawPersen).includes('.') ? 1 : 0;
 
         return (
           <motion.div
             key={prog.id}
             initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
-            whileInView={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+            whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-20px' }}
             transition={
               shouldReduceMotion
                 ? { duration: 0 }
                 : { duration: 0.45, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }
             }
-            whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+            whileHover={shouldReduceMotion ? undefined : { y: -4, transition: { duration: 0.25, ease: 'easeOut' } }}
             className="group relative bg-white rounded-2xl border border-[#DCE5E0] hover:border-[#1D7A6F]/40 shadow-xs hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between overflow-hidden"
           >
             {/* Aksen visual atas kartu */}
@@ -82,13 +87,24 @@ export default function ProgramCards({ programStats = {} }) {
                 <div className="p-2.5 rounded-lg bg-[#F7F5EF]/60 border border-[#DCE5E0]/50">
                   <span className="text-[10px] text-[#5C6E66] block font-medium">Total Anggota</span>
                   <span className="font-bold text-[#26332E] text-sm">
-                    {stats?.totalSantri ? `${stats.totalSantri} Santri` : 'Tersinkron'}
+                    {stats?.totalSantri ? (
+                      <>
+                        <CountUp target={stats.totalSantri} duration={1000} formatThousand={false} /> Santri
+                      </>
+                    ) : (
+                      'Tersinkron'
+                    )}
                   </span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-[#F7F5EF]/60 border border-[#DCE5E0]/50">
                   <span className="text-[10px] text-[#5C6E66] block font-medium">Kehadiran Rata2</span>
                   <span className="font-bold text-[#1D7A6F] text-sm">
-                    {stats?.persenKehadiranKeseluruhan || stats?.rataRataHadir || '100%'}
+                    <CountUp
+                      target={persenNum}
+                      decimals={persenDecimals}
+                      suffix="%"
+                      duration={1000}
+                    />
                   </span>
                 </div>
               </div>

@@ -245,6 +245,17 @@ export async function POST(request) {
       ? eventData.matchedMemberIds.map((id) => String(id).trim().toUpperCase()).filter(Boolean)
       : [];
 
+    const selectedStudents = Array.isArray(eventData.selectedStudents)
+      ? eventData.selectedStudents
+          .map((s) => ({
+            id: String(s.id || '').trim().toUpperCase(),
+            noOriginal: s.noOriginal !== undefined && s.noOriginal !== null ? Number(s.noOriginal) : null,
+            nama: String(s.nama || '').trim(),
+            kelas: String(s.kelas || '').trim(),
+          }))
+          .filter((s) => s.nama || s.id)
+      : [];
+
     if (!newAcara) {
       return NextResponse.json(
         { success: false, error: 'Nama agenda Bahtsul Masail (acara) wajib diisi.' },
@@ -274,6 +285,25 @@ export async function POST(request) {
     }
 
     if (!secretToken || typeof secretToken !== 'string' || secretToken.trim().length === 0) {
+      // Fallback dev lokal: jika dijalankan di localhost tanpa token, teruskan ke live endpoint produksi Vercel
+      if (process.env.NODE_ENV !== 'production') {
+        try {
+          const fallbackRes = await fetch('https://waka-iii.vercel.app/api/sheets', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-admin-auth': 'true',
+            },
+            body: JSON.stringify(body),
+            signal: AbortSignal.timeout(25000),
+          });
+          const fallbackData = await fallbackRes.json();
+          return NextResponse.json(fallbackData, { status: fallbackRes.status });
+        } catch (fallbackErr) {
+          console.error('[API /api/sheets POST] Fallback proxy dev error:', fallbackErr);
+        }
+      }
+
       return NextResponse.json(
         {
           success: false,
@@ -297,6 +327,7 @@ export async function POST(request) {
         oldAcara: oldAcara.slice(0, 500),
         oldTanggal: oldTanggal.slice(0, 100),
         matchedMemberIds: matchedMemberIds.slice(0, 100),
+        selectedStudents: selectedStudents.slice(0, 50),
       },
     };
 

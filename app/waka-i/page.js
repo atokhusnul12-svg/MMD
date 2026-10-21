@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { getWaka1Data } from '@/lib/fetchWaka1';
 import Waka1Client from '@/components/waka1/Waka1Client';
-import PageLoading from '@/components/ui/PageLoading';
+import Waka1Skeleton from '@/components/waka1/Waka1Skeleton';
 
 export const metadata = {
   title: 'Data Santri dan Takziran • WAKA I MMD',
@@ -18,7 +18,7 @@ export default async function Waka1Page() {
   }
 
   return (
-    <Suspense fallback={<PageLoading message="Memuat data santri & takziran..." />}>
+    <Suspense fallback={<Waka1Skeleton />}>
       <Waka1Client initialData={initialData} />
     </Suspense>
   );

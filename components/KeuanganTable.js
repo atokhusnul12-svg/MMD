@@ -5,6 +5,8 @@ import { formatRupiah, fetchDetailSheetData } from '@/lib/fetchCSV';
 import { DATA_LINKS } from '@/lib/dataLinks';
 import AdminButton from './AdminButton';
 import { PrintHeader, PrintSignatures } from './PrintHeaderFooter';
+import CountUp from '@/components/motion/CountUp';
+import { smartScrollTo } from '@/lib/scrollTo';
 import {
   Wallet,
   TrendingDown,
@@ -152,15 +154,13 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
           tabIndex={0}
           onClick={() => {
             handleTabChange('RAB');
-            const el = document.getElementById('section-tabel-keuangan');
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            smartScrollTo('section-tabel-keuangan');
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               handleTabChange('RAB');
-              const el = document.getElementById('section-tabel-keuangan');
-              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              smartScrollTo('section-tabel-keuangan');
             }
           }}
           className={`bg-white rounded-xl p-5 border shadow-xs transition-all duration-200 cursor-pointer select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
@@ -178,7 +178,7 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
             </div>
           </div>
           <div className="text-2xl font-bold font-serif text-[#26332E] mt-2">
-            {formatRupiah(total?.subsidi || 0)}
+            <CountUp prefix="Rp " target={total?.subsidi || 0} duration={1000} />
           </div>
           <p className="text-xs text-[#5C6D66] mt-1">
             {activeTab === 'RAB' ? 'Tab aktif (klik untuk refresh)' : 'Klik untuk rincian RAB ↓'}
@@ -191,15 +191,13 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
           tabIndex={0}
           onClick={() => {
             handleTabChange('LPJ');
-            const el = document.getElementById('section-tabel-keuangan');
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            smartScrollTo('section-tabel-keuangan');
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               handleTabChange('LPJ');
-              const el = document.getElementById('section-tabel-keuangan');
-              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              smartScrollTo('section-tabel-keuangan');
             }
           }}
           className={`bg-white rounded-xl p-5 border shadow-xs transition-all duration-200 cursor-pointer select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8A2F1B] ${
@@ -217,10 +215,10 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
             </div>
           </div>
           <div className="text-2xl font-bold font-serif text-[#8A2F1B] mt-2">
-            {formatRupiah(total?.pengeluaran || 0)}
+            <CountUp prefix="Rp " target={total?.pengeluaran || 0} duration={1000} />
           </div>
           <p className="text-xs text-[#5C6D66] mt-1">
-            Realisasi: <strong className="text-[#8A2F1B] font-semibold">{persenRealisasiTotal}%</strong> (Klik rincian LPJ ↓)
+            Realisasi: <strong className="text-[#8A2F1B] font-semibold"><CountUp target={parseFloat(persenRealisasiTotal) || 0} decimals={1} suffix="%" duration={800} /></strong> (Klik rincian LPJ ↓)
           </p>
         </div>
 
@@ -230,15 +228,13 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
           tabIndex={0}
           onClick={() => {
             handleTabChange('KOMPARASI');
-            const el = document.getElementById('section-tabel-keuangan');
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            smartScrollTo('section-tabel-keuangan');
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               handleTabChange('KOMPARASI');
-              const el = document.getElementById('section-tabel-keuangan');
-              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              smartScrollTo('section-tabel-keuangan');
             }
           }}
           className={`bg-white rounded-xl p-5 border-2 shadow-xs relative overflow-hidden transition-all duration-200 cursor-pointer select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F] ${
@@ -257,7 +253,7 @@ export default function KeuanganTable({ keuanganData, editUrl }) {
             </div>
           </div>
           <div className="text-2xl font-bold font-serif text-[#1D7A6F] mt-2">
-            {formatRupiah(total?.saldo || 0)}
+            <CountUp prefix="Rp " target={total?.saldo || 0} duration={1000} />
           </div>
           <p className="text-xs text-[#5C6E66] mt-1">Sisa dana disetor ke kas pusat (Klik komparasi ↓)</p>
         </div>

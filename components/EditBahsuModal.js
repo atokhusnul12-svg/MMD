@@ -62,6 +62,7 @@ export default function EditBahsuModal({
         setShowPicker(false);
 
         if (event) {
+          setShowPicker(false);
           setNo(event.no ? String(event.no) : '');
 
           // Pisahkan nama acara dan tempat jika terdapat tanda koma
@@ -107,7 +108,8 @@ export default function EditBahsuModal({
             setCustomKeterangan('');
           }
         } else {
-          // Mode Tambah Baru
+          // Mode Tambah Baru: buka daftar santri secara langsung agar mudah dipilih
+          setShowPicker(true);
           setNo(suggestedNo ? String(suggestedNo) : '');
           setNamaAcara('');
           setLokasi('');
@@ -235,6 +237,29 @@ export default function EditBahsuModal({
     setDelegasi(newDelegasi);
   };
 
+  // Hapus santri dari daftar delegasi dan rapikan penomoran
+  const handleRemoveMemberFromDelegasi = (member) => {
+    const lines = delegasi
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const filtered = lines.filter((l) => {
+      const c = cleanMemberName(l);
+      return c !== cleanMemberName(member.nama);
+    });
+
+    let counter = 1;
+    const renumbered = filtered.map((l) => {
+      if (/^\d+[\.\)]\s*/.test(l)) {
+        return l.replace(/^\d+[\.\)]\s*/, `${counter++}. `);
+      }
+      return l;
+    });
+
+    setDelegasi(renumbered.join('\n'));
+  };
+
   // Tambahkan Komisi ke delegasi
   const handleAddKomisi = (komisiName) => {
     const lines = delegasi
@@ -275,8 +300,14 @@ export default function EditBahsuModal({
       setErrorMsg('');
       setSuccessMsg('');
 
-      // Kumpulkan ID anggota yang cocok untuk sinkronisasi stabil
-      const matchedMemberIds = parsedDelegates.matched.map((m) => m.anggota.id);
+      // Kumpulkan identitas lengkap dan terverifikasi dari santri yang dipilih
+      const selectedStudents = parsedDelegates.matched.map((m) => ({
+        id: m.anggota.id,
+        noOriginal: m.anggota.noOriginal,
+        nama: m.anggota.nama,
+        kelas: m.anggota.kelas,
+      }));
+      const matchedMemberIds = selectedStudents.map((s) => s.id);
 
       const payload = {
         action: 'syncBahsuEvent',
@@ -288,6 +319,7 @@ export default function EditBahsuModal({
           newTanggal: trimmedTanggal,
           delegasi: delegasi.trim(),
           keterangan: finalKeterangan,
+          selectedStudents,
           matchedMemberIds,
           oldAcara: event ? (event.acara || '').trim() : '',
           oldTanggal: event ? (event.tanggal || '').trim() : '',
@@ -616,7 +648,7 @@ export default function EditBahsuModal({
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-bold text-[#5C6E66] uppercase tracking-wider">
-                Daftar Delegasi Santri (Baris demi Baris)
+                Pilih Siswa / Delegasi Santri LBM <span className="text-red-500">*</span>
               </label>
               <div className="flex items-center gap-2">
                 <button
@@ -626,7 +658,7 @@ export default function EditBahsuModal({
                   className="inline-flex items-center gap-1 text-xs font-semibold text-[#1D7A6F] hover:underline cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>{showPicker ? 'Tutup Pilihan Santri' : 'Pilih dari Anggota LBM'}</span>
+                  <span>{showPicker ? 'Tutup Daftar Santri' : 'Buka Daftar Santri LBM'}</span>
                 </button>
               </div>
             </div>
@@ -636,7 +668,7 @@ export default function EditBahsuModal({
               <div className="mb-3 p-3 rounded-xl bg-[#F7F5EF] border border-[#DCE5E0] space-y-2 animate-in fade-in duration-150">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-[#1D7A6F] uppercase tracking-wider">
-                    Pilih Santri Anggota LBM
+                    Daftar Santri Anggota LBM ({anggotaList.length} Santri)
                   </span>
                   <div className="flex items-center gap-1">
                     <button
@@ -662,7 +694,7 @@ export default function EditBahsuModal({
                     type="text"
                     value={pickerSearch}
                     onChange={(e) => setPickerSearch(e.target.value)}
-                    placeholder="Ketik nama santri / kelas / ID untuk menyaring..."
+                    placeholder="Cari nama santri / kelas / ID untuk memilih..."
                     className="w-full text-xs text-[#26332E] focus:outline-hidden"
                   />
                   {pickerSearch && (
@@ -676,26 +708,47 @@ export default function EditBahsuModal({
                   )}
                 </div>
 
-                <div className="max-h-40 overflow-y-auto space-y-1 divide-y divide-[#DCE5E0]/40">
+                <div className="max-h-44 overflow-y-auto space-y-1 divide-y divide-[#DCE5E0]/40">
                   {availableMembers.length > 0 ? (
-                    availableMembers.map((a) => (
-                      <div
-                        key={a.id}
-                        onClick={() => handleAddMemberToDelegasi(a)}
-                        className="pt-1.5 first:pt-0 flex items-center justify-between px-2 py-1 hover:bg-white rounded cursor-pointer text-xs transition-colors"
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="font-mono text-[10px] text-[#1D7A6F] font-bold shrink-0">
-                            {a.id}
-                          </span>
-                          <span className="text-[#26332E] font-medium truncate">{a.nama}</span>
-                          <span className="text-[10px] text-[#5C6E66] shrink-0">({a.kelas})</span>
+                    availableMembers.map((a) => {
+                      const isSelected = parsedDelegates.matched.some((m) => m.anggota.id === a.id);
+                      return (
+                        <div
+                          key={a.id}
+                          className={`pt-1.5 first:pt-0 flex items-center justify-between px-2 py-1.5 rounded text-xs transition-colors ${
+                            isSelected ? 'bg-[#E8F5F3]/60' : 'hover:bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-mono text-[10px] text-[#1D7A6F] font-bold shrink-0 bg-white px-1 py-0.5 rounded border border-[#C8E3DC]">
+                              {a.id}
+                            </span>
+                            <span className="text-[#26332E] font-medium truncate">{a.nama}</span>
+                            <span className="text-[10px] text-[#5C6E66] shrink-0">({a.kelas})</span>
+                          </div>
+                          {isSelected ? (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveMemberFromDelegasi(a)}
+                              className="text-[11px] text-[#8A2F1B] font-semibold hover:underline cursor-pointer shrink-0 ml-2 flex items-center gap-1"
+                              title="Hapus dari daftar delegasi"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 text-[#1D7A6F]" />
+                              <span>Terpilih (✕)</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleAddMemberToDelegasi(a)}
+                              className="text-[11px] text-[#1D7A6F] font-bold hover:underline cursor-pointer shrink-0 ml-2"
+                              title="Tambahkan ke delegasi"
+                            >
+                              + Pilih
+                            </button>
+                          )}
                         </div>
-                        <span className="text-[11px] text-[#1D7A6F] font-bold shrink-0 ml-2">
-                          + Tambah
-                        </span>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="p-3 text-center text-[11px] text-[#5C6E66]">
                       Santri tidak ditemukan dengan kata kunci tersebut.
@@ -705,8 +758,51 @@ export default function EditBahsuModal({
               </div>
             )}
 
+            {/* Tampilan Chips Santri Terpilih */}
+            {parsedDelegates.matched.length > 0 && (
+              <div className="space-y-1.5 mb-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-[#1D7A6F] uppercase tracking-wider">
+                    Santri Terpilih ({parsedDelegates.matched.length} Siswa):
+                  </span>
+                  <span className="text-[10px] text-[#5C6E66]">
+                    Klik ✕ untuk menghapus dari delegasi
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-[#F7F5EF] rounded-xl border border-[#DCE5E0]">
+                  {parsedDelegates.matched.map((m) => (
+                    <span
+                      key={m.anggota.id}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-[#C8E3DC] text-xs text-[#26332E] shadow-2xs"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#1D7A6F] shrink-0" />
+                      <span className="font-mono text-[10px] font-bold text-[#1D7A6F] bg-[#E8F5F3] px-1 py-0.5 rounded">
+                        {m.anggota.id}
+                      </span>
+                      <span className="font-semibold truncate max-w-[150px] sm:max-w-[200px]">
+                        {m.anggota.nama}
+                      </span>
+                      <span className="text-[10px] text-[#5C6E66] shrink-0">({m.anggota.kelas})</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveMemberFromDelegasi(m.anggota)}
+                        disabled={isSubmitting}
+                        className="p-0.5 rounded-full hover:bg-[#FAF0ED] text-[#5C6E66] hover:text-[#8A2F1B] cursor-pointer ml-1 transition-colors"
+                        title={`Hapus ${m.anggota.nama} dari daftar`}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <label className="block text-[11px] font-bold text-[#5C6E66] uppercase tracking-wider mb-1">
+              Teks Delegasi Lengkap (Disimpan ke DAFTAR PEMBERANGKATAN BAHSU)
+            </label>
             <textarea
-              rows={4}
+              rows={3}
               value={delegasi}
               onChange={(e) => setDelegasi(e.target.value)}
               placeholder="Contoh:&#10;1. Bpk. Lukman Julianto&#10;2. Abdul Hakim Ibnu Asyhari&#10;3. Muhammad Aufilana Zulfa Hasan"
@@ -714,7 +810,7 @@ export default function EditBahsuModal({
               className="w-full px-3 py-2 rounded-lg border border-[#DCE5E0] bg-white text-xs font-mono text-[#26332E] focus:outline-hidden focus:ring-2 focus:ring-[#1D7A6F]/20 focus:border-[#1D7A6F] leading-relaxed"
             />
             <span className="text-[10px] text-[#5C6E66] mt-0.5 block">
-              Gunakan satu baris untuk setiap nama delegasi. Nomor urut akan otomatis disesuaikan.
+              Nama pembina, alumni, atau tamu dapat ditambahkan pada teks di atas. Hanya siswa anggota LBM yang akan disinkronkan ke sheet PERKEMBANGAN.
             </span>
           </div>
 
@@ -722,43 +818,39 @@ export default function EditBahsuModal({
           <div className="p-3.5 rounded-xl bg-[#F7F5EF] border border-[#DCE5E0] space-y-2 text-xs">
             <div className="flex items-center gap-1.5 font-bold text-[#1D7A6F]">
               <Sparkles className="w-4 h-4 text-[#C6A66B]" />
-              <span>Pratinjau Sinkronisasi Riwayat ke Sheet PERKEMBANGAN:</span>
+              <span>Pratinjau Sinkronisasi Riwayat ke Sheet PERKEMBANGAN (Kolom J):</span>
             </div>
 
             {keterangan === 'IZIN' ? (
-              <p className="text-[11px] text-[#8A2F1B] font-medium">
-                ℹ️ Status Izin / Batal: Riwayat kehadiran tidak akan ditambahkan ke kolom BAHTSU YANG DIDATANGI santri.
+              <p className="text-[11px] text-[#8A2F1B] font-medium leading-relaxed">
+                ℹ️ Status Izin / Batal: Riwayat kehadiran tidak akan ditambahkan ke kolom BAHTSU YANG DIDATANGI siswa.
               </p>
             ) : parsedDelegates.matched.length > 0 ? (
               <div className="space-y-1.5">
-                <p className="text-[11px] text-[#5C6E66]">
-                  Kolom <span className="font-bold text-[#26332E]">BAHTSU YANG DIDATANGI</span> pada {parsedDelegates.matched.length} santri berikut akan otomatis ditambahkan riwayat acara ini:
+                <p className="text-[11px] text-[#5C6E66] leading-relaxed">
+                  Kolom <span className="font-bold text-[#26332E]">J (BAHTSU YANG DIDATANGI)</span> pada {parsedDelegates.matched.length} baris siswa berikut akan otomatis ditambahkan riwayat agenda ini:
                 </p>
-                <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pt-0.5">
-                  {parsedDelegates.matched.map((m) => (
-                    <span
-                      key={m.anggota.id}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white border border-[#C8E3DC] text-[11px] font-medium text-[#1D7A6F] shadow-2xs"
-                      title={`${m.anggota.nama} • ${m.anggota.kelas}`}
-                    >
-                      <CheckCircle2 className="w-3 h-3 text-[#1D7A6F] shrink-0" />
-                      <span className="font-mono text-[10px]">{m.anggota.id}</span>
-                      <span className="truncate max-w-[140px] sm:max-w-[200px]">{m.anggota.nama}</span>
-                    </span>
-                  ))}
+                <div className="p-2 rounded-lg bg-white border border-[#C8E3DC] text-[11px] font-mono text-[#1D7A6F] space-y-1">
+                  <div>
+                    <span className="text-[#5C6E66] font-sans">Data yang ditambahkan ke Kolom J:</span>{' '}
+                    <span className="font-bold text-[#26332E]">{finalAcaraCombined || '(Nama Acara)'} {tanggal || '(Tanggal)'}</span>
+                  </div>
+                  <div className="text-[10px] text-[#5C6E66] font-sans">
+                    ✓ Catatan lama di Kolom J dipertahankan dan penulisan ganda dicegah otomatis.
+                  </div>
                 </div>
               </div>
             ) : (
-              <p className="text-[11px] text-[#5C6E66] italic">
-                Belum ada nama santri anggota LBM yang terdeteksi dari daftar delegasi di atas.
+              <p className="text-[11px] text-[#8A2F1B] font-medium leading-relaxed">
+                ⚠️ Belum ada santri anggota LBM yang dipilih. Silakan pilih minimal 1 nama santri pada daftar di atas agar data kegiatan tersinkronkan ke Kolom J sheet PERKEMBANGAN.
               </p>
             )}
 
             {parsedDelegates.nonMatched.length > 0 && (
               <div className="pt-1 text-[11px] text-[#5C6E66] flex items-start gap-1">
-                <Info className="w-3 h-3 shrink-0 mt-0.5 text-[#C6A66B]" />
+                <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#C6A66B]" />
                 <span>
-                  {parsedDelegates.nonMatched.length} nama pembina / alumni tetap tercatat di sheet DAFTAR PEMBERANGKATAN BAHSU tanpa membuat baris santri fiktif di PERKEMBANGAN.
+                  {parsedDelegates.nonMatched.length} nama pembina / alumni tercatat di sheet DAFTAR PEMBERANGKATAN BAHSU tanpa mengubah baris di sheet PERKEMBANGAN.
                 </span>
               </div>
             )}
