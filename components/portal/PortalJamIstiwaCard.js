@@ -59,54 +59,51 @@ export default function PortalJamIstiwaCard() {
   const [dayOffset, setDayOffset] = useState(0);
   const [showWibDetails, setShowWibDetails] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [tafawutHeight, setTafawutHeight] = useState(0);
-  const tafawutRef = useRef(null);
+  const [leftColHeight, setLeftColHeight] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const leftColRef = useRef(null);
   const activePrayerRef = useRef(null);
 
-  // Ukur tinggi aktual kartu Tafawut secara dinamis menggunakan ResizeObserver
+  // Ukur tinggi aktual area kolom kiri dashboard secara dinamis menggunakan ResizeObserver
   useEffect(() => {
-    if (!tafawutRef.current) return;
-    const el = tafawutRef.current;
-
-    const updateHeight = () => {
-      const h = el.offsetHeight || el.getBoundingClientRect().height;
-      if (h > 0) {
-        setTafawutHeight(Math.round(h));
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+      if (leftColRef.current) {
+        const h = leftColRef.current.offsetHeight || leftColRef.current.getBoundingClientRect().height;
+        if (h > 0) {
+          setLeftColHeight(Math.round(h));
+        }
       }
     };
 
-    updateHeight();
+    handleResize();
 
     let ro = null;
-    if (typeof ResizeObserver !== 'undefined') {
+    if (typeof ResizeObserver !== 'undefined' && leftColRef.current) {
       ro = new ResizeObserver(() => {
-        updateHeight();
+        handleResize();
       });
-      ro.observe(el);
+      ro.observe(leftColRef.current);
     }
 
-    el.addEventListener('transitionend', updateHeight);
-    window.addEventListener('resize', updateHeight);
-
+    window.addEventListener('resize', handleResize);
     return () => {
       if (ro) ro.disconnect();
-      el.removeEventListener('transitionend', updateHeight);
-      window.removeEventListener('resize', updateHeight);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
-  // Hitung batas tinggi panel jadwal sholat saat dibuka:
-  // - Bila kartu Tafawut dibuka & ukurannya membesar (misal 180-240px+), panel jadwal dapat menyesuaikan.
-  // - Bila kartu Tafawut tertutup (~44px), panel jadwal saat dibuka TIDAK BOLEH ikut gepeng ke 44px.
-  //   Gunakan batas proporsional (225px) agar header tanggal, daftar waktu sholat yang bisa di-scroll,
-  //   dan footer tetap tampil utuh & serasi dengan kolom kiri.
-  const openPanelHeight = useMemo(() => {
-    const baseHeight = 225;
-    if (!tafawutHeight || tafawutHeight <= baseHeight) {
-      return baseHeight;
+  // Batas tinggi dinamis yang mengikuti area konten dashboard yang tersedia:
+  // - Pada desktop (>= 1024px): Presisi mengikuti tinggi aktual kolom kiri hero (~225px s/d ~360px saat Tafawut dibuka),
+  //   sehingga panel jadwal saat dibuka TIDAK PERNAH memanjangkan container atau menimbulkan scroll halaman.
+  // - Pada mobile (< 1024px): Dibatasi 280px dengan scroll internal vertikal.
+  const dynamicPanelHeight = useMemo(() => {
+    if (!isDesktop) {
+      return 280;
     }
-    return Math.min(tafawutHeight, 320);
-  }, [tafawutHeight]);
+    const h = leftColHeight || 230;
+    return Math.max(h, 220);
+  }, [isDesktop, leftColHeight]);
 
   // Otomatis scroll ke sholat yang sedang aktif saat panel dibuka
   useEffect(() => {
@@ -317,7 +314,7 @@ export default function PortalJamIstiwaCard() {
         {/* ============================================================== */}
         {/* KOLOM KIRI: JAM ISTIWA' UTAMA (WIS) & INFORMASI LOKASI        */}
         {/* ============================================================== */}
-        <div className="flex-1 min-w-0 space-y-3 sm:space-y-3.5">
+        <div ref={leftColRef} className="flex-1 min-w-0 space-y-3 sm:space-y-3.5">
           {/* 1. Header Badges: Jam Istiwa' (WIS), status real-time, dan lokasi */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FAF6EF]/15 backdrop-blur-md text-[10px] sm:text-[11px] font-bold text-[#ECD8A5] border border-[#ECD8A5]/30">
@@ -382,7 +379,7 @@ export default function PortalJamIstiwaCard() {
           </div>
 
           {/* 4. Kartu Waktu Istiwa' (WIS) Tafawut (Tepat setelah informasi utama) */}
-          <div ref={tafawutRef} className="max-w-lg">
+          <div className="max-w-lg">
             <Collapsible
               title="Waktu Istiwa' (WIS) Tafawut"
               icon={Compass}
@@ -409,7 +406,7 @@ export default function PortalJamIstiwaCard() {
               onClick={() => setIsExpanded(true)}
               aria-expanded={false}
               aria-label="Buka seluruh jadwal sholat"
-              className="w-full text-left p-3 sm:p-3.5 rounded-2xl bg-black/15 hover:bg-black/25 backdrop-blur-sm border border-white/15 shadow-inner transition-all duration-200 cursor-pointer select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#ECD8A5]"
+              className="w-full text-left p-3 sm:p-3.5 rounded-2xl bg-black/20 hover:bg-black/30 backdrop-blur-sm border border-white/15 shadow-inner transition-all duration-200 cursor-pointer select-none group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#ECD8A5]"
               style={{ minHeight: '74px' }}
             >
               {/* Baris Atas: Label & Tombol Buka */}
@@ -419,9 +416,7 @@ export default function PortalJamIstiwaCard() {
                     <Sun className="w-3 h-3" />
                   </div>
                   <span className="text-[11px] font-bold text-[#ECD8A5] uppercase tracking-wider truncate">
-                    {dayOffset === 0
-                      ? 'Jadwal Sholat'
-                      : `Jadwal ${dayOffset === 1 ? 'Besok' : dayOffset === -1 ? 'Kemarin' : `${selectedDateInfo.tanggal} ${selectedDateInfo.namaBulan}`}`}
+                    JADWAL SHOLAT
                   </span>
                   <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-white/10 text-white/90 shrink-0">
                     {dayOffset === 0
@@ -440,7 +435,7 @@ export default function PortalJamIstiwaCard() {
                 </div>
               </div>
 
-              {/* Baris Bawah: Sholat Aktif, Countdown, Jam WIS */}
+              {/* Baris Bawah: Sholat Aktif, Countdown, Jam WIS & WIB Pembanding */}
               <div className="flex items-baseline justify-between gap-2 pt-2">
                 <div className="flex items-baseline gap-2 min-w-0">
                   <span className="text-[15px] sm:text-[16px] font-bold text-white tracking-wide truncate">
@@ -451,7 +446,12 @@ export default function PortalJamIstiwaCard() {
                   </span>
                 </div>
 
-                <div className="flex items-baseline gap-1 shrink-0 text-right font-mono tabular-nums">
+                <div className="flex items-baseline gap-1.5 shrink-0 text-right font-mono tabular-nums">
+                  {currentFocusPrayer.wib && (
+                    <span className="text-[10px] sm:text-[11px] text-white/50 font-normal">
+                      {currentFocusPrayer.wib} WIB
+                    </span>
+                  )}
                   <span
                     suppressHydrationWarning
                     className="text-[15px] sm:text-[16px] font-black text-[#ECD8A5]"
@@ -462,31 +462,27 @@ export default function PortalJamIstiwaCard() {
               </div>
             </button>
           ) : (
-            /* SAAT DIBUKA: PANEL DENGAN TINGGI PROPORSIONAL & SEIMBANG DENGAN KOLOM KIRI */
+            /* SAAT DIBUKA: PANEL DENGAN TINGGI DINAMIS MENGIKUTI AREA KONTEN DASHBOARD */
             <div
-              className="w-full rounded-2xl bg-black/20 backdrop-blur-sm border border-white/15 p-2.5 sm:p-3 flex flex-col overflow-hidden transition-all duration-200 shadow-inner"
+              className="w-full rounded-2xl bg-black/25 backdrop-blur-md border border-white/15 p-2.5 sm:p-3 flex flex-col overflow-hidden transition-all duration-200 shadow-inner"
               style={{
-                height: `${openPanelHeight}px`,
-                maxHeight: `${openPanelHeight}px`,
+                height: `${dynamicPanelHeight}px`,
+                maxHeight: `${dynamicPanelHeight}px`,
               }}
             >
-              {/* 1. Header Tanggal Ringkas (Tetap Terlihat, Fixed / shrink-0) */}
+              {/* 1. Header Panel: JADWAL SHOLAT, Tanggal Aktif, Navigasi & Tutup (shrink-0) */}
               <div className="shrink-0 pb-1.5 mb-1 border-b border-white/10 space-y-1">
-                {/* Baris 1: Panah Kiri, Label Tanggal Aktif, Panah Kanan, & Tombol Tutup */}
+                {/* Baris 1: Judul JADWAL SHOLAT, Tanggal Aktif, Navigasi Tanggal & Tombol Tutup */}
                 <div className="flex items-center justify-between gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setDayOffset((prev) => prev - 1)}
-                    aria-label="Tanggal sebelumnya"
-                    title="Lihat hari sebelumnya"
-                    className="p-1 rounded-md bg-white/10 hover:bg-white/20 active:scale-95 text-[#ECD8A5] hover:text-white transition-all cursor-pointer shrink-0"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                  </button>
-
-                  <div className="text-center min-w-0 px-1 truncate flex items-center justify-center gap-1.5">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="w-4 h-4 rounded-md bg-[#ECD8A5]/20 flex items-center justify-center text-[#ECD8A5] shrink-0">
+                      <Sun className="w-2.5 h-2.5" />
+                    </div>
+                    <span className="text-[10px] sm:text-[11px] font-bold text-[#ECD8A5] uppercase tracking-wider truncate">
+                      JADWAL SHOLAT
+                    </span>
                     <span
-                      className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 rounded-full uppercase tracking-wider shrink-0 ${
+                      className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full uppercase tracking-wider shrink-0 ${
                         dayOffset === 0
                           ? 'bg-[#ECD8A5]/25 text-[#ECD8A5] border border-[#ECD8A5]/40'
                           : dayOffset === 1
@@ -504,18 +500,29 @@ export default function PortalJamIstiwaCard() {
                         ? 'Kemarin'
                         : `${dayOffset > 0 ? `+${dayOffset}` : dayOffset} hr`}
                     </span>
-                    <span className="text-xs sm:text-[13px] font-bold text-white tracking-wide truncate">
-                      {selectedDateInfo.namaHari}, {selectedDateInfo.tanggal} {selectedDateInfo.namaBulan}
-                    </span>
                   </div>
 
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       type="button"
+                      onClick={() => setDayOffset((prev) => prev - 1)}
+                      aria-label="Tanggal sebelumnya"
+                      title="Lihat hari sebelumnya"
+                      className="p-1 rounded-md bg-white/10 hover:bg-white/20 active:scale-95 text-[#ECD8A5] hover:text-white transition-all cursor-pointer shrink-0"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </button>
+
+                    <span className="text-[11px] sm:text-xs font-bold text-white px-0.5 truncate max-w-[110px]">
+                      {selectedDateInfo.tanggal} {selectedDateInfo.namaBulan.slice(0, 3)}
+                    </span>
+
+                    <button
+                      type="button"
                       onClick={() => setDayOffset((prev) => prev + 1)}
                       aria-label="Tanggal berikutnya"
                       title="Lihat hari berikutnya"
-                      className="p-1 rounded-md bg-white/10 hover:bg-white/20 active:scale-95 text-[#ECD8A5] hover:text-white transition-all cursor-pointer"
+                      className="p-1 rounded-md bg-white/10 hover:bg-white/20 active:scale-95 text-[#ECD8A5] hover:text-white transition-all cursor-pointer shrink-0"
                     >
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
@@ -525,7 +532,7 @@ export default function PortalJamIstiwaCard() {
                       onClick={() => setIsExpanded(false)}
                       aria-label="Tutup daftar jadwal"
                       title="Tutup daftar jadwal"
-                      className="p-1 rounded-md bg-white/10 hover:bg-white/20 active:scale-95 text-[#ECD8A5] hover:text-white transition-all cursor-pointer ml-0.5"
+                      className="p-1 rounded-md bg-white/10 hover:bg-white/20 active:scale-95 text-[#ECD8A5] hover:text-white transition-all cursor-pointer ml-0.5 shrink-0"
                     >
                       <ChevronUp className="w-3.5 h-3.5" />
                     </button>
@@ -585,7 +592,7 @@ export default function PortalJamIstiwaCard() {
                       ref={isHighlighted ? activePrayerRef : null}
                       className={`h-[34px] min-h-[34px] px-2.5 sm:px-3 rounded-lg flex items-center justify-between transition-all duration-150 shrink-0 ${
                         isHighlighted
-                          ? 'relative bg-[#ECD8A5]/25 text-[#ECD8A5] shadow-xs'
+                          ? 'relative bg-[#ECD8A5]/25 text-[#ECD8A5] shadow-xs border border-[#ECD8A5]/30'
                           : 'text-white/85 hover:text-white hover:bg-white/5'
                       }`}
                     >
@@ -598,32 +605,34 @@ export default function PortalJamIstiwaCard() {
                       <span
                         className={`text-[14px] sm:text-[15px] leading-none ${
                           isHighlighted
-                            ? 'font-semibold text-[#ECD8A5] pl-2'
+                            ? 'font-bold text-[#ECD8A5] pl-2'
                             : 'font-medium text-white/90'
                         }`}
                       >
                         {item.label}
                       </span>
 
-                      {/* Jam WIS Rata Kanan (13-14px, semibold/bold tabular) */}
-                      <div className="flex items-center gap-1.5 text-right font-mono tabular-nums leading-none">
+                      {/* Jam WIB Pembanding & Jam WIS Rata Kanan */}
+                      <div className="flex items-center gap-2 text-right font-mono tabular-nums leading-none">
+                        {rawWib && (
+                          <span
+                            className={`text-[10px] sm:text-[11px] font-normal ${
+                              isHighlighted ? 'text-[#ECD8A5]/80' : 'text-white/50'
+                            }`}
+                          >
+                            {rawWib} WIB
+                          </span>
+                        )}
                         <span
                           suppressHydrationWarning
                           className={`text-[13px] sm:text-[14px] ${
                             isHighlighted
                               ? 'font-bold text-[#ECD8A5]'
-                              : 'font-semibold text-white/85'
+                              : 'font-semibold text-white/95'
                           }`}
                         >
                           {wisTime}
                         </span>
-
-                        {/* Padanan Waktu WIB (Jika Detail Dibuka) */}
-                        {showWibDetails && rawWib && (
-                          <span className="text-[10px] text-white/60 font-sans">
-                            ({rawWib})
-                          </span>
-                        )}
                       </div>
                     </div>
                   );
@@ -649,21 +658,10 @@ export default function PortalJamIstiwaCard() {
                     <ChevronUp className="w-4 h-4" />
                   </button>
 
-                  {/* Countdown Target Sholat & Toggle WIB */}
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <span suppressHydrationWarning className="text-[11px] sm:text-xs font-semibold font-mono tabular-nums truncate">
-                      {countdownDisplay}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowWibDetails(!showWibDetails)}
-                      aria-label="Tampilkan detail padanan WIB"
-                      title={showWibDetails ? 'Sembunyikan jam WIB' : 'Tampilkan padanan jam WIB'}
-                      className="text-[9px] px-1 py-0.2 rounded bg-white/10 hover:bg-white/20 text-white/70 hover:text-[#ECD8A5] transition-colors cursor-pointer"
-                    >
-                      {showWibDetails ? 'WIS' : 'WIB'}
-                    </button>
-                  </div>
+                  {/* Countdown Target Sholat */}
+                  <span suppressHydrationWarning className="text-[11px] sm:text-xs font-semibold font-mono tabular-nums truncate">
+                    {countdownDisplay}
+                  </span>
                 </div>
               </div>
             </div>
