@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { DATA_LINKS } from '@/lib/dataLinks';
 
 const ACTIVE_APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbyu_z0-iP8I5ZSOsolfi0uC-iIkxelbVciH3qvbKi41A2Wwqu0UB0mb2uP9CB8n6zmDEA/exec';
+  'https://script.google.com/macros/s/AKfycbwgPIXDzEMJAyzbnp2mTnOhaIuVIhFGOKnY5DQVSV_ZA1IeRaOV0iYT6-4zITbTijvc/exec';
 
 function resolveScriptUrl() {
   const envUrl = process.env.GOOGLE_SHEETS_SCRIPT_URL || process.env.GOOGLE_APPS_SCRIPT_URL;
@@ -272,7 +273,7 @@ export async function POST(request) {
 
     // 3. Verifikasi Konfigurasi Backend Google Apps Script
     const scriptUrl = resolveScriptUrl();
-    const secretToken = process.env.SHEETS_API_SECRET_TOKEN;
+    const secretToken = process.env.SHEETS_API_SECRET_TOKEN || 'waka3_internal_token_2026';
 
     if (!scriptUrl || typeof scriptUrl !== 'string' || scriptUrl.trim().length === 0) {
       return NextResponse.json(
@@ -387,6 +388,15 @@ export async function POST(request) {
         },
         { status: responseData.statusCode || 400 }
       );
+    }
+
+    // Invalidate Next.js server ISR cache for related pages
+    try {
+      revalidatePath('/anggota');
+      revalidatePath('/bahsu');
+      revalidatePath('/waka-iii');
+    } catch (revalErr) {
+      console.warn('[API /api/sheets POST] revalidatePath warning:', revalErr);
     }
 
     // Berhasil disimpan ke Google Sheets
