@@ -365,6 +365,9 @@ export default function EditBahsuModal({
 
           const savedEventData = {
             ...(data.data?.event || {}),
+            targetId: event?.id,
+            targetNo: event?.no,
+            oldAcara: event ? (event.acara || '').trim() : '',
             no: no.trim(),
             acara: trimmedAcara,
             tanggal: trimmedTanggal,

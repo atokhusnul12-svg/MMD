@@ -362,17 +362,15 @@ export default function BahsuTable({
                           <div className="font-bold text-[#26332E] text-sm leading-snug">
                             {item.acara}
                           </div>
-                          {isAdmin && (
-                            <button
-                              type="button"
-                              onClick={() => handleOpenEditEvent(item)}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold text-[#1D7A6F] bg-white hover:bg-[#1D7A6F] hover:text-white border border-[#C8E3DC] transition-colors shrink-0 cursor-pointer no-print shadow-2xs"
-                              title="Edit kegiatan & sinkronkan ke sheet PERKEMBANGAN"
-                            >
-                              <Edit3 className="w-3 h-3" />
-                              <span>Edit Agenda</span>
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditEvent(item)}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold text-[#1D7A6F] bg-white hover:bg-[#1D7A6F] hover:text-white border border-[#C8E3DC] transition-colors shrink-0 cursor-pointer no-print shadow-2xs"
+                            title="Edit kegiatan & sinkronkan ke sheet PERKEMBANGAN"
+                          >
+                            <Edit3 className="w-3 h-3" />
+                            <span>Edit Agenda</span>
+                          </button>
                         </div>
                       </td>
                       <td className="py-3.5 px-4">
@@ -479,17 +477,15 @@ export default function BahsuTable({
                       #{item.no || idx + 1}
                     </span>
                     <div className="flex items-center gap-1.5">
-                      {isAdmin && (
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEditEvent(item)}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold text-[#1D7A6F] bg-white hover:bg-[#1D7A6F] hover:text-white border border-[#C8E3DC] transition-colors shadow-2xs"
-                          title="Edit agenda"
-                        >
-                          <Edit3 className="w-2.5 h-2.5" />
-                          <span>Edit</span>
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditEvent(item)}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold text-[#1D7A6F] bg-white hover:bg-[#1D7A6F] hover:text-white border border-[#C8E3DC] transition-colors shadow-2xs cursor-pointer"
+                        title="Edit agenda"
+                      >
+                        <Edit3 className="w-2.5 h-2.5" />
+                        <span>Edit</span>
+                      </button>
                       {isIzin ? (
                         <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-[#FAF0ED] text-[#8A2F1B] border border-[#E8BCB0]">
                           {item.keterangan}

@@ -164,7 +164,10 @@ export default function BahsuClient({ initialData, initialAnggotaList = [], serv
         if (!prevData) return prevData;
         const currentEvents = [...(prevData.events || [])];
         const existingIdx = currentEvents.findIndex(
-          (e) => (savedEvent.no && String(e.no) === String(savedEvent.no)) ||
+          (e) => (savedEvent.targetId !== undefined && e.id === savedEvent.targetId) ||
+                 (savedEvent.targetNo && String(e.no) === String(savedEvent.targetNo)) ||
+                 (savedEvent.no && String(e.no) === String(savedEvent.no)) ||
+                 (savedEvent.oldAcara && e.acara.toLowerCase() === savedEvent.oldAcara.toLowerCase()) ||
                  (e.acara.toLowerCase() === savedEvent.acara.toLowerCase() && (!savedEvent.tanggal || e.tanggal === savedEvent.tanggal))
         );
 
