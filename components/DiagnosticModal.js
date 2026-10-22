@@ -22,9 +22,7 @@ export default function DiagnosticModal({ isOpen, onClose }) {
     setResult(null);
     try {
       const res = await fetch('/api/sheets?action=diagnose', {
-        headers: {
-          'x-admin-auth': 'true',
-        },
+        credentials: 'same-origin',
       });
       const data = await res.json();
       setResult(data);

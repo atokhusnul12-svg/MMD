@@ -1,6 +1,21 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { DATA_LINKS } from '@/lib/dataLinks';
+import { verifyServerSession, validateSameOrigin } from '@/lib/serverAuth';
+
+/**
+ * Sanitasi string untuk mencegah Formula Injection di Google Sheets / Excel
+ * Jika nilai diawali karakter =, +, -, @, \t, atau \r, berikan prefix petik tunggal (')
+ * sehingga dievaluasi murni sebagai teks dan tidak dieksekusi sebagai formula.
+ */
+function sanitizeSpreadsheetCell(val) {
+  if (typeof val !== 'string') return val;
+  const trimmed = val.trim();
+  if (/^[=+\-@\t\r]/.test(trimmed)) {
+    return `'${trimmed}`;
+  }
+  return trimmed;
+}
 
 const ACTIVE_APPS_SCRIPT_URL =
   'https://script.google.com/macros/s/AKfycbwgPIXDzEMJAyzbnp2mTnOhaIuVIhFGOKnY5DQVSV_ZA1IeRaOV0iYT6-4zITbTijvc/exec';
@@ -30,11 +45,9 @@ export async function GET(request) {
 
     // Fitur Diagnostik & Pemeriksaan Koneksi Aman (Hanya untuk Admin)
     if (action === 'diagnose') {
-      const cookieSession = request.cookies?.get('waka3_admin_session')?.value;
-      const headerAuth = request.headers?.get('x-admin-auth');
-      const isAdmin = cookieSession === 'true' || headerAuth === 'true';
+      const session = verifyServerSession(request);
 
-      if (!isAdmin) {
+      if (!session || session.role !== 'admin') {
         return NextResponse.json(
           { success: false, error: 'Akses ditolak: Fitur diagnostik hanya dapat diakses oleh Administrator.' },
           { status: 403 }
@@ -191,22 +204,27 @@ export async function GET(request) {
  */
 export async function POST(request) {
   try {
-    // 1. Guard Hak Akses Administrator di Server
-    const cookieSession = request.cookies?.get('waka3_admin_session')?.value;
-    const headerAuth = request.headers?.get('x-admin-auth');
-    const isAdmin = cookieSession === 'true' || headerAuth === 'true';
+    // 1. Proteksi CSRF / Same-Origin
+    if (!validateSameOrigin(request)) {
+      return NextResponse.json(
+        { success: false, error: 'Akses ditolak: Permintaan lintas asal (Cross-Origin) tidak diizinkan.' },
+        { status: 403 }
+      );
+    }
 
-    if (!isAdmin) {
+    // 2. Guard Hak Akses Administrator di Server (Hanya Sesi Bertanda Tangan Kriptografis)
+    const session = verifyServerSession(request);
+    if (!session || session.role !== 'admin') {
       return NextResponse.json(
         {
           success: false,
-          error: 'Akses ditolak: Hanya Administrator yang berwenang memperbarui biodata santri ke Google Sheets.',
+          error: 'Akses ditolak: Hanya Administrator yang berwenang memperbarui data ke Google Sheets.',
         },
         { status: 403 }
       );
     }
 
-    // 2. Baca dan validasi format payload
+    // 3. Baca dan validasi format payload JSON
     let body;
     try {
       body = await request.json();
@@ -217,9 +235,9 @@ export async function POST(request) {
       );
     }
 
-    const { action, id, changes, event } = body || {};
+    const { action, event } = body || {};
 
-    // 1. Guard Aksi: Hanya 'syncBahsuEvent' yang diizinkan. Pengeditan biodata ditolak permanen.
+    // 4. Guard Aksi: Hanya 'syncBahsuEvent' yang diizinkan.
     if (action !== 'syncBahsuEvent' && !event) {
       return NextResponse.json(
         {
@@ -231,84 +249,79 @@ export async function POST(request) {
       );
     }
 
-    // 2. Validasi Input Payload Kegiatan Bahtsul Masail
+    // 5. Validasi & Sanitasi Input Payload (Cegah Formula Injection)
     const eventData = event || {};
-    const newAcara = String(eventData.newAcara || eventData.acara || '').trim();
-    const newTanggal = String(eventData.newTanggal || eventData.tanggal || '').trim();
-    const delegasi = String(eventData.delegasi || '').trim();
-    const keterangan = String(eventData.keterangan || 'SUDAH').trim();
-    const oldAcara = String(eventData.oldAcara || '').trim();
-    const oldTanggal = String(eventData.oldTanggal || '').trim();
+    const rawAcara = String(eventData.newAcara || eventData.acara || '').trim();
+    const rawTanggal = String(eventData.newTanggal || eventData.tanggal || '').trim();
+    const rawDelegasi = String(eventData.delegasi || '').trim();
+    const rawKeterangan = String(eventData.keterangan || 'SUDAH').trim();
+    const rawOldAcara = String(eventData.oldAcara || '').trim();
+    const rawOldTanggal = String(eventData.oldTanggal || '').trim();
     const mode = eventData.mode === 'create' ? 'create' : 'edit';
-    const rowNumber = Number(eventData.rowNumber) || null;
-    const no = eventData.no !== undefined && eventData.no !== null ? String(eventData.no).trim() : '';
-    const matchedMemberIds = Array.isArray(eventData.matchedMemberIds)
-      ? eventData.matchedMemberIds.map((id) => String(id).trim().toUpperCase()).filter(Boolean)
-      : [];
+    const rowNumber = Number.isInteger(Number(eventData.rowNumber)) ? Number(eventData.rowNumber) : null;
+    const rawNo = eventData.no !== undefined && eventData.no !== null ? String(eventData.no).trim() : '';
 
-    const selectedStudents = Array.isArray(eventData.selectedStudents)
-      ? eventData.selectedStudents
-          .map((s) => ({
-            id: String(s.id || '').trim().toUpperCase(),
-            noOriginal: s.noOriginal !== undefined && s.noOriginal !== null ? Number(s.noOriginal) : null,
-            nama: String(s.nama || '').trim(),
-            kelas: String(s.kelas || '').trim(),
-          }))
-          .filter((s) => s.nama || s.id)
-      : [];
-
-    if (!newAcara) {
+    if (!rawAcara) {
       return NextResponse.json(
         { success: false, error: 'Nama agenda Bahtsul Masail (acara) wajib diisi.' },
         { status: 400 }
       );
     }
 
-    if (!newTanggal) {
+    if (!rawTanggal) {
       return NextResponse.json(
         { success: false, error: 'Tanggal pelaksanaan kegiatan Bahtsul Masail wajib diisi.' },
         { status: 400 }
       );
     }
 
-    // 3. Verifikasi Konfigurasi Backend Google Apps Script
+    // Terapkan sanitasi sel anti formula injection
+    const newAcara = sanitizeSpreadsheetCell(rawAcara.slice(0, 500));
+    const newTanggal = sanitizeSpreadsheetCell(rawTanggal.slice(0, 100));
+    const delegasi = sanitizeSpreadsheetCell(rawDelegasi.slice(0, 3000));
+    const keterangan = sanitizeSpreadsheetCell(rawKeterangan.slice(0, 100));
+    const oldAcara = sanitizeSpreadsheetCell(rawOldAcara.slice(0, 500));
+    const oldTanggal = sanitizeSpreadsheetCell(rawOldTanggal.slice(0, 100));
+    const no = sanitizeSpreadsheetCell(rawNo.slice(0, 50));
+
+    const matchedMemberIds = Array.isArray(eventData.matchedMemberIds)
+      ? eventData.matchedMemberIds
+          .map((id) => sanitizeSpreadsheetCell(String(id).trim().toUpperCase()))
+          .filter(Boolean)
+          .slice(0, 100)
+      : [];
+
+    const selectedStudents = Array.isArray(eventData.selectedStudents)
+      ? eventData.selectedStudents
+          .map((s) => ({
+            id: sanitizeSpreadsheetCell(String(s.id || '').trim().toUpperCase()),
+            noOriginal: Number.isInteger(Number(s.noOriginal)) ? Number(s.noOriginal) : null,
+            nama: sanitizeSpreadsheetCell(String(s.nama || '').trim().slice(0, 200)),
+            kelas: sanitizeSpreadsheetCell(String(s.kelas || '').trim().slice(0, 100)),
+          }))
+          .filter((s) => s.nama || s.id)
+          .slice(0, 50)
+      : [];
+
+    // 6. Verifikasi Konfigurasi Backend Google Apps Script (Fail-Closed)
     const scriptUrl = resolveScriptUrl();
-    const secretToken = process.env.SHEETS_API_SECRET_TOKEN || 'waka3_internal_token_2026';
+    const secretToken = process.env.SHEETS_API_SECRET_TOKEN;
 
     if (!scriptUrl || typeof scriptUrl !== 'string' || scriptUrl.trim().length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Variabel lingkungan GOOGLE_SHEETS_SCRIPT_URL belum diatur di server Vercel / .env.local. Silakan lakukan deployment Google Apps Script terlebih dahulu.',
+          error: 'Variabel lingkungan GOOGLE_SHEETS_SCRIPT_URL belum diatur di server Vercel / .env.local.',
         },
         { status: 503 }
       );
     }
 
     if (!secretToken || typeof secretToken !== 'string' || secretToken.trim().length === 0) {
-      // Fallback dev lokal: jika dijalankan di localhost tanpa token, teruskan ke live endpoint produksi Vercel
-      if (process.env.NODE_ENV !== 'production') {
-        try {
-          const fallbackRes = await fetch('https://waka-iii.vercel.app/api/sheets', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-admin-auth': 'true',
-            },
-            body: JSON.stringify(body),
-            signal: AbortSignal.timeout(25000),
-          });
-          const fallbackData = await fallbackRes.json();
-          return NextResponse.json(fallbackData, { status: fallbackRes.status });
-        } catch (fallbackErr) {
-          console.error('[API /api/sheets POST] Fallback proxy dev error:', fallbackErr);
-        }
-      }
-
       return NextResponse.json(
         {
           success: false,
-          error: 'Variabel lingkungan SHEETS_API_SECRET_TOKEN belum diatur pada hosting website (Vercel / .env.local). Silakan tambahkan token rahasia server-to-server.',
+          error: 'Konfigurasi keamanan belum lengkap: SHEETS_API_SECRET_TOKEN belum diatur pada environment variable server.',
         },
         { status: 500 }
       );
@@ -316,19 +329,19 @@ export async function POST(request) {
 
     const appsScriptPayload = {
       action: 'syncBahsuEvent',
-      token: secretToken,
+      token: secretToken.trim(),
       event: {
         mode,
         rowNumber,
         no,
-        newAcara: newAcara.slice(0, 500),
-        newTanggal: newTanggal.slice(0, 100),
-        delegasi: delegasi.slice(0, 3000),
-        keterangan: keterangan.slice(0, 100),
-        oldAcara: oldAcara.slice(0, 500),
-        oldTanggal: oldTanggal.slice(0, 100),
-        matchedMemberIds: matchedMemberIds.slice(0, 100),
-        selectedStudents: selectedStudents.slice(0, 50),
+        newAcara,
+        newTanggal,
+        delegasi,
+        keterangan,
+        oldAcara,
+        oldTanggal,
+        matchedMemberIds,
+        selectedStudents,
       },
     };
 

@@ -78,12 +78,24 @@ const postAnon = await fetchRoute('/api/sheets', {
 assert.strictEqual(postAnon.status, 403, 'POST anonim harus ditolak 403');
 console.log('  ✓ [Security] POST anonim ke /api/sheets ditolak dengan status 403 Forbidden');
 
+// Dapatkan session token admin
+const loginRes = await fetchRoute('/api/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ username: 'MMD', password: 'WAKA3' }),
+});
+const rawSetCookie = Array.isArray(loginRes.headers['set-cookie'])
+  ? loginRes.headers['set-cookie'].join(';')
+  : String(loginRes.headers['set-cookie'] || '');
+const tokenMatch = rawSetCookie.match(/waka3_admin_session=([^;]+)/i);
+const sessionCookie = tokenMatch ? `waka3_admin_session=${tokenMatch[1]}` : '';
+
 // 2.3 POST dengan otorisasi admin tetapi mencoba mengubah biodata santri harus ditolak 403
 const postBiodata = await fetchRoute('/api/sheets', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'x-admin-auth': 'true',
+    Cookie: sessionCookie,
   },
   body: JSON.stringify({ action: 'updateSantri', id: '123' }),
 });
@@ -97,7 +109,7 @@ const postEmptyEvent = await fetchRoute('/api/sheets', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'x-admin-auth': 'true',
+    Cookie: sessionCookie,
   },
   body: JSON.stringify({
     action: 'syncBahsuEvent',

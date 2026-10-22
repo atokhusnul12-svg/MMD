@@ -330,8 +330,8 @@ export default function EditBahsuModal({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-auth': 'true',
         },
+        credentials: 'same-origin',
         body: JSON.stringify(payload),
       });
 

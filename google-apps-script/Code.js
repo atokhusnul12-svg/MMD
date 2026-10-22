@@ -81,10 +81,10 @@ function doGet(e) {
   var error = null;
 
   try {
-    var token = PropertiesService.getScriptProperties().getProperty("SHEETS_API_SECRET_TOKEN") || "waka3_internal_token_2026";
+    var token = PropertiesService.getScriptProperties().getProperty("SHEETS_API_SECRET_TOKEN");
     isTokenConfigured = Boolean(token && token.trim().length > 0);
   } catch (err) {
-    isTokenConfigured = true;
+    isTokenConfigured = false;
   }
 
   try {
@@ -141,11 +141,14 @@ function doPost(e) {
       return createJsonResponse(false, "Format JSON tidak valid: " + parseErr.message, 400);
     }
 
-    // Verifikasi Token Keamanan (Wajib dari Script Property atau Default Internal)
-    var configuredToken = PropertiesService.getScriptProperties().getProperty("SHEETS_API_SECRET_TOKEN") || "waka3_internal_token_2026";
+    // Verifikasi Token Keamanan (Wajib dari Script Property — Tidak Ada Fallback Statis)
+    var configuredToken = PropertiesService.getScriptProperties().getProperty("SHEETS_API_SECRET_TOKEN");
+    if (!configuredToken || typeof configuredToken !== "string" || configuredToken.trim().length === 0) {
+      return createJsonResponse(false, "Konfigurasi keamanan Google Apps Script belum lengkap: Script Property SHEETS_API_SECRET_TOKEN belum diatur.", 500);
+    }
 
     var providedToken = payload.token || (e.parameter && e.parameter.token);
-    if (!providedToken || typeof providedToken !== "string" || providedToken !== configuredToken) {
+    if (!providedToken || typeof providedToken !== "string" || providedToken.trim() !== configuredToken.trim()) {
       return createJsonResponse(false, "Otorisasi ditolak: Token autentikasi tidak valid atau tidak disertakan.", 401);
     }
 
@@ -156,7 +159,19 @@ function doPost(e) {
       return handleSyncBahsuEvent(ss, payload);
     }
 
-    return createJsonResponse(false, "Fitur pengeditan biodata santri dinonaktifkan. Data biodata santri pada tab PERKEMBANGAN bersifat tetap (read-only).", 403);
+    if (action === "getPushSubscriptions") {
+      return handleGetPushSubscriptions(ss);
+    }
+
+    if (action === "savePushSubscription") {
+      return handleSavePushSubscription(ss, payload.subscription);
+    }
+
+    if (action === "deletePushSubscription") {
+      return handleDeletePushSubscription(ss, payload.endpoint);
+    }
+
+    return createJsonResponse(false, "Aksi tidak dikenali atau dinonaktifkan.", 403);
 
   } catch (err) {
     return createJsonResponse(false, "Terjadi kesalahan sistem saat memproses permintaan: " + err.message, 500);
@@ -1137,3 +1152,99 @@ function createJsonResponse(success, message, statusCode, data) {
   return ContentService.createTextOutput(JSON.stringify(response))
     .setMimeType(ContentService.MimeType.JSON);
 }
+
+/**
+ * ==============================================================================
+ * MODUL PERSISTENSI WEB PUSH SUBSCRIPTIONS KE SPREADSHEET
+ * ==============================================================================
+ */
+
+function getOrCreateSubscriptionSheet(ss) {
+  var sheet = ss.getSheetByName("PUSH_SUBSCRIPTIONS");
+  if (!sheet) {
+    sheet = ss.insertSheet("PUSH_SUBSCRIPTIONS");
+    sheet.appendRow(["Endpoint", "p256dh", "auth", "UpdatedAt"]);
+    sheet.getRange(1, 1, 1, 4).setFontWeight("bold");
+  }
+  return sheet;
+}
+
+function handleGetPushSubscriptions(ss) {
+  var sheet = getOrCreateSubscriptionSheet(ss);
+  var values = sheet.getDataRange().getValues();
+  var subscriptions = [];
+
+  for (var i = 1; i < values.length; i++) {
+    var row = values[i];
+    var endpoint = row[0];
+    var p256dh = row[1];
+    var auth = row[2];
+    var updatedAt = row[3];
+
+    if (endpoint && p256dh && auth) {
+      subscriptions.push({
+        endpoint: String(endpoint),
+        keys: {
+          p256dh: String(p256dh),
+          auth: String(auth)
+        },
+        updatedAt: updatedAt ? String(updatedAt) : null
+      });
+    }
+  }
+
+  return ContentService.createTextOutput(
+    JSON.stringify({
+      success: true,
+      subscriptions: subscriptions,
+      count: subscriptions.length
+    })
+  ).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleSavePushSubscription(ss, sub) {
+  if (!sub || !sub.endpoint || !sub.keys) {
+    return createJsonResponse(false, "Objek subscription tidak valid.", 400);
+  }
+
+  var sheet = getOrCreateSubscriptionSheet(ss);
+  var values = sheet.getDataRange().getValues();
+  var targetRow = -1;
+
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][0]) === String(sub.endpoint)) {
+      targetRow = i + 1; // 1-indexed
+      break;
+    }
+  }
+
+  var nowStr = new Date().toISOString();
+  if (targetRow > 0) {
+    // Update data baris eksisting
+    sheet.getRange(targetRow, 2, 1, 3).setValues([[sub.keys.p256dh, sub.keys.auth, nowStr]]);
+  } else {
+    // Tambahkan baris baru
+    sheet.appendRow([sub.endpoint, sub.keys.p256dh, sub.keys.auth, nowStr]);
+  }
+
+  return createJsonResponse(true, "Subscription berhasil disimpan secara persisten.", 200);
+}
+
+function handleDeletePushSubscription(ss, endpoint) {
+  if (!endpoint) {
+    return createJsonResponse(false, "Endpoint tidak valid.", 400);
+  }
+
+  var sheet = getOrCreateSubscriptionSheet(ss);
+  var values = sheet.getDataRange().getValues();
+
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][0]) === String(endpoint)) {
+      sheet.deleteRow(i + 1);
+      return createJsonResponse(true, "Subscription berhasil dihapus.", 200);
+    }
+  }
+
+  return createJsonResponse(true, "Endpoint tidak ditemukan atau sudah terhapus.", 200);
+}
+

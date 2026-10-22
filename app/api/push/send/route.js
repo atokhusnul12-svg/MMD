@@ -2,44 +2,77 @@ import { NextResponse } from 'next/server';
 import webpush from 'web-push';
 import { VAPID_KEYS } from '@/lib/vapidKeys';
 import { getSubscriptions, deleteSubscription } from '@/lib/subscriptionStore';
+import { verifyServerSession, validateSameOrigin } from '@/lib/serverAuth';
 
 export async function POST(request) {
   try {
-    // 1. Guard hak akses: Hanya Admin yang diizinkan mengirim broadcast
-    const cookieSession = request.cookies?.get('waka3_admin_session')?.value;
-    const headerAuth = request.headers?.get('x-admin-auth');
-    const isAdmin = cookieSession === 'true' || headerAuth === 'true';
+    // 1. Proteksi CSRF / Same-Origin
+    if (!validateSameOrigin(request)) {
+      return NextResponse.json(
+        { success: false, error: 'Akses ditolak: Permintaan lintas asal (Cross-Origin) tidak diizinkan.' },
+        { status: 403 }
+      );
+    }
 
-    if (!isAdmin) {
+    // 2. Guard Hak Akses Administrator di Server (Hanya Sesi Bertanda Tangan Kriptografis)
+    const session = verifyServerSession(request);
+    if (!session || session.role !== 'admin') {
       return NextResponse.json(
         {
           success: false,
-          error: 'Hanya Admin yang dapat mengirim broadcast.',
+          error: 'Akses ditolak: Hanya Administrator yang berwenang mengirim broadcast notifikasi.',
         },
         { status: 403 }
       );
     }
 
-    const body = await request.json();
-    const { title, message, url, type, targetSubscription } = body;
-
-    if (!title || !message) {
+    // 3. Baca dan validasi payload JSON
+    let body;
+    try {
+      body = await request.json();
+    } catch {
       return NextResponse.json(
-        { success: false, error: 'Judul dan pesan notifikasi wajib diisi.' },
+        { success: false, error: 'Payload permintaan bukan JSON yang valid.' },
         { status: 400 }
       );
     }
 
-    // Setel kredensial VAPID
+    const { title, message, url, type, targetSubscription } = body || {};
+
+    if (!title || typeof title !== 'string' || title.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Judul notifikasi wajib diisi.' },
+        { status: 400 }
+      );
+    }
+
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Pesan notifikasi wajib diisi.' },
+        { status: 400 }
+      );
+    }
+
+    // 4. Verifikasi Kredensial VAPID
+    if (!VAPID_KEYS.publicKey || !VAPID_KEYS.privateKey) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Konfigurasi Web Push VAPID belum lengkap di server.',
+        },
+        { status: 500 }
+      );
+    }
+
     webpush.setVapidDetails(
       VAPID_KEYS.subject,
       VAPID_KEYS.publicKey,
       VAPID_KEYS.privateKey
     );
 
-    // Tentukan URL tujuan
-    let targetUrl = url || '/';
-    if (!targetUrl.startsWith('http')) {
+    // 5. Tentukan URL Tujuan yang Aman
+    let targetUrl = typeof url === 'string' && url.trim().length > 0 ? url.trim() : '/';
+    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
       const baseUrl = process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}`
         : 'https://waka-iii.vercel.app';
@@ -47,23 +80,23 @@ export async function POST(request) {
     }
 
     const payload = JSON.stringify({
-      title: title.trim(),
-      message: message.trim(),
+      title: title.trim().slice(0, 120),
+      message: message.trim().slice(0, 500),
       url: targetUrl,
-      type: type || 'general',
+      type: typeof type === 'string' ? type.slice(0, 50) : 'general',
       icon: 'https://waka-iii.vercel.app/icon.png',
       timestamp: Date.now(),
     });
 
-    // Target penerima: subscription spesifik atau seluruh subscriber
-    const recipients = targetSubscription ? [targetSubscription] : getSubscriptions();
+    // 6. Target Penerima: Subscription Tertentu atau Seluruh Subscriber
+    const recipients = targetSubscription ? [targetSubscription] : await getSubscriptions();
 
     if (recipients.length === 0) {
       return NextResponse.json({
         success: true,
         sent: 0,
         total: 0,
-        message: 'Belum ada perangkat yang mendaftar untuk menerima notifikasi.',
+        message: 'Belum ada perangkat yang terdaftar untuk menerima notifikasi.',
       });
     }
 
@@ -76,13 +109,13 @@ export async function POST(request) {
         successCount++;
       } catch (err) {
         failCount++;
-        // Jika token sudah expired / uninstalled (Status 404 atau 410 Gone), hapus dari store
+        // Jika token sudah kedaluwarsa atau uninstalled (Status 404 / 410 Gone), bersihkan
         if (err.statusCode === 404 || err.statusCode === 410) {
           if (sub?.endpoint) {
             deleteSubscription(sub.endpoint);
           }
         }
-        console.warn('[WebPush] Gagal mengirim ke client:', err?.message || err);
+        console.warn('[WebPush] Pengiriman ke subscriber gagal:', err?.message || err);
       }
     });
 
@@ -100,7 +133,7 @@ export async function POST(request) {
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Gagal mengirim push notification.',
+        error: 'Terjadi kesalahan sistem saat mengirimkan notifikasi.',
       },
       { status: 500 }
     );

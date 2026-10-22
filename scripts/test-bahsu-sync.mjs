@@ -67,13 +67,25 @@ async function runTests() {
   }
 
   // -------------------------------------------------------------
+  // Dapatkan Sesi Admin Sah via /api/auth/login
+  // -------------------------------------------------------------
+  const loginRes = await fetch(`${BASE_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: 'MMD', password: 'WAKA3' }),
+  });
+  const setCookie = loginRes.headers.get('set-cookie') || '';
+  const tokenMatch = setCookie.match(/waka3_admin_session=([^;]+)/i);
+  const sessionCookie = tokenMatch ? `waka3_admin_session=${tokenMatch[1]}` : '';
+
+  // -------------------------------------------------------------
   // TEST 1: Validasi Input (Acara / Tanggal Kosong)
   // -------------------------------------------------------------
   console.log('📌 Uji 1: Validasi Kolom Wajib (Nama Acara & Tanggal)');
   {
     const res = await fetch(`${BASE_URL}/api/sheets`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-auth': 'true' },
+      headers: { 'Content-Type': 'application/json', Cookie: sessionCookie },
       body: JSON.stringify({
         action: 'syncBahsuEvent',
         event: { newAcara: '', newTanggal: '21 Oktober 2026 M.' },
@@ -127,7 +139,7 @@ async function runTests() {
 
     const res = await fetch(`${BASE_URL}/api/sheets`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-auth': 'true' },
+      headers: { 'Content-Type': 'application/json', Cookie: sessionCookie },
       body: JSON.stringify(payload),
     });
 
@@ -182,7 +194,7 @@ async function runTests() {
 
     const res = await fetch(`${BASE_URL}/api/sheets`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-auth': 'true' },
+      headers: { 'Content-Type': 'application/json', Cookie: sessionCookie },
       body: JSON.stringify(retryPayload),
     });
     const data = await res.json();
@@ -234,7 +246,7 @@ async function runTests() {
 
     const res = await fetch(`${BASE_URL}/api/sheets`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-auth': 'true' },
+      headers: { 'Content-Type': 'application/json', Cookie: sessionCookie },
       body: JSON.stringify(multiPayload),
     });
     const data = await res.json();
@@ -278,7 +290,7 @@ async function runTests() {
 
     const res = await fetch(`${BASE_URL}/api/sheets`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-auth': 'true' },
+      headers: { 'Content-Type': 'application/json', Cookie: sessionCookie },
       body: JSON.stringify(cleanPayload),
     });
     const data = await res.json();

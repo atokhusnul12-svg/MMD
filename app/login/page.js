@@ -24,18 +24,27 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
 
-    const isSuccess = login(username, password);
-    if (isSuccess) {
-      setSuccess(true);
-      setTimeout(() => {
-        router.push('/');
-      }, 700);
-    } else {
-      setError('Username atau Password yang Anda masukkan salah.');
+    try {
+      const res = await login(username, password);
+      if (res && res.success) {
+        setSuccess(true);
+        setTimeout(() => {
+          router.push('/');
+        }, 700);
+      } else {
+        setError(res?.error || 'Username atau Password yang Anda masukkan salah.');
+      }
+    } catch (err) {
+      setError(`Terjadi kesalahan: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -154,10 +163,11 @@ export default function LoginPage() {
             {/* Tombol Submit */}
             <button
               type="submit"
-              className="w-full mt-2 py-3 px-4 rounded-xl font-semibold text-white bg-[#1D7A6F] hover:bg-[#1A453B] transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-2"
+              disabled={isSubmitting}
+              className="w-full mt-2 py-3 px-4 rounded-xl font-semibold text-white bg-[#1D7A6F] hover:bg-[#1A453B] disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-2"
             >
               <ShieldCheck className="w-4 h-4" />
-              <span>Masuk sebagai Pengurus</span>
+              <span>{isSubmitting ? 'Memverifikasi...' : 'Masuk sebagai Pengurus'}</span>
             </button>
           </form>
 

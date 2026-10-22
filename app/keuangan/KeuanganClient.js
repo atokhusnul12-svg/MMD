@@ -17,11 +17,13 @@ import {
   ExternalLink,
   ShieldCheck,
   Info,
+  FileText,
 } from 'lucide-react';
 import { DATA_LINKS } from '@/lib/dataLinks';
 import { useAuth } from '@/lib/auth';
 import { formatRupiah, getKeuanganData } from '@/lib/fetchCSV';
 import KeuanganDonutChart from '@/components/KeuanganDonutChart';
+import KeuanganDetailModal from '@/components/KeuanganDetailModal';
 import { smartScrollTo } from '@/lib/scrollTo';
 import { useBackgroundSync } from '@/lib/useBackgroundSync';
 import CountUp from '@/components/motion/CountUp';
@@ -53,7 +55,12 @@ export default function KeuanganClient({ initialData, serverError = null }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedBulan, setSelectedBulan] = useState('TOTAL');
   const [hoveredBulan, setHoveredBulan] = useState(null);
+  const [selectedDetailItem, setSelectedDetailItem] = useState(null);
   const lastFetchRef = useRef(0);
+
+  const handleOpenDetail = useCallback((itemToOpen) => {
+    setSelectedDetailItem(itemToOpen);
+  }, []);
 
   // Sinkronisasi data latar belakang (Client-Side)
   const fetchKeuangan = useCallback(async (showIndicator = false) => {
@@ -189,9 +196,40 @@ export default function KeuanganClient({ initialData, serverError = null }) {
               Pilih Periode Anggaran Keuangan:
             </span>
           </div>
-          <span className="text-xs font-semibold text-[#1D7A6F] bg-[#E8F5F3] border border-[#C8E3DC] px-2.5 py-1 rounded">
-            Aktif: {activeKeuangan.label}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-[#1D7A6F] bg-[#E8F5F3] border border-[#C8E3DC] px-2.5 py-1 rounded">
+              Aktif: {activeKeuangan.label}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                const currentItem =
+                  selectedBulan === 'TOTAL'
+                    ? {
+                        bulan: 'TOTAL',
+                        subsidi: data?.total?.subsidi || 0,
+                        pengeluaran: data?.total?.pengeluaran || 0,
+                        saldo: data?.total?.saldo || 0,
+                        keterangan: data?.total?.keterangan || 'Akumulasi Seluruh Periode',
+                        serap: activeKeuangan.serap,
+                      }
+                    : data?.rekapitulasi?.find((r) => r.bulan === selectedBulan) || {
+                        bulan: selectedBulan,
+                        subsidi: activeKeuangan.subsidi,
+                        pengeluaran: activeKeuangan.pengeluaran,
+                        saldo: activeKeuangan.saldo,
+                        keterangan: '',
+                        serap: activeKeuangan.serap,
+                      };
+                handleOpenDetail(currentItem);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#1D7A6F] hover:bg-[#155A52] text-white text-xs font-semibold transition-colors shadow-2xs cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F]"
+              title={`Buka rincian lengkap untuk ${activeKeuangan.label}`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Lihat Rincian</span>
+            </button>
+          </div>
         </div>
 
         {/* Tab Tombol Pilihan Bulan */}
@@ -402,7 +440,7 @@ export default function KeuanganClient({ initialData, serverError = null }) {
                 <span>Rekapitulasi Anggaran Bulanan</span>
               </h2>
               <p className="text-xs text-[#5C6E66] mt-0.5">
-                Klik baris bulan untuk melihat detail angka masuk, keluar &amp; saldo pada kartu di atas
+                Klik baris bulan atau klik tombol &ldquo;Lihat Rincian&rdquo; untuk memeriksa rincian lengkap sesuai data asli
               </p>
             </div>
 
@@ -421,6 +459,7 @@ export default function KeuanganClient({ initialData, serverError = null }) {
                   <th className="py-3 px-4 text-right">LPJ (Keluar)</th>
                   <th className="py-3 px-4 text-right font-bold text-[#1D7A6F]">Saldo Kas</th>
                   <th className="py-3 px-4 text-center">Serap</th>
+                  <th className="py-3 px-4 text-center">Rincian</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DCE5E0]/60">
@@ -459,6 +498,20 @@ export default function KeuanganClient({ initialData, serverError = null }) {
                           {persen}%
                         </span>
                       </td>
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenDetail(item);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E8F5F3] hover:bg-[#1D7A6F] text-[#1D7A6F] hover:text-white border border-[#C8E3DC] hover:border-[#1D7A6F] text-xs font-semibold transition-colors duration-150 shadow-2xs cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F]"
+                          title={`Lihat Rincian Lengkap ${item.bulan}`}
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>Lihat Rincian</span>
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -489,6 +542,29 @@ export default function KeuanganClient({ initialData, serverError = null }) {
                         : 0}%
                     </span>
                   </td>
+                  <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenDetail({
+                          bulan: 'TOTAL',
+                          subsidi: data?.total?.subsidi || 0,
+                          pengeluaran: data?.total?.pengeluaran || 0,
+                          saldo: data?.total?.saldo || 0,
+                          keterangan: data?.total?.keterangan || 'Akumulasi Seluruh Periode',
+                          serap: data?.total?.subsidi > 0
+                            ? ((data.total.pengeluaran / data.total.subsidi) * 100).toFixed(1)
+                            : 0,
+                        });
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1D7A6F] hover:bg-[#155A52] text-white border border-[#1D7A6F] text-xs font-semibold transition-colors duration-150 shadow-2xs cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1D7A6F]"
+                      title="Lihat Rincian Lengkap Akumulasi Seluruh Periode"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Lihat Rincian</span>
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -505,6 +581,16 @@ export default function KeuanganClient({ initialData, serverError = null }) {
           </span>
         </div>
       </div>
+
+      {/* Modal Dialog Rincian Keuangan Lengkap */}
+      <KeuanganDetailModal
+        isOpen={Boolean(selectedDetailItem)}
+        onClose={() => setSelectedDetailItem(null)}
+        item={selectedDetailItem}
+        allRekap={data?.rekapitulasi || []}
+        totalData={data?.total}
+        catatanBerikutnya={data?.catatanBerikutnya || []}
+      />
     </div>
   );
 }
