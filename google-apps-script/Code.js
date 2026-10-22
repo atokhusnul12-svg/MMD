@@ -689,23 +689,76 @@ function handleSyncBahsuEvent(ss, payload) {
     } catch (eWrap) {}
 
   } else {
-    // Mode Edit: verifikasi baris
+    // Mode Edit: validasi identitas agenda agar rowNumber dari CSV tidak
+    // mengarahkan penulisan ke baris yang salah (CSV dapat melewati baris kosong).
     var candidateRow = -1;
+    var oldAcaraNorm = oldAcara.toLowerCase();
+    var oldTanggalNorm = oldTanggal.toLowerCase();
+    var newAcaraNorm = newAcara.toLowerCase();
+    var newTanggalNorm = newTanggal.toLowerCase();
+
+    function rowMatchesAgendaIdentity(rowValues) {
+      var rowAcara = String(rowValues[bColMap.acara] || "").trim().toLowerCase();
+      var rowTanggal = String(rowValues[bColMap.tanggal] || "").trim().toLowerCase();
+
+      // Utamakan pasangan nama agenda + tanggal untuk menghindari salah baris.
+      if (oldAcaraNorm && oldTanggalNorm &&
+          rowAcara === oldAcaraNorm && rowTanggal === oldTanggalNorm) return true;
+      if (rowAcara === newAcaraNorm && rowTanggal === newTanggalNorm) return true;
+
+      // Fallback hanya bila tanggal lama tidak tersedia.
+      if (oldAcaraNorm && !oldTanggalNorm && rowAcara === oldAcaraNorm) return true;
+      if (!oldAcaraNorm && rowAcara === newAcaraNorm) return true;
+      return false;
+    }
+
+    // Pakai rowNumber hanya jika baris tersebut cocok dengan identitas agenda.
     if (targetRow && targetRow > bHeaderRowIndex + 1 && targetRow <= bValues.length) {
-      candidateRow = targetRow;
-    } else {
-      for (var bi2 = bHeaderRowIndex + 1; bi2 < bValues.length; bi2++) {
-        var rAcara = String(bValues[bi2][bColMap.acara] || "").trim().toLowerCase();
-        var matchAcara = (oldAcara && rAcara === oldAcara.toLowerCase()) || (rAcara === newAcara.toLowerCase());
-        if (matchAcara) {
-          candidateRow = bi2 + 1;
-          break;
+      if (rowMatchesAgendaIdentity(bValues[targetRow - 1])) {
+        candidateRow = targetRow;
+      }
+    }
+
+    // Jika nomor baris dari UI tidak cocok, cari baris berdasarkan identitas agenda.
+    if (candidateRow === -1) {
+      // Pass pertama: pasangan nama agenda dan tanggal lama.
+      if (oldAcaraNorm && oldTanggalNorm) {
+        for (var bi2 = bHeaderRowIndex + 1; bi2 < bValues.length; bi2++) {
+          var oldRowAcara = String(bValues[bi2][bColMap.acara] || "").trim().toLowerCase();
+          var oldRowTanggal = String(bValues[bi2][bColMap.tanggal] || "").trim().toLowerCase();
+          if (oldRowAcara === oldAcaraNorm && oldRowTanggal === oldTanggalNorm) {
+            candidateRow = bi2 + 1;
+            break;
+          }
+        }
+      }
+
+      // Pass kedua: pasangan nama agenda dan tanggal baru (misalnya retry setelah tersimpan).
+      if (candidateRow === -1) {
+        for (var bi3 = bHeaderRowIndex + 1; bi3 < bValues.length; bi3++) {
+          var newRowAcara = String(bValues[bi3][bColMap.acara] || "").trim().toLowerCase();
+          var newRowTanggal = String(bValues[bi3][bColMap.tanggal] || "").trim().toLowerCase();
+          if (newRowAcara === newAcaraNorm && newRowTanggal === newTanggalNorm) {
+            candidateRow = bi3 + 1;
+            break;
+          }
+        }
+      }
+
+      // Fallback nama agenda saja jika tanggal lama tidak dikirim.
+      if (candidateRow === -1 && oldAcaraNorm && !oldTanggalNorm) {
+        for (var bi4 = bHeaderRowIndex + 1; bi4 < bValues.length; bi4++) {
+          var fallbackAcara = String(bValues[bi4][bColMap.acara] || "").trim().toLowerCase();
+          if (fallbackAcara === oldAcaraNorm) {
+            candidateRow = bi4 + 1;
+            break;
+          }
         }
       }
     }
 
     if (candidateRow === -1) {
-      return createJsonResponse(false, "Baris agenda tidak ditemukan pada Google Sheets.", 404);
+      return createJsonResponse(false, "Baris agenda tidak ditemukan atau identitas agenda tidak cocok pada Google Sheets. Tidak ada baris yang diubah.", 404);
     }
 
     actualSourceRow = candidateRow;
@@ -717,6 +770,20 @@ function handleSyncBahsuEvent(ss, payload) {
     bahsuSheet.getRange(actualSourceRow, bColMap.delegasi + 1).setValue(delegasi);
     bahsuSheet.getRange(actualSourceRow, bColMap.keterangan + 1).setValue(keterangan);
     SpreadsheetApp.flush();
+  }
+
+  // Verifikasi penulisan pada tab sumber sebelum menyatakan berhasil.
+  SpreadsheetApp.flush();
+  var verifyValues = bahsuSheet.getRange(actualSourceRow, 1, 1, 5).getValues()[0];
+  var savedAcara = String(verifyValues[bColMap.acara] || "").trim();
+  var savedTanggal = String(verifyValues[bColMap.tanggal] || "").trim();
+  var savedDelegasi = String(verifyValues[bColMap.delegasi] || "").trim();
+  if (savedAcara !== newAcara || savedTanggal !== newTanggal || savedDelegasi !== delegasi) {
+    return createJsonResponse(false,
+      "Verifikasi penyimpanan gagal pada baris " + actualSourceRow +
+      ". Nama agenda, tanggal, atau delegasi yang terbaca kembali tidak sesuai. Periksa tab DAFTAR PEMBERANGKATAN BAHSU.",
+      500,
+      { sourceSheet: "DAFTAR PEMBERANGKATAN BAHSU", sourceRow: actualSourceRow });
   }
 
   // Panggil fungsi inti sinkronisasi ke tab PERKEMBANGAN
