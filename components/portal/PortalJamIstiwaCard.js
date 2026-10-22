@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useJamIstiwa } from '@/lib/useJamIstiwa';
 import { getWibParts, getSelisihMenitPare } from '@/lib/jamIstiwa';
+import { getUnifiedNextPrayerInfo } from '@/lib/prayerSchedule';
 import Collapsible from '@/components/motion/Collapsible';
 import staticPrayerSchedule from '@/public/data/prayer-schedule-waka-iii.json';
 
@@ -186,50 +187,10 @@ export default function PortalJamIstiwaCard() {
     return row;
   }, [dataWaktu]);
 
-  // Kalkulasi target sholat berikutnya dan hitung mundur aktual hari ini
+  // Kalkulasi target sholat berikutnya dan hitung mundur aktual hari ini (fungsi bersama)
   const nextPrayerInfo = useMemo(() => {
-    if (!todayRow || !dataWaktu) return null;
-    const nowSec = dataWaktu.wib.jam * 3600 + dataWaktu.wib.menit * 60 + dataWaktu.wib.detik;
-
-    const chronological = [
-      { key: 'imsak', label: 'Imsak' },
-      { key: 'subuh', label: 'Shubuh' },
-      { key: 'sunrise', label: "Thulu'" },
-      { key: 'dhuha', label: 'Dhuha' },
-      { key: 'dhuhr', label: 'Dhuhur' },
-      { key: 'asr', label: 'Ashar' },
-      { key: 'maghrib', label: 'Maghrib' },
-      { key: 'isha', label: "Isya'" },
-    ];
-
-    let nextP = null;
-    let diffSec = 0;
-
-    for (const p of chronological) {
-      const pSec = timeStrToSeconds(todayRow[p.key]);
-      if (pSec > nowSec) {
-        nextP = p;
-        diffSec = pSec - nowSec;
-        break;
-      }
-    }
-
-    if (!nextP) {
-      nextP = chronological[0]; // Imsak besok
-      const tomSec = tomorrowRow ? timeStrToSeconds(tomorrowRow[nextP.key]) : timeStrToSeconds(todayRow[nextP.key]);
-      diffSec = 86400 - nowSec + tomSec;
-    }
-
-    const remH = Math.floor(diffSec / 3600);
-    const remM = Math.floor((diffSec % 3600) / 60);
-
-    const pad = (n) => String(n).padStart(2, '0');
-    return {
-      key: nextP.key,
-      label: nextP.label,
-      countdownShort: `-${pad(remH)}:${pad(remM)}`,
-    };
-  }, [todayRow, tomorrowRow, dataWaktu]);
+    return getUnifiedNextPrayerInfo(dataWaktu);
+  }, [dataWaktu]);
 
   // Status tampilan countdown / footer berdasarkan tanggal yang sedang dipilih
   const countdownDisplay = useMemo(() => {
