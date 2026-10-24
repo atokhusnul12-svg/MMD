@@ -120,7 +120,7 @@ export default function PortalJamIstiwaCard() {
       d.setDate(d.getDate() + dayOffset);
     }
     return getWibParts(d);
-  }, [dayOffset, dataWaktu?.tanggal]);
+  }, [dayOffset]);
 
   // Selisih menit Pare dinamis untuk tanggal terpilih
   const selectedSelisih = useMemo(() => {

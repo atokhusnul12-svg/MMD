@@ -19,6 +19,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "lib/kalenderDataFallback.js",
+    "**/*.backup*.js",
   ]),
 ]);
 
