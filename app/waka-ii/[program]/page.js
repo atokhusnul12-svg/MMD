@@ -26,8 +26,8 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function ProgramDetailPage({ params }) {
-  const resolvedParams = await params;
+async function ProgramDetailContent({ programPromise }) {
+  const resolvedParams = await programPromise;
   const programSlug = resolvedParams?.program;
   const config = getProgramConfig(programSlug);
 
@@ -48,12 +48,19 @@ export default async function ProgramDetailPage({ params }) {
   }
 
   return (
+    <ProgramDetailClient
+      program={config}
+      initialData={absensiData}
+      serverError={serverError}
+    />
+  );
+}
+
+export default function ProgramDetailPage({ params }) {
+  return (
     <Suspense fallback={<ProgramDetailSkeleton />}>
-      <ProgramDetailClient
-        program={config}
-        initialData={absensiData}
-        serverError={serverError}
-      />
+      <ProgramDetailContent programPromise={params} />
     </Suspense>
   );
 }
+
