@@ -39,7 +39,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id" className={`h-full scroll-smooth ${lora.variable} ${inter.variable}`}>
+    <html lang="id" data-scroll-behavior="smooth" className={`h-full scroll-smooth ${lora.variable} ${inter.variable}`}>
       <body className="min-h-full flex flex-col bg-[#F7F5EF] text-[#26332E] font-sans antialiased">
         <AuthProvider>
           <MotionProvider>
