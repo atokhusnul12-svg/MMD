@@ -59,11 +59,11 @@ export default function PortalWakaCards() {
     {
       id: 'waka-iii',
       title: 'WAKA III',
-      subtitle: 'Lembaga Bahtsul Masail & Santri LBM',
-      badge: 'Bidang III • Lembaga Bahtsul Masail',
+      subtitle: 'Lajnah Bahtsul Masail',
+      badge: 'Bidang III • agen khusus',
       badgeColor: 'bg-[#F0F4FA] text-[#0A192F] border-[#D0DDEB]',
       description:
-        'Pusat komando pembinaan santri Lembaga Bahtsul Masail (LBM), pemantauan perkembangan anggota, dan koordinasi utusan delegasi forum ilmiah se-Jawa Madura.',
+        'Pusat komando pembinaan santri Lajnah Bahtsul Masail (LBM), pemantauan perkembangan anggota, dan koordinasi utusan delegasi forum ilmiah se-Jawa Madura.',
       icon: Layers,
       href: '/waka-iii',
       buttonText: 'Buka Dashboard WAKA III',

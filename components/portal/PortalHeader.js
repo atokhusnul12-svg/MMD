@@ -3,7 +3,6 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Sparkles, Compass } from 'lucide-react';
 
 export default function PortalHeader() {
   const shouldReduceMotion = useReducedMotion();
@@ -36,11 +35,6 @@ export default function PortalHeader() {
 
           {/* Teks Identitas Resmi */}
           <div className="space-y-0.5">
-            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#E8F5F3] text-[#1D7A6F] text-[10px] font-semibold border border-[#C8E3DC]">
-              <Sparkles className="w-3 h-3 text-[#C6A66B]" />
-              <span>HOME • Majlis Musyawaroh Darussalam</span>
-            </div>
-
             <div className="flex items-center justify-center md:justify-start gap-2">
               <h1 className="text-2xl sm:text-3xl font-black font-serif text-[#1D7A6F] tracking-tight leading-none">
                 MMD
@@ -62,11 +56,7 @@ export default function PortalHeader() {
 
         {/* Kolom Kanan: Quick Info */}
         <div className="flex flex-col items-center md:items-end gap-1 shrink-0">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FAF6EF] text-[#1D7A6F] text-[11px] font-semibold border border-[#DCE5E0]">
-            <Compass className="w-3.5 h-3.5 text-[#C6A66B]" />
-            <span>Waktu Istiwa&apos; &amp; 5 Pilar Layanan MMD</span>
-          </div>
-          <p className="text-[10px] text-[#5C6E66]">
+          <p className="text-xs text-[#5C6E66] font-medium">
             Pusat Informasi &amp; Layanan Data Terpadu
           </p>
         </div>
